@@ -1,50 +1,21 @@
-# Catherine Full Body
+# Catherine: Full Body PC Port
 
-Run `Build/catherine.exe` from an existing local build. Current work includes the in-game F8 developer menu, direct level and cutscene loading, controller and mouse improvements, and package-first Vulkan shader setup.
+## Features
 
-This repository contains the active source, supplied interface artwork, installer tools and build recipes. Original game files, `assets.pak`, saves, local settings, compiled game executables, caches and historical experiments are excluded. Build recipes under `Build/` are tracked because the current build script reads them there.
+- Native Windows and Linux support.
+- 60 FPS by default, with an uncapped option. Code patches and interpolation enable higher frame rates, including interpolation for puzzle levels.
+- In-game PC settings and full keyboard and mouse support.
+- Local co-op. Online play has been removed. Babel Pair and Colosseum automatically use local co-op and stay greyed out until two distinct input devices are connected and assigned.
+- An F8 menu for jumping directly to levels and cutscenes.
 
-- `Source/`: the canonical game source and selected headers. `Source/compile_commands.json` lists every compilation unit; `Source/build-manifest.json` defines the build. Historical directory names inside `Source/imports/` preserve relative includes, but these are the selected sources, not complete experiment trees.
-- `Build/`: the only active game build/output directory, including assets, DLLs, save, settings, object files, logs and the current release ZIP.
-- `Old/`: previous builds, release ZIPs, audit reports, original source trees and experiments. These are retained for reference and are not build inputs.
-- `graphics/` and `base/assets/`: preserved DirectX 12 plugin/supporting graphics sources and shader asset data, left in place at your request. The obsolete Vulkan CMake build directory is archived as `Old/graphics-build/`.
+## Installation
 
-## Build
+1. Use your own fully decrypted, extracted copy of the North American or European Nintendo Switch release (title ID `0100BF00112C0000`) and its 1.0.1 update. You can use a tool such as NSPUnpacker to prepare the files. The port accepts extracted files only.
+2. On Windows, launch `Catherine.exe` and point setup at the extracted files when prompted. Setup builds `assets.pak`, then generates the Vulkan shaders. See the [Windows setup guide](Source/resources/INSTALL-ASSETS.txt) for details.
+3. On Linux, use a prepared `assets.pak` that already contains the Vulkan shaders. Run `./Build/catherine --assets-pak /path/to/assets.pak`.
 
-From this directory, run `python build.py`. It checks source/header fingerprints and rebuilds changed units. Use `python build.py --rebuild` for a full compile, or `python build.py --check-dependencies` to verify the source closure. The installed Visual Studio LLVM toolchain, Windows SDK and Vulkan SDK remain external prerequisites.
+## Planned
 
-The build configuration currently uses the original Windows workspace path, `C:/catherine/recomp`, and installed toolchain paths recorded in the manifest. Clone there to retain those paths. Python and the .NET 10 SDK are also required to build the embedded installer. Profile-guided release builds additionally require a locally trained `Build/perf/pgo/merged.profdata`; training profiles and compiled output are excluded from the repository.
-
-The primary output is `Build/catherine.exe`. For simultaneous temporary tests, use `python build.py --output catherine1.exe` or `--output catherine2.exe`; remove those temporary EXEs when their tests finish. Do not create more build folders or dated source copies.
-
-On a user's first launch, the installer verifies their extracted game files, builds `assets.pak`, then generates Vulkan shaders from that completed package. Missing shaders can be regenerated on a later launch without the extracted inputs. See `Source/resources/INSTALL-ASSETS.txt` for supported inputs and setup details.
-
-Cleanup validation: all 263 compilation units compiled and linked from Source; their machine-code sections matched the previous release. Dependency resolution passed again after archival. The primary EXE, save and settings were preserved byte for byte.
-
-
-## Native Linux build
-
-The root build script uses the same 263 compilation units on Linux and writes
-the x86-64 executable to `Build/catherine`. It needs Clang, lld, Vulkan headers
-and loader, SDL2, Cairo, OpenSSL, pkg-config, and the FFmpeg development
-libraries `libavcodec`, `libavutil` and `libswscale`. Set
-`CATHERINE_VULKAN_INCLUDE` if the Vulkan headers are outside the compiler's
-include path.
-
-```sh
-CATHERINE_VULKAN_INCLUDE="$PWD/Build/obj-linux/vulkan-headers/include" python3 build.py --jobs 12
-./Build/catherine --assets-pak /path/to/assets.pak
-```
-
-The Linux launcher can use a prepared package in place. It reads the Vulkan
-shaders and index from the package and uses the executable directory for saves,
-settings, and optional `dev-checkpoints.pak`. The Windows installer continues
-to build the package first and generate shaders from it. On Linux, use a
-package that already contains the shaders.
-
-F8 opens the in-game level and cutscene picker. `--dev-menu` opens the picker on
-startup, and `--dev-level ID` requests a destination by ID. Checkpoint-based
-destinations require the separate checkpoint package. For unattended tests,
-`NX_HEADLESS=1 NX_MUTE=1 CATHERINE_TEST_ISOLATE_SAVE=1` uses a hidden Vulkan
-window, muted audio, and a private save. A Vulkan-capable desktop session is
-required for the hidden window.
+- Further optimisation.
+- A custom level editor.
+- Restore the voting system. Other online features are outside my plans, but forks and pull requests are welcome.
