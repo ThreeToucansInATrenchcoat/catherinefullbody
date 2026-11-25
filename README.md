@@ -19,3 +19,7 @@
 - Further optimisation.
 - A custom level editor.
 - Restore the voting system. Other online features are outside my plans, but forks and pull requests are welcome.
+
+### AI
+
+Yes.
