@@ -46,6 +46,31 @@ Based on the Switch version of the game, there was already a recomp of this game
 2. On Windows, launch `Catherine.exe` and point setup at the extracted files when prompted. Setup builds `assets.pak`, then generates the Vulkan shaders. See the [Windows setup guide](Source/resources/INSTALL-ASSETS.txt) for details.
 3. On Linux, launch `./Build/catherine` and select the extracted game and update folders when prompted. The built-in installer creates `assets.pak` and then generates the Vulkan shaders. First-time setup uses SPIRV-Tools and KDialog or Zenity. Building the executable requires the .NET 10 SDK.
 
+## Compile from source
+
+### Windows
+
+Clone to `C:\catherine\recomp`. Install Python 3, the .NET 10 SDK, and Visual Studio with the C++ desktop workload, LLVM/Clang tools, and Windows SDK. The recorded build expects Vulkan headers at `C:\recomp\wetrix_dc\VulkanSDK\Include` and uses the Visual Studio paths in [the build manifest](Source/build-manifest.json).
+
+From the checkout root in a Visual Studio Developer PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force Build\obj | Out-Null
+python build.py --jobs 12
+```
+
+The executable is `Build\catherine.exe`.
+
+### Linux
+
+Use an x86-64-v3-capable system with Python 3, Clang, LLD, the .NET 10 SDK, pkg-config, and development files for Vulkan, SDL2, Cairo, OpenSSL, and FFmpeg (`libavcodec`, `libavutil`, and `libswscale`).
+
+```sh
+python3 build.py --jobs 12
+```
+
+The executable is `Build/catherine`. If your Vulkan headers are outside the compiler's default include path, set `CATHERINE_VULKAN_INCLUDE` to the directory containing `vulkan/vulkan.h`.
+
 ## Planned
 
 - Further optimisation.
