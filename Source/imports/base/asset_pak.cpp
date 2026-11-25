@@ -26,6 +26,8 @@
 #include <vector>
 #ifdef _WIN32
 #include "asset_setup_impl.h"
+#elif defined(__linux__) && !defined(__ANDROID__)
+#include "../../platform/shader_translation_linux.inc"
 #endif
 #ifndef MINIZ_NO_ZLIB_APIS
 #define MINIZ_NO_ZLIB_APIS

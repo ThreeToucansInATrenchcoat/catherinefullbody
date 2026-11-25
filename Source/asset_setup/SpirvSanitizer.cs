@@ -8,6 +8,12 @@ static class SpirvSanitizer {
  static readonly Regex Token=new("\"(?:[^\"\\\\]|\\\\.)*\"|[^\\s]+",RegexOptions.Compiled);
  static string Tools="";
  public static void PrepareTools(){
+#if CATHERINE_LINUX_SETUP
+  foreach(string name in new[]{"spirv-dis","spirv-as","spirv-val"}){
+   if(!((Environment.GetEnvironmentVariable("PATH")??"").Split(Path.PathSeparator).Any(dir=>dir.Length>0&&File.Exists(Path.Combine(dir,name)))))
+    throw new FileNotFoundException("Install SPIRV-Tools and make "+name+" available on PATH.");
+  }
+#else
   Tools=Path.Combine(Path.GetTempPath(),"CatherineAssetTools",Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId.ToString());Directory.CreateDirectory(Tools);
   foreach(string name in new[]{"spirv-dis.exe","spirv-as.exe","spirv-val.exe"}){
    string path=Path.Combine(Tools,name);using var s=Assembly.GetExecutingAssembly().GetManifestResourceStream(name)??throw new FileNotFoundException(name);using var bytes=new MemoryStream();s.CopyTo(bytes);var expected=bytes.ToArray();
@@ -15,8 +21,12 @@ static class SpirvSanitizer {
    string temp=path+"."+Environment.ProcessId+".tmp";File.WriteAllBytes(temp,expected);
    try{File.Move(temp,path,false);}catch(IOException){File.Delete(temp);if(!File.Exists(path)||!File.ReadAllBytes(path).AsSpan().SequenceEqual(expected))throw;}
   }
+#endif
  }
  static byte[] Run(string name,string args,byte[] input){
+#if CATHERINE_LINUX_SETUP
+  name=Path.GetFileNameWithoutExtension(name);
+#endif
   using var p=new Process{StartInfo=new(Path.Combine(Tools,name),args){UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true}};p.Start();var output=new MemoryStream();var o=p.StandardOutput.BaseStream.CopyToAsync(output);var e=p.StandardError.ReadToEndAsync();p.StandardInput.BaseStream.Write(input);p.StandardInput.Close();p.WaitForExit();o.GetAwaiter().GetResult();string error=e.GetAwaiter().GetResult();if(p.ExitCode!=0)throw new InvalidDataException(name+": "+error);return output.ToArray();
  }
  public static byte[] Sanitize(byte[] binary){

@@ -22,6 +22,7 @@
 #include "platform.h"
 #include "gui.h"
 #include "window_linux.h"
+#include "window_icon_linux.h"
 #include "guest_host.h"
 #include "keyboard_mouse_policy.h"
 #include "player_input_policy.h"
@@ -89,34 +90,6 @@ void center_window(int display) {
                                 bounds.y+(bounds.h-height-top-bottom)/2);
 }
 
-void load_window_icon() {
-    cairo_surface_t* png=cairo_image_surface_create_from_png("catherine.png");
-    if (cairo_surface_status(png)!=CAIRO_STATUS_SUCCESS) {
-        log_line("Could not load catherine.png");
-        cairo_surface_destroy(png);
-        return;
-    }
-    const int width=cairo_image_surface_get_width(png),height=cairo_image_surface_get_height(png);
-    SDL_Surface* icon=SDL_CreateRGBSurfaceWithFormat(0,width,height,32,SDL_PIXELFORMAT_ARGB8888);
-    if (icon && SDL_LockSurface(icon)==0) {
-        for (int y=0;y<height;++y) {
-            auto* source=reinterpret_cast<const uint32_t*>(cairo_image_surface_get_data(png)+y*cairo_image_surface_get_stride(png));
-            auto* dest=reinterpret_cast<uint32_t*>(static_cast<uint8_t*>(icon->pixels)+y*icon->pitch);
-            for (int x=0;x<width;++x) {
-                const uint32_t pixel=source[x],alpha=pixel>>24;
-                if (!alpha) {dest[x]=0;continue;}
-                const auto straight=[&](unsigned shift) {
-                    return std::min(255u,(((pixel>>shift)&255u)*255u+alpha/2)/alpha);
-                };
-                dest[x]=(alpha<<24)|(straight(16)<<16)|(straight(8)<<8)|straight(0);
-            }
-        }
-        SDL_UnlockSurface(icon);
-        SDL_SetWindowIcon(window,icon);
-    }
-    SDL_FreeSurface(icon);
-    cairo_surface_destroy(png);
-}
 
 void update_window_title(uint64_t now) {
     static uint64_t last=now, last_frames=presented_frames.load(std::memory_order_relaxed);
@@ -393,8 +366,7 @@ void update_window() {
 extern "C" int catherine_linux_run(int (*guest)()) {
     // XWayland accepts initial window positions. Native Wayland leaves placement
     // to the compositor. An explicitly selected SDL backend still takes precedence.
-    if (!std::getenv("SDL_VIDEODRIVER") && std::getenv("WAYLAND_DISPLAY") && std::getenv("DISPLAY"))
-        SDL_SetHint(SDL_HINT_VIDEODRIVER,"x11,wayland");
+    catherine_linux_video_driver();
     SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE,"0");
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_GAMECONTROLLER) != 0) {
         std::fprintf(stderr,"SDL initialization failed: %s\n",SDL_GetError());
@@ -432,7 +404,9 @@ extern "C" int catherine_linux_run(int (*guest)()) {
     bool centered_after_show=hidden || fullscreen;
     const int initial_display=SDL_GetWindowDisplayIndex(window);
     catherine::initialize_display_mode(display_mode(initial_display),fullscreen,config.window_height);
-    load_window_icon();
+    cairo_surface_t* icon=catherine_game_icon_png();
+    catherine_set_window_icon(window,icon);
+    cairo_surface_destroy(icon);
     std::fprintf(stderr,"Catherine startup window %dx%d on %s (%s), internal render height %u\n",
                  height*16/9,height,SDL_GetDisplayName(initial_display),
                  SDL_GetCurrentVideoDriver(),catherine_internal_render_height());

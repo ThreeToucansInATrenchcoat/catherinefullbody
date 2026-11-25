@@ -44,7 +44,7 @@ Based on the Switch version of the game, there was already a recomp of this game
 
 1. Use your own fully decrypted, extracted copy of the North American or European Nintendo Switch release (title ID `0100BF00112C0000`) and its 1.0.1 update. You can use a tool such as NSPUnpacker to prepare the files. The port accepts extracted files only.
 2. On Windows, launch `Catherine.exe` and point setup at the extracted files when prompted. Setup builds `assets.pak`, then generates the Vulkan shaders. See the [Windows setup guide](Source/resources/INSTALL-ASSETS.txt) for details.
-3. On Linux, use a prepared `assets.pak` that already contains the Vulkan shaders. Run `./Build/catherine --assets-pak /path/to/assets.pak`.
+3. On Linux, launch `./Build/catherine` and select the extracted game and update folders when prompted. The built-in installer creates `assets.pak` and then generates the Vulkan shaders. First-time setup uses SPIRV-Tools and KDialog or Zenity. Building the executable requires the .NET 10 SDK.
 
 ## Planned
 

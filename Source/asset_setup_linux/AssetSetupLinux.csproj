@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <StartupObject>Catherine.AssetSetup.EntryPoint</StartupObject>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>CatherineAssetSetup</AssemblyName>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DefineConstants>$(DefineConstants);CATHERINE_LINUX_SETUP</DefineConstants>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="EntryPoint.cs" />
+    <Compile Include="../asset_setup/*.cs" Exclude="../asset_setup/EntryPoint.cs;../asset_setup/PackageVerification.cs" />
+    <Compile Include="../asset_setup/Shaders/*.cs" />
+    <Reference Include="../asset_setup/vendor/lib/*.dll" />
+    <EmbeddedResource Include="../asset_setup/Compatibility/main-93a79c77.xor.zlib" LogicalName="Catherine.AssetSetup.Compatibility.Main93a79c77" />
+    <EmbeddedResource Include="../resources/assets-required.json" LogicalName="Catherine.AssetSetup.Manifest" />
+    <EmbeddedResource Include="../resources/catherine.ico" LogicalName="Catherine.AssetSetup.GameIcon" />
+    <EmbeddedResource Include="../asset_setup/vendor/licenses/*" LogicalName="licenses/%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

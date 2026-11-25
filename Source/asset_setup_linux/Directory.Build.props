@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)../../Build/asset-setup-linux/obj/</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(MSBuildThisFileDirectory)../../Build/asset-setup-linux/bin/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

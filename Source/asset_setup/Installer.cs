@@ -38,8 +38,11 @@ sealed class Installer {
    Build();
   }
   if(!scanOnly)CompleteShaders();
+  #if !CATHERINE_LINUX_SETUP
   try{Verify();}catch(IOException e){warn("assets.pak could not be fully verified and may be corrupt. The game may not function correctly. Catherine will try to launch anyway.\n\n"+e.Message);}catch(UnauthorizedAccessException e){warn("assets.pak could not be verified. Catherine will try to launch anyway.\n\n"+e.Message);}
+  #endif
  }
+ #if !CATHERINE_LINUX_SETUP
  void Verify(){
   if(PackageVerification.TryReuse(root,pack,manifest))return;
   Report("Verifying assets.pak","Checking the package SHA-256",0);using var f=File.OpenRead(pack);var identity=PackageVerification.Begin(root,pack,f);using var sha=IncrementalHash.CreateHash(HashAlgorithmName.SHA256);byte[] buf=new byte[4*1024*1024];int n;while((n=f.Read(buf))>0){sha.AppendData(buf,0,n);Report("Verifying assets.pak",$"{f.Position/(1024*1024):N0} / {f.Length/(1024*1024):N0} MB",f.Position/(double)f.Length);}string hash=Convert.ToHexString(sha.GetHashAndReset()).ToLowerInvariant();
@@ -47,6 +50,7 @@ sealed class Installer {
   if(!manifest.PackageSha256.Contains(hash,StringComparer.OrdinalIgnoreCase)&&!hash.Equals(manifest.CanonicalPackageSha256,StringComparison.OrdinalIgnoreCase))warn("assets.pak may be corrupt or from an unsupported version. The game may not function correctly. Catherine will try to launch anyway.\n\nSHA-256: "+hash);
   PackageVerification.Remember(root,pack,manifest,f,identity,hash);
  }
+ #endif
  void Build(){
   Report("Preparing game modules","Decompressing and relocating the supplied executables",0);var modules=NsoImage.Prepare(manifest,locations);
   string temp=pack+".building";Directory.CreateDirectory(Path.GetDirectoryName(pack)!);if(File.Exists(temp))File.Delete(temp);

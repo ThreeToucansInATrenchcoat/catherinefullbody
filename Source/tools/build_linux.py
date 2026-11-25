@@ -69,7 +69,7 @@ def native_command(unit, root, objects, overlays, compilers, vulkan_include):
     return command, obj
 
 
-def install_desktop_files(icon_source, build):
+def game_icon_png(icon_source):
     ico = icon_source.read_bytes()
     count = struct.unpack_from("<H", ico, 4)[0]
     pngs = []
@@ -80,8 +80,12 @@ def install_desktop_files(icon_source, build):
             pngs.append(((width or 256) * (height or 256), payload))
     if not pngs:
         raise SystemExit(f"No PNG image in {icon_source}.")
+    return max(pngs, key=lambda entry: entry[0])[1]
+
+
+def install_desktop_files(icon_png, build):
     icon = build / "catherine.png"
-    icon.write_bytes(max(pngs, key=lambda entry: entry[0])[1])
+    icon.write_bytes(icon_png)
 
     executable = str(build / "catherine")
     escaped = "".join("\\\\" + char if char in '\\"$`' else "%%" if char == "%" else char
@@ -95,6 +99,44 @@ def install_desktop_files(icon_source, build):
     launcher.chmod(0o755)
 
 
+def build_setup_payload(root, build, objects, logs, compiler, dotnet, icon_png):
+    setup = build / "asset-setup-linux"
+    publish = setup / "embedded"
+    environment = dict(os.environ, DOTNET_CLI_HOME=str(setup), DOTNET_CLI_TELEMETRY_OPTOUT="1",
+                       DOTNET_GENERATE_ASPNET_CERTIFICATE="false")
+    command = [
+        dotnet, "publish", str(root / "Source/asset_setup_linux/AssetSetupLinux.csproj"),
+        "-c", "Release", "--self-contained", "-r", "linux-x64", "-o", str(publish), "--nologo",
+        "-p:PublishSingleFile=true", "-p:IncludeNativeLibrariesForSelfExtract=true",
+        "-p:EnableCompressionInSingleFile=true",
+    ]
+    result = subprocess.run(command, capture_output=True, text=True, env=environment, cwd=root)
+    (logs / "asset-setup-build.log").write_text(result.stdout + result.stderr)
+    if result.returncode:
+        raise SystemExit(f"Linux asset installer build failed. See {logs / 'asset-setup-build.log'}.")
+    executable = (publish / "CatherineAssetSetup").relative_to(root)
+    icon = objects / "catherine-window.png"
+    icon.write_bytes(icon_png)
+    assembly = objects / "asset-setup-embedded.s"
+    assembly.write_text(
+        '.section .rodata\n'
+        '.globl catherine_asset_setup_start, catherine_asset_setup_end\n'
+        '.hidden catherine_asset_setup_start, catherine_asset_setup_end\n'
+        'catherine_asset_setup_start:\n'
+        f'.incbin {json.dumps(executable.as_posix())}\n'
+        'catherine_asset_setup_end:\n'
+        '.globl catherine_game_icon_start, catherine_game_icon_end\n'
+        '.hidden catherine_game_icon_start, catherine_game_icon_end\n'
+        'catherine_game_icon_start:\n'
+        f'.incbin {json.dumps(icon.relative_to(root).as_posix())}\n'
+        'catherine_game_icon_end:\n'
+        '.section .note.GNU-stack,"",@progbits\n'
+    )
+    obj = assembly.with_suffix(".o")
+    subprocess.run([compiler, "-c", str(assembly), "-o", str(obj)], cwd=root, check=True)
+    return obj
+
+
 def run_linux(root, manifest, options):
     if options.pgo:
         raise SystemExit("Linux builds do not yet support the Windows PGO recipe.")
@@ -102,6 +144,10 @@ def run_linux(root, manifest, options):
     if output not in {"catherine", "catherine1", "catherine2"}:
         raise SystemExit("Linux output must be catherine, catherine1 or catherine2.")
     build = root / "Build"
+    local_dotnet = build / "dotnet-sdk" / "dotnet"
+    dotnet = str(local_dotnet) if local_dotnet.is_file() else shutil.which("dotnet")
+    if not dotnet and not options.check_dependencies:
+        raise SystemExit("The .NET 10 SDK is required to embed the Linux asset installer.")
     objects = build / "obj-linux"
     overlays_dir = objects / "vfs"
     logs = build / "logs" / "linux"
@@ -173,6 +219,8 @@ def run_linux(root, manifest, options):
         print("All Linux source dependencies resolve.")
         return
 
+    icon_png = game_icon_png(root / "Source/resources/catherine.ico")
+    payload = build_setup_payload(root, build, objects, logs, compilers[0], dotnet, icon_png)
     rsp = build / "Catherine.rsp"
     args = [line.strip().strip('"') for line in rsp.read_text().splitlines() if line.strip()]
     link = [compilers[1], "-pthread"]
@@ -182,7 +230,7 @@ def run_linux(root, manifest, options):
         link.append(str(objects / (Path(arg).stem + ".o")) if arg.endswith(".obj") else arg)
     # Link to a fresh output so a failed link preserves any previous build.
     temporary = objects / (output + ".link")
-    link += ["-ldl", "-lavcodec", "-lavutil", "-lswscale", "-lSDL2", "-lcrypto", "-lcairo", "-o", str(temporary)]
+    link += [str(payload), "-ldl", "-lavcodec", "-lavutil", "-lswscale", "-lSDL2", "-lcrypto", "-lcairo", "-o", str(temporary)]
     result = subprocess.run(link, cwd=root, capture_output=True, text=True, errors="replace")
     (logs / "link.log").write_text(shlex.join(link) + "\n" + result.stdout + result.stderr)
     if result.returncode:
@@ -192,5 +240,5 @@ def run_linux(root, manifest, options):
     shutil.copytree(root / "Source" / "CathAssets", build / "CathAssets", dirs_exist_ok=True)
     shutil.copy2(root / "Source" / "resources" / "assets-required.json", build)
     if output == "catherine":
-        install_desktop_files(root / "Source" / "resources" / "catherine.ico", build)
+        install_desktop_files(icon_png, build)
     print(f"Built {build / output}")
