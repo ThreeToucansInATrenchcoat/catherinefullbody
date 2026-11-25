@@ -1,5 +1,7 @@
 # Catherine: Full Body PC Port
 
+Based on the Switch version of the game, there was already a recomp of this game available that supports the PS4 version but that version is still locked to 30fps and is more of a no-frill type of recomp. I'm still going to thank and appreciate its existence though, because this was what got me interested in the game again.
+
 ## Features
 
 - Native Windows and Linux support.
@@ -20,6 +22,6 @@
 - A custom level editor.
 - Restore the voting system. Other online features are outside my plans, but forks and pull requests are welcome.
 
-### AI
+## AI
 
 Yes.
