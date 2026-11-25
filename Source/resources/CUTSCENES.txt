@@ -1,0 +1,1165 @@
+CATHERINE FULL BODY  |  CUTSCENE INDEX
+
+Includes story and ending spoilers. Native movie and event IDs can be used to cross-reference a game log. DEV target IDs select the corresponding entries in the picker.
+
+FIRST NIGHTMARE
+40001  First nightmare - Vincent enters the tower (Underground Cemetery)
+  Puzzle.cpk/puzzle/script_E/p01_01.bf  /  pzl_01_01_start
+  story_day_00 PC 16 CALL_MOVIE(401), Vincent meets Rin in the alley; story_day_00 PC 20 PZL_PRE_READ(0,1,1); story_day_00 PC 22 CALL_MOVIE(37), opening credits; story_day_01 PC 8 CALL_FALLASLEEP()
+  story_day_01 PC 8 CALL_FALLASLEEP(), then PC 12 CALL_PUZZLE(0,1,1) starts the first floor and owns its opening cameras and dialogue.
+  story_day_01 PC 15 CALL_TOOLEVENT(310,10), Astaroth after the floor result; story_day_01 PC 23 CALL_MOVIE(1), Vincent wakes in his apartment
+
+PRE-RENDERED MOVIES  |  147
+Target   Movie       Length   Description / authored caller
+30000    mov000      1:11     Opening credits featuring the tower and duelling sheep
+30001    mov001      1:20     Vincent wakes in his apartment after the first nightmare  |  story_day_01
+30002    mov002      0:32     Katherine and Vincent at the cafe  |  story_day_01
+30003    mov003      1:03     Nightly news and Catherine's arrival at the Stray Sheep  |  story_day_01
+30004    mov004      0:31     Vincent wakes beside Catherine  |  story_day_02
+30005    mov005      1:56     Vincent remembers meeting Catherine at the bar  |  story_day_02
+30006    mov006      0:22     Vincent and Orlando at the sushi counter  |  story_day_02
+30008    mov008      2:52     Catherine is in Vincent's apartment when Katherine knocks  |  story_day_04
+30010    mov010      2:31     Catherine and Vincent with the music box  |  story_day_06
+30011    mov011      0:47     Vincent's nightmare at the clock tower
+30012    mov012      5:59     Katherine and Catherine confront each other in Vincent's apartment  |  story_day_08
+30013    mov013      1:33     Vincent and Katherine on opposite sides of a nightmare door
+30014    mov014      2:14     Vincent and Katherine leave the apartment on a rainy day  |  story_day_08
+30015    mov015      0:28     Vincent looks out over the city at night  |  story_day_09
+30016    mov016      2:23     Mutton at the bar  |  story_day_09
+30017    mov017      1:10     Vincent wakes alone after the final night  |  story_day_09
+30018    mov018      3:24     An evening at the Stray Sheep in the wedding ending  |  story_day_09
+30019    mov019      1:44     Vincent and Catherine in bed  |  story_day_09
+30020    mov020      1:27     Catherine and her father in the underworld  |  story_day_09
+30021    mov021      0:38     Golden Playhouse animated opening  |  story_day_00
+30022    mov022      0:38     Vincent and Katherine celebrate their wedding at the bar  |  story_day_09
+30023    mov023      1:08     Vincent's freedom ending montage
+30025    mov025      2:20     Vincent confronts the red-eyed face on the tower
+30029    mov029      0:16     Game over nightmare  |  gameOver
+30037    mov037      1:38     Studio Zero opening credits  |  story_day_00
+30108    mov108      2:52     Katherine at Vincent's door (alternate cut of movie 008)  |  story_day_04
+30110    mov110      2:31     The music box (alternate cut of movie 010)  |  story_day_06
+30112    mov112      5:59     The apartment confrontation (alternate cut of movie 012)  |  story_day_08
+30150    mov150      0:25     The Full Body opening title song
+30200    mov200      0:17     Block-climbing technique demonstration 01
+30201    mov201      0:22     Block-climbing technique demonstration 02
+30202    mov202      0:12     Block-climbing technique demonstration 03
+30203    mov203      0:14     Block-climbing technique demonstration 04
+30204    mov204      0:17     Block-climbing technique demonstration 05
+30205    mov205      0:14     Block-climbing technique demonstration 06
+30206    mov206      0:11     Block-climbing technique demonstration 07
+30207    mov207      0:10     Block-climbing technique demonstration 08
+30208    mov208      0:14     Block-climbing technique demonstration 09
+30209    mov209      0:12     Block-climbing technique demonstration 10
+30210    mov210      0:16     Block-climbing technique demonstration 11
+30211    mov211      0:14     Block-climbing technique demonstration 12
+30212    mov212      0:26     Block-climbing technique demonstration 13
+30213    mov213      0:19     Block-climbing technique demonstration 14
+30214    mov214      0:15     Block-climbing technique demonstration 15
+30215    mov215      0:08     Block-climbing technique demonstration 16
+30216    mov216      0:12     Block-climbing technique demonstration 17
+30217    mov217      0:10     Block-climbing technique demonstration 18
+30218    mov218      0:20     Block-climbing technique demonstration 19
+30219    mov219      0:16     Block-climbing technique demonstration 20
+30220    mov220      0:20     Block-climbing technique demonstration 21
+30221    mov221      0:33     Block-climbing technique demonstration 22
+30222    mov222      0:28     Block-climbing technique demonstration 23
+30223    mov223      0:07     Block-climbing technique demonstration 24
+30224    mov224      0:12     Block-climbing technique demonstration 25
+30225    mov225      0:15     Block-climbing technique demonstration 26
+30226    mov226      0:11     Block-climbing technique demonstration 27
+30227    mov227      0:08     Block-climbing technique demonstration 28
+30228    mov228      0:14     Block-climbing technique demonstration 29
+30229    mov229      0:18     Block-climbing technique demonstration 30
+30230    mov230      0:20     Two-player block climbing in the prison
+30231    mov231      0:20     Two-player block climbing at the clock tower
+30232    mov232      0:20     Two-player block climbing among falling cubes
+30233    mov233      0:20     Two-player block climbing above lava
+30234    mov234      0:20     Tower demonstration on the stone stairs
+30235    mov235      0:20     Tower demonstration on the dark stone wall
+30236    mov236      0:20     Tower demonstration beside the brass machinery
+30237    mov237      0:20     Tower demonstration around the clockwork ledge
+30238    mov238      0:20     Tower demonstration on the ice wall
+30239    mov239      0:20     Tower demonstration on a wall of metal blocks
+30240    mov240      0:20     Tower demonstration among purple trap blocks
+30241    mov241      0:20     Tower demonstration along a split wall
+30242    mov242      0:20     Tower demonstration on the gold staircase
+30243    mov243      0:20     Competitive climbing on the prison wall
+30244    mov244      0:20     Competitive climbing beneath the neon signs
+30245    mov245      0:20     Competitive climbing on the clock tower
+30246    mov246      0:20     Competitive climbing above the lava
+30247    mov247      0:20     Tower demonstration among sweeping beams
+30248    mov248      0:20     Tower demonstration on the gold and purple blocks
+30250    mov250      0:20     Tower demonstration on the split lower staircase
+30251    mov251      0:20     Tower demonstration with linked colored blocks
+30303    mov303      0:17     Golden Playhouse recap of the red-eyed nightmare
+30304    mov304      0:27     Golden Playhouse recap of Vincent at the confessional
+30305    mov305      0:41     Golden Playhouse recap of Vincent and Boss at the bar
+30306    mov306      0:45     Golden Playhouse recap of Catherine at the bar
+30307    mov307      0:38     Golden Playhouse recap of Vincent in the bar booth
+30308    mov308      0:49     Golden Playhouse recap of Vincent and Catherine
+30309    mov309      0:38     Golden Playhouse recap of Vincent talking to Boss
+30310    mov310      0:20     Golden Playhouse competitive tower montage
+30311    mov311      0:17     Golden Playhouse recap of the nightmare doors with Katherine
+30312    mov312      0:17     Golden Playhouse alternate recap of the nightmare doors
+30313    mov313      0:17     Golden Playhouse recap of the final tower
+30314    mov314      0:22     Golden Playhouse recap of Katherine at the apartment
+30316    mov316      0:26     Golden Playhouse competitive climbing montage
+30317    mov317      0:15     Golden Playhouse recap of Trisha at the bar
+30318    mov318      0:17     Golden Playhouse recap of the confessional door
+30319    mov319      0:11     Golden Playhouse recap of Vincent's phone
+30320    mov320      0:16     Golden Playhouse lava tower footage
+30321    mov321      0:22     Golden Playhouse overhead tower footage
+30323    mov323      0:45     Golden Playhouse recap of Vincent and a wedding dress
+30324    mov324      0:29     Golden Playhouse recap of Katherine changing her clothes
+30325    mov325      0:36     Golden Playhouse diner and Vincent on the guitar
+30326    mov326      0:39     Golden Playhouse recap of Vincent and Rin at the door
+30327    mov327      0:36     Golden Playhouse recap of Rin and Vincent at the bar
+30328    mov328      0:38     Golden Playhouse recap of the sushi counter and Rin
+30329    mov329      0:09     Golden Playhouse recap of Rin's brother
+30330    mov330      0:22     Rin runs through the alley
+30331    mov331      0:03     Rin speaks under the night sky
+30332    mov332      0:05     Rin at the piano
+30337    mov337      0:02     Rin holding up a blue bag
+30401    mov401      0:33     Vincent meets Rin in the alley  |  story_day_00
+30402    mov402      0:36     Vincent in bed with Catherine  |  story_day_02
+30403    mov403      1:05     Rin's nighttime flight and encounter with Vincent  |  story_day_02
+30404    mov404      0:40     Catherine splashes a drink at Vincent  |  lg_talk_c03
+30405    mov405      0:44     Young Vincent and Katherine at school  |  story_day_03
+30406    mov406      0:46     Vincent first notices Catherine  |  lg_talk_c03
+30407    mov407      0:38     Vincent and Katherine kiss  |  story_day_04
+30408    mov408      0:20     Katherine and Vincent in the apartment hallway
+30409    mov409      1:46     Rin and Vincent embrace in the apartment  |  story_day_05
+30410    mov410      0:32     Vincent discovers Rin after a shower  |  story_day_06
+30411    mov411      1:24     Vincent faces Catherine in his room  |  story_day_06
+30412    mov412      0:55     Vincent and Catherine in the bar booth  |  lg_talk_c03
+30413    mov413      0:26     Katherine chooses a new look  |  story_day_09
+30414    mov414      1:42     Katherine in a red dress at sunset  |  story_day_09
+30415    mov415      0:59     The school reunion and Katherine at the lockers  |  story_day_09
+30416    mov416      1:02     Vincent and Catherine at a wedding in the Stray Sheep  |  story_day_09
+30417    mov417      3:52     Catherine in the nightmare confrontation  |  story_day_08
+30418    mov418      1:04     Vincent reaches for Rin
+30419    mov419      0:53     Vincent plays guitar at the diner  |  story_day_09
+30420    mov420      0:33     Vincent and Rin face Rin's brother  |  story_day_09
+30421    mov421      0:21     Vincent and Rin reunite on the final tower
+30423    mov423      1:58     Rin's concert and the assembled guests  |  story_day_10
+30429    mov429      5:00     Full Body staff credits  |  story_day_09, story_day_10
+30430    mov430      0:24     Ending photographs of the wedding celebration  |  story_day_09
+30431    mov431      0:24     Ending photographs of Vincent, Katherine and their friends  |  story_day_09
+30432    mov432      0:24     Ending photographs of Katherine's new life  |  story_day_09
+30433    mov433      0:24     Ending photographs of Catherine and Vincent in the underworld  |  story_day_09
+30434    mov434      0:24     Ending photographs of Catherine's underworld court  |  story_day_09
+30435    mov435      0:24     Ending photographs of Vincent and Catherine  |  story_day_09
+30436    mov436      0:24     Ending photographs of space tourism  |  story_day_09
+30437    mov437      0:24     Ending photographs of Vincent and the guys  |  story_day_09
+30438    mov438      0:24     Ending photographs of Vincent and Rin together  |  story_day_10
+30439    mov439      0:24     Ending photographs of Rin on tour  |  story_day_09
+30440    mov440      4:31     Vincent and Rin speak on the nightmare landing
+30441    mov441      4:30     Rin and the red-eyed figure on the landing
+30505    mov505      1:39     Rin at the piano in Vincent's nightmare
+30507    mov507      1:23     Rin speaks to Vincent among the lights
+30516    mov516      1:56     Vincent's friends gather at the Stray Sheep  |  trial_00, trial_01, trial_02, trial_03
+
+REAL-TIME EVENT TIMELINES  |  90
+Target      Event       Description / authored caller
+100001011   e001_011    Trisha opens the Golden Playhouse and introduces Vincent  |  story_day_00
+100004030   e004_030    Katherine asks Vincent about overtime and their future  |  story_day_01
+100005021   e005_021    The guys hear Vincent may be getting married  |  story_day_01
+100005030   e005_030    Catherine asks to sit beside Vincent  |  story_day_02
+100009010   e009_010    Vincent panics the morning after meeting Catherine  |  story_day_02
+100010020   e010_020    The guys discuss Vincent's one-night stand  |  story_day_02
+100011011   e011_011    Nobody remembers Catherine; Rin starts at the bar  |  story_day_02
+100011020   e011_020    Vincent recalls Katherine's marriage question  |  story_day_03
+100013010   e013_010    Vincent finds Catherine in his room again  |  story_day_03
+100014010   e014_010    The cafe conversation about pregnancy  |  story_day_03
+100015011   e015_011    The guys hear about the close call at the cafe  |  story_day_03
+100018010   e018_010    Planning to tell the parents and choose a name  |  story_day_04
+100019010   e019_010    Vincent recalls Katherine's plans for life together  |  story_day_04
+100021011   e021_011    Catherine visits as the phone rings  |  story_day_04
+100022010   e022_010    The guys ask whether Vincent is still seeing both women  |  story_day_04
+100022020   e022_020    Vincent recalls the other girl's message  |  story_day_05
+100024011   e024_011    A threatening phone call wakes Vincent  |  story_day_05
+100025010   e025_010    Vincent asks Catherine about Steve  |  story_day_05
+100026010   e026_010    The guys discuss whether Katherine is cheating  |  story_day_05
+100026020   e026_020    Vincent recalls the confusion over Steve  |  story_day_06
+100029010   e029_010    Vincent questions Katherine about a secret  |  story_day_06
+100030010   e030_010    Vincent and Steve compare stories by phone  |  story_day_06
+100031011   e031_011    Vincent explains the wrong-girl mix-up at the bar  |  story_day_06
+100034010   e034_010    Silent story insert  |  story_day_07
+100035010   e035_010    Nightmares and Steve's breakdown  |  story_day_07
+100035011   e035_011    Vincent discusses his nightmares on the Rin route  |  story_day_07
+100036030   e036_030    The guys check on Vincent as he regrets hurting her  |  story_day_07
+100036050   e036_050    Vincent explains that he wants to break up  |  story_day_07
+100038010   e038_010    Vincent wakes rested after ending the affair  |  story_day_08
+100041010   e041_010    Vincent tries to make sense of Katherine's nightmare  |  story_day_08
+100043010   e043_010    Vincent asks his friends if he is dreaming  |  story_day_08
+100044010   e044_010    Vincent confirms the breakup and asks about yesterday  |  story_day_08
+100044020   e044_020    Vincent remembers Catherine taking the empty seat  |  story_day_08
+100044030   e044_030    Vincent confronts the man behind the nightmares  |  story_day_08
+100045030   e045_030    Vincent defeats Mutton  [Unavailable: incomplete original assets]
+100045040   e045_040    Vincent greets the morning after his victory  |  story_day_09
+100046010   e046_010    Orlando brings Katherine and Vincent together  |  story_day_09
+100046020   e046_020    Vincent explains the affair to Katherine at the bar  |  story_day_09
+100046021   e046_021    Vincent asks Katherine for forgiveness  |  story_day_09
+100046030   e046_030    Trisha closes the rejected-Katherine ending  |  story_day_09
+100047010   e047_010    Trisha introduces a glimpse of Katherine's future  |  story_day_09
+100047011   e047_011    Trisha considers Katherine's party invitation  |  story_day_09
+100049010   e049_010    Vincent proposes to Catherine  |  story_day_09
+100049011   e049_011    Vincent and Catherine meet again  |  story_day_09
+100049020   e049_020    Vincent asks Boss to bring Catherine back  |  story_day_09
+100049040   e049_040    Trisha reflects on Vincent's rejection  |  story_day_09
+100050010   e050_010    Trisha considers Vincent's promise to Catherine  |  story_day_09
+100050011   e050_011    Trisha closes Catherine's alternate future  |  story_day_09
+100052010   e052_010    Trisha asks what happened to Vincent's wager  |  story_day_09
+100052011   e052_011    Trisha reflects on Vincent and Rin parting  |  story_day_09
+100052012   e052_012    Trisha reflects on Vincent's conviction  |  story_day_09
+100052013   e052_013    Trisha reflects on Vincent choosing his own life  |  story_day_10
+100052014   e052_014    Trisha introduces Vincent's choice of Rin  |  story_day_06
+100052020   e052_020    Vincent asks Boss to place a wrestling bet  |  story_day_09
+100052030   e052_030    Jonny and the guys watch Feather's match  |  story_day_09
+100101011   e101_011    Trisha introduces Colosseum  |  to_cmp, to_cmpAdHoc, to_cmpOnline_R, to_cmpOnline_C
+100102010   e102_010    Trisha introduces Babel  |  to_trial_one, to_trial_two, to_trial_two_AdHoc
+100103010   e103_010    Trisha introduces Axis Mundi  |  to_trial_one, to_trial_two, to_trial_two_AdHoc
+100103020   e103_020    Trisha visits Vincent after Axis Mundi  |  trial_03
+100310010   e310_010    Astaroth speaks after the first nightmare  |  story_day_01
+100320010   e320_010    Rin asks Vincent about the piano performance  |  story_day_02
+100320020   e320_020    Astaroth introduces the first memory  |  story_day_02
+100320021   e320_021    Astaroth reflects on Vincent's fond memories  |  story_day_02
+100330030   e330_030    Vincent finds Rin's apartment door open  |  story_day_03
+100330040   e330_040    Astaroth introduces a memory of first love  |  story_day_03
+100330041   e330_041    Astaroth asks how Vincent has changed  |  story_day_03
+100340010   e340_010    A drunk patron interrupts Rin's piano playing  |  story_day_04
+100340020   e340_020    Astaroth calls up more memories  |  story_day_04
+100340021   e340_021    Astaroth remembers how innocent the couple were  |  story_day_04
+100350020   e350_020    The bar notices Rin's improved playing  |  story_day_05
+100360020   e360_020    Vincent searches for Rin and receives a farewell  |  story_day_06
+100360030   e360_030    Vincent examines his feelings for Rin  |  story_day_06
+100360040   e360_040    Vincent and his friends discuss the nightmares  |  story_day_06
+100360061   e360_061    Vincent decides how to face Katherine  |  story_day_06
+100360070   e360_070    Astaroth introduces the last memory  |  story_day_06
+100360071   e360_071    Astaroth asks what Vincent holds dear  |  story_day_06
+100370010   e370_010    Catherine discusses Vincent's troubles  |  story_day_07
+100370020   e370_020    Astaroth warns of the cost of Vincent's decision  |  story_day_07
+100380010   e380_010    Vincent wakes without a nightmare or a reply from Rin  |  story_day_08
+100380030   e380_030    Vincent and Katherine part after the nightmare  |  story_day_08
+100380040   e380_040    The guys help Vincent look for Rin  |  story_day_08
+100380050   e380_050    Vincent demands answers about Rin from Boss  |  story_day_08
+100380060   e380_060    Dinner and a tune arrive at the bar  |  story_day_08
+100390020   e390_020    Vincent reunites with Rin on the normal ending route
+100390030   e390_030    Vincent reunites with Rin on the true ending route
+100390040   e390_040    Rin explains why the nightmares have ended  |  story_day_09
+100390050   e390_050    Vincent challenges Rin's brother  |  story_day_09
+100390090   e390_090    Vincent and Rin return after the final challenge  |  story_day_10
+100400000   e400_000    Game over
+100450010   e450_010    Trisha introduces Joker and Morgana  |  to_trial_one, to_trial_two, to_trial_two_AdHoc, to_cmp, to_cmpAdHoc, to_cmpOnline_R, to_cmpOnline_C, P5_DLC_1st
+
+SCENES OWNED BY ANOTHER GAME MODE
+These require their parent stage, characters, assets or event task. Each row lists the owning script and its authored entry points. The machine-readable catalog also lists supporting, interactive, and shared procedures.
+
+Dedicated transition    CALL_FALLASLEEP   story_day_01@8, story_day_02@31, story_day_03@31, story_day_04@24, story_day_05@60, story_day_06@81, story_day_07@46, story_day_09@46, story_day_10@25
+gameSequence/E_rapunzel.pac#rpzlevt.bf  |  rap_opng, rap_evt_01, rap_evt_02, rap_evt_03, rap_evt_04, rap_evt_05, rap_evt_06, rap_evt_07, rap_evt_08, rap_evt_09, rap_evt_10, rap_evt_11, rap_evt_12, rap_evt_13, rap_evt_14, rap_evt_15, rap_end_good, rap_end_bad, rap_test_01, rap_test_beta_01, notice_ura_command, rap_game_over, rap_name_entr
+gameSequence/E_rapunzel.pac#nextevt.bf  |  nxra_opng, nxra_evt_01, nxra_evt_02, nxra_evt_03, nxra_evt_04, nxra_evt_05, nxra_evt_06, nxra_evt_07, nxra_evt_08, nxra_evt_09, nxra_evt_10, nxra_evt_11, nxra_evt_12, nxra_evt_13, nxra_evt_13_err, nxra_evt_14, nxra_evt_14_err, nxra_evt_15, nxra_evt_15_err, nxra_end_true, nxra_end_false, rap_test_beta_03, nxra_game_over, nxra_name_entr
+event_E/e360/030/s000.bf  |  s000, s001, s002
+kflounge/script/lg_01.bf  |  lgc_beginning_of_day, lgc_end_of_day, lg_te_beginning_of_day, lg_te_end_of_day
+kflounge/script/lg_02.bf  |  lgc_beginning_of_day, lgc_end_of_day, lg_te_beginning_of_day, lg_te_end_of_day
+kflounge/script/lg_03.bf  |  lgc_beginning_of_day, lgc_end_of_day, lg_te_beginning_of_day, lg_te_end_of_day
+kflounge/script/lg_04.bf  |  lgc_beginning_of_day, lgc_end_of_day, lg_te_beginning_of_day, lg_te_end_of_day
+kflounge/script/lg_05.bf  |  lgc_beginning_of_day, lgc_end_of_day, lg_te_beginning_of_day, lg_te_end_of_day
+kflounge/script/lg_06_kc.bf  |  lgc_beginning_of_day, lgc_end_of_day, lg_te_beginning_of_day, lg_te_end_of_day
+kflounge/script/lg_06_r.bf  |  lgc_beginning_of_day, lgc_end_of_day, lg_te_beginning_of_day, lg_te_end_of_day
+kflounge/script/lg_07_kc.bf  |  lgc_beginning_of_day, lgc_end_of_day, lg_te_beginning_of_day, lg_te_end_of_day
+kflounge/script/lg_07_r.bf  |  lgc_beginning_of_day, lgc_end_of_day, lg_te_beginning_of_day, lg_te_end_of_day
+kflounge/script/lg_08_kc.bf  |  lgc_beginning_of_day, lgc_end_of_day, lg_te_beginning_of_day, lg_te_end_of_day
+kflounge/script/lg_08_r.bf  |  lgc_beginning_of_day, lgc_end_of_day, lg_te_beginning_of_day, lg_te_end_of_day
+kflounge/script/lg_09_r.bf  |  lgc_beginning_of_day, lgc_end_of_day, lg_te_beginning_of_day, lg_te_end_of_day
+kfmiddlefloor_E/script/mf_02_01.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_02_02.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_03_01.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_03_02.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_04_01.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_05_01.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_05_02.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_06_01.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_06_02.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_06_03.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_07_01_kc.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_07_01_r.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_07_02_kc.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_07_02_r.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_07_03_kc.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_07_03_r.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_07_04_kc.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_07_04_r.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_09_01_kc.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_09_01_r.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_09_02_kc.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_09_02_r.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_09_03_kc.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_09_03_r.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_09_04_kc.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_09_04_r.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_09_05_kc.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_09_05_r.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_10_01_r.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_10_02_r.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_10_03_r.bf  |  mfc_enter_tuto, mf_common_talk
+kfmiddlefloor_E/script/mf_e02_01.bf  |  mf_event_main
+kfmiddlefloor_E/script/mf_e02_02.bf  |  mf_event_main
+kfmiddlefloor_E/script/mf_e03_01.bf  |  mf_event_main
+kfmiddlefloor_E/script/mf_e05_02.bf  |  mf_event_main
+puzzle/script_E/common.bf  |  See procedure index in cutscene-catalog.json
+puzzle/script_E/compe.bf  |  pzl_compe_start, point_start
+puzzle/script_E/p01_01.bf  |  pzl_01_01_start, pzl_01_01_end
+puzzle/script_E/p01_02.bf  |  pzl_01_02_start, pzl_01_02_end
+puzzle/script_E/p01_03.bf  |  pzl_01_03_start, pzl_01_03_end
+puzzle/script_E/p02_01.bf  |  pzl_02_01_start, pzl_02_01_end
+puzzle/script_E/p02_02.bf  |  pzl_02_02_start, pzl_02_02_end
+puzzle/script_E/p02_03.bf  |  pzl_02_03_start, pzl_02_03_end
+puzzle/script_E/p03_01.bf  |  pzl_03_01_start, pzl_03_01_end
+puzzle/script_E/p03_02.bf  |  pzl_03_02_start, pzl_03_02_end
+puzzle/script_E/p03_03.bf  |  pzl_03_03_start, pzl_03_03_end
+puzzle/script_E/p04_01.bf  |  pzl_04_01_start, pzl_04_01_end
+puzzle/script_E/p04_02.bf  |  pzl_04_02_start, pzl_04_02_end
+puzzle/script_E/p05_01.bf  |  pzl_05_01_start, pzl_05_01_end
+puzzle/script_E/p05_02.bf  |  pzl_05_02_start, pzl_05_02_end
+puzzle/script_E/p05_03.bf  |  pzl_05_03_start, pzl_05_03_end
+puzzle/script_E/p06_01.bf  |  pzl_06_01_start, pzl_06_01_end
+puzzle/script_E/p06_02.bf  |  pzl_06_02_start, pzl_06_02_end
+puzzle/script_E/p06_03.bf  |  pzl_06_03_start, pzl_06_03_end
+puzzle/script_E/p06_04.bf  |  pzl_06_04_start, pzl_06_04_end
+puzzle/script_E/p07_01.bf  |  pzl_07_01_start, pzl_07_01_end
+puzzle/script_E/p07_02.bf  |  pzl_07_02_start, pzl_07_02_end
+puzzle/script_E/p07_03.bf  |  pzl_07_03_start, pzl_07_03_end
+puzzle/script_E/p07_04.bf  |  pzl_07_04_start, pzl_07_04_end
+puzzle/script_E/p07_05.bf  |  pzl_07_05_start, pzl_07_05_end
+puzzle/script_E/p08_01.bf  |  pzl_08_01_start, pzl_08_01_end
+puzzle/script_E/p08_02.bf  |  pzl_08_02_start, pzl_08_02_end
+puzzle/script_E/p09_01.bf  |  pzl_09_01_start, pzl_09_01_end
+puzzle/script_E/p09_02.bf  |  pzl_09_02_start, pzl_09_02_end
+puzzle/script_E/p09_03.bf  |  pzl_09_03_start, pzl_09_03_end
+puzzle/script_E/p09_04.bf  |  pzl_09_04_start, pzl_09_04_end
+puzzle/script_E/p09_05.bf  |  pzl_09_05_start, pzl_09_05_end
+puzzle/script_E/p09_06.bf  |  pzl_09_06_start, pzl_09_06_end
+puzzle/script_E/p10_01.bf  |  pzl_10_01_start, pzl_10_01_end
+puzzle/script_E/p10_02.bf  |  pzl_10_02_start, pzl_10_02_end
+puzzle/script_E/p10_03.bf  |  pzl_10_03_start, pzl_10_03_end
+puzzle/script_E/p10_04.bf  |  pzl_10_04_start, pzl_10_04_end
+puzzle/script_E/r01_01.bf  |  pzl_12_01_start, pzl_12_01_end
+puzzle/script_E/t01_01_00.bf  |  pzl_11_01_start, pzl_11_01_end
+puzzle/script_E/t01_01_01.bf  |  pzl_11_01_start, pzl_11_01_end
+puzzle/script_E/t01_01_02.bf  |  pzl_11_01_start, pzl_11_01_end
+puzzle/script_E/t01_01_03.bf  |  pzl_11_01_start, pzl_11_01_end
+puzzle/script_E/t01_01_04.bf  |  pzl_11_01_start, pzl_11_01_end
+puzzle/script_E/t01_01_05.bf  |  pzl_11_01_start, pzl_11_01_end
+puzzle/script_E/t01_01_06.bf  |  pzl_11_01_start, pzl_11_01_end
+puzzle/script_E/t01_01_07.bf  |  pzl_11_01_start, pzl_11_01_end
+puzzle/script_E/t01_01_08.bf  |  pzl_11_01_start, pzl_11_01_end
+puzzle/script_E/t01_01_09.bf  |  pzl_11_01_start, pzl_11_01_end
+puzzle/script_E/t01_01_10.bf  |  pzl_11_01_start, pzl_11_01_end
+puzzle/script_E/t01_02_00.bf  |  pzl_11_02_start, pzl_11_02_end
+puzzle/script_E/t01_02_01.bf  |  pzl_11_02_start, pzl_11_02_end
+puzzle/script_E/t01_02_02.bf  |  pzl_11_02_start, pzl_11_02_end
+puzzle/script_E/t01_02_03.bf  |  pzl_11_02_start, pzl_11_02_end
+puzzle/script_E/t01_02_04.bf  |  pzl_11_02_start, pzl_11_02_end
+puzzle/script_E/t01_02_05.bf  |  pzl_11_02_start, pzl_11_02_end
+puzzle/script_E/t01_02_06.bf  |  pzl_11_02_start, pzl_11_02_end
+puzzle/script_E/t01_02_07.bf  |  pzl_11_02_start, pzl_11_02_end
+puzzle/script_E/t01_02_08.bf  |  pzl_11_02_start, pzl_11_02_end
+puzzle/script_E/t01_02_09.bf  |  pzl_11_02_start, pzl_11_02_end
+puzzle/script_E/t01_02_10.bf  |  pzl_11_02_start, pzl_11_02_end
+puzzle/script_E/t01_03_00.bf  |  pzl_11_03_start, pzl_11_03_end
+puzzle/script_E/t01_03_01.bf  |  pzl_11_03_start, pzl_11_03_end
+puzzle/script_E/t01_03_02.bf  |  pzl_11_03_start, pzl_11_03_end
+puzzle/script_E/t01_03_03.bf  |  pzl_11_03_start, pzl_11_03_end
+puzzle/script_E/t01_03_04.bf  |  pzl_11_03_start, pzl_11_03_end
+puzzle/script_E/t01_03_05.bf  |  pzl_11_03_start, pzl_11_03_end
+puzzle/script_E/t01_03_06.bf  |  pzl_11_03_start, pzl_11_03_end
+puzzle/script_E/t01_03_07.bf  |  pzl_11_03_start, pzl_11_03_end
+puzzle/script_E/t01_03_08.bf  |  pzl_11_03_start, pzl_11_03_end
+puzzle/script_E/t01_03_09.bf  |  pzl_11_03_start, pzl_11_03_end
+puzzle/script_E/t01_03_10.bf  |  pzl_11_03_start, pzl_11_03_end
+puzzle/script_E/t01_04_00.bf  |  pzl_11_04_start, pzl_11_04_end
+puzzle/script_E/t01_04_01.bf  |  pzl_11_04_start, pzl_11_04_end
+puzzle/script_E/t01_04_02.bf  |  pzl_11_04_start, pzl_11_04_end
+puzzle/script_E/t01_04_03.bf  |  pzl_11_04_start, pzl_11_04_end
+puzzle/script_E/t01_04_04.bf  |  pzl_11_04_start, pzl_11_04_end
+puzzle/script_E/t01_04_05.bf  |  pzl_11_04_start, pzl_11_04_end
+puzzle/script_E/t01_04_06.bf  |  pzl_11_04_start, pzl_11_04_end
+puzzle/script_E/t01_04_07.bf  |  pzl_11_04_start, pzl_11_04_end
+puzzle/script_E/t01_04_08.bf  |  pzl_11_04_start, pzl_11_04_end
+puzzle/script_E/t01_04_09.bf  |  pzl_11_04_start, pzl_11_04_end
+puzzle/script_E/t01_04_10.bf  |  pzl_11_04_start, pzl_11_04_end
+
+FULL PROCEDURE LOOKUP
+Within each game mode, each name appears once with the script files that define it. Shared routines, conditional dialogue and setup functions appear here so an individual moment can be traced to its owner. They do not each represent a separate movie.
+
+RAPUNZEL
+rap_init  |  rapunzel.bf
+rap_01  |  rapunzel.bf
+rap_02  |  rapunzel.bf
+rap_03  |  rapunzel.bf
+rap_04  |  rapunzel.bf
+rap_05  |  rapunzel.bf
+rap_06  |  rapunzel.bf
+rap_07  |  rapunzel.bf
+rap_08  |  rapunzel.bf
+rap_09  |  rapunzel.bf
+rap_10  |  rapunzel.bf
+rap_11  |  rapunzel.bf
+rap_12  |  rapunzel.bf
+rap_13  |  rapunzel.bf
+rap_14  |  rapunzel.bf
+rap_15  |  rapunzel.bf
+rap_16  |  rapunzel.bf
+rap_17  |  rapunzel.bf
+rap_18  |  rapunzel.bf
+rap_19  |  rapunzel.bf
+rap_20  |  rapunzel.bf
+rap_21  |  rapunzel.bf
+rap_22  |  rapunzel.bf
+rap_23  |  rapunzel.bf
+rap_24  |  rapunzel.bf
+rap_25  |  rapunzel.bf
+rap_26  |  rapunzel.bf
+rap_27  |  rapunzel.bf
+rap_28  |  rapunzel.bf
+rap_29  |  rapunzel.bf
+rap_30  |  rapunzel.bf
+rap_31  |  rapunzel.bf
+rap_32  |  rapunzel.bf
+rap_33  |  rapunzel.bf
+rap_34  |  rapunzel.bf
+rap_35  |  rapunzel.bf
+rap_36  |  rapunzel.bf
+rap_37  |  rapunzel.bf
+rap_38  |  rapunzel.bf
+rap_39  |  rapunzel.bf
+rap_40  |  rapunzel.bf
+rap_41  |  rapunzel.bf
+rap_42  |  rapunzel.bf
+rap_43  |  rapunzel.bf
+rap_44  |  rapunzel.bf
+rap_45  |  rapunzel.bf
+rap_46  |  rapunzel.bf
+rap_47  |  rapunzel.bf
+rap_48  |  rapunzel.bf
+rap_49  |  rapunzel.bf
+rap_50  |  rapunzel.bf
+rap_51  |  rapunzel.bf
+rap_52  |  rapunzel.bf
+rap_53  |  rapunzel.bf
+rap_54  |  rapunzel.bf
+rap_55  |  rapunzel.bf
+rap_56  |  rapunzel.bf
+rap_57  |  rapunzel.bf
+rap_58  |  rapunzel.bf
+rap_59  |  rapunzel.bf
+rap_60  |  rapunzel.bf
+rap_61  |  rapunzel.bf
+rap_62  |  rapunzel.bf
+rap_63  |  rapunzel.bf
+rap_64  |  rapunzel.bf
+rap_99  |  rapunzel.bf
+rap_100  |  rapunzel.bf
+rap_101  |  rapunzel.bf
+nxra_init  |  nextrap.bf
+nxra_01  |  nextrap.bf
+nxra_02  |  nextrap.bf
+nxra_03  |  nextrap.bf
+nxra_04  |  nextrap.bf
+nxra_05  |  nextrap.bf
+nxra_06  |  nextrap.bf
+nxra_07  |  nextrap.bf
+nxra_08  |  nextrap.bf
+nxra_09  |  nextrap.bf
+nxra_10  |  nextrap.bf
+nxra_11  |  nextrap.bf
+nxra_12  |  nextrap.bf
+nxra_13  |  nextrap.bf
+nxra_14  |  nextrap.bf
+nxra_15  |  nextrap.bf
+nxra_16  |  nextrap.bf
+nxra_17  |  nextrap.bf
+nxra_18  |  nextrap.bf
+nxra_19  |  nextrap.bf
+nxra_20  |  nextrap.bf
+nxra_21  |  nextrap.bf
+nxra_22  |  nextrap.bf
+nxra_23  |  nextrap.bf
+nxra_24  |  nextrap.bf
+nxra_25  |  nextrap.bf
+nxra_26  |  nextrap.bf
+nxra_27  |  nextrap.bf
+nxra_28  |  nextrap.bf
+nxra_29  |  nextrap.bf
+nxra_30  |  nextrap.bf
+nxra_31  |  nextrap.bf
+nxra_32  |  nextrap.bf
+nxra_33  |  nextrap.bf
+nxra_34  |  nextrap.bf
+nxra_35  |  nextrap.bf
+nxra_36  |  nextrap.bf
+nxra_37  |  nextrap.bf
+nxra_38  |  nextrap.bf
+nxra_39  |  nextrap.bf
+nxra_40  |  nextrap.bf
+nxra_41  |  nextrap.bf
+nxra_42  |  nextrap.bf
+nxra_43  |  nextrap.bf
+nxra_44  |  nextrap.bf
+nxra_45  |  nextrap.bf
+nxra_46  |  nextrap.bf
+nxra_47  |  nextrap.bf
+nxra_48  |  nextrap.bf
+nxra_49  |  nextrap.bf
+nxra_50  |  nextrap.bf
+nxra_51  |  nextrap.bf
+nxra_52  |  nextrap.bf
+nxra_53  |  nextrap.bf
+nxra_54  |  nextrap.bf
+nxra_55  |  nextrap.bf
+nxra_56  |  nextrap.bf
+nxra_57  |  nextrap.bf
+nxra_58  |  nextrap.bf
+nxra_59  |  nextrap.bf
+nxra_60  |  nextrap.bf
+nxra_61  |  nextrap.bf
+nxra_62  |  nextrap.bf
+nxra_63  |  nextrap.bf
+nxra_64  |  nextrap.bf
+nxra_99  |  nextrap.bf
+nxra_100  |  nextrap.bf
+nxra_101  |  nextrap.bf
+rap_opng  |  rpzlevt.bf
+rap_evt_01  |  rpzlevt.bf
+rap_evt_02  |  rpzlevt.bf
+rap_evt_03  |  rpzlevt.bf
+rap_evt_04  |  rpzlevt.bf
+rap_evt_05  |  rpzlevt.bf
+rap_evt_06  |  rpzlevt.bf
+rap_evt_07  |  rpzlevt.bf
+rap_evt_08  |  rpzlevt.bf
+rap_evt_09  |  rpzlevt.bf
+rap_evt_10  |  rpzlevt.bf
+rap_evt_11  |  rpzlevt.bf
+rap_evt_12  |  rpzlevt.bf
+rap_evt_13  |  rpzlevt.bf
+rap_evt_14  |  rpzlevt.bf
+rap_evt_15  |  rpzlevt.bf
+rap_end_good  |  rpzlevt.bf
+rap_end_bad  |  rpzlevt.bf
+rap_test_01  |  rpzlevt.bf
+rap_test_beta_01  |  rpzlevt.bf
+notice_ura_command  |  rpzlevt.bf
+rap_game_over  |  rpzlevt.bf
+rap_name_entr  |  rpzlevt.bf
+nxra_opng  |  nextevt.bf
+nxra_evt_01  |  nextevt.bf
+nxra_evt_02  |  nextevt.bf
+nxra_evt_03  |  nextevt.bf
+nxra_evt_04  |  nextevt.bf
+nxra_evt_05  |  nextevt.bf
+nxra_evt_06  |  nextevt.bf
+nxra_evt_07  |  nextevt.bf
+nxra_evt_08  |  nextevt.bf
+nxra_evt_09  |  nextevt.bf
+nxra_evt_10  |  nextevt.bf
+nxra_evt_11  |  nextevt.bf
+nxra_evt_12  |  nextevt.bf
+nxra_evt_13  |  nextevt.bf
+nxra_evt_13_err  |  nextevt.bf
+nxra_evt_14  |  nextevt.bf
+nxra_evt_14_err  |  nextevt.bf
+nxra_evt_15  |  nextevt.bf
+nxra_evt_15_err  |  nextevt.bf
+nxra_end_true  |  nextevt.bf
+nxra_end_false  |  nextevt.bf
+rap_test_beta_03  |  nextevt.bf
+nxra_game_over  |  nextevt.bf
+nxra_name_entr  |  nextevt.bf
+
+EVENT-LOCAL SCRIPTS
+s000  |  s000.bf
+s001  |  s000.bf
+s002  |  s000.bf
+
+STRAY SHEEP
+lgc_cellphone_retry  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_cellphone_retry_ret  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_cellphone_surprised  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_check_ATM  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_check_exit  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_game  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_game_end  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_drink  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_vin_drink  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_vin_drink_monologue  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_vin_drink_select  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_change_drink  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+orderchara_return  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_event_wine  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_incoming_call  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_rin_talk_start  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_rin_talk_end  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_sake_column  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_sit_boxseat_A  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_sit_boxseat_C  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_te_astaroth  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_beginning_of_day  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_end_of_day  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_te_goto_toilet  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_te_invit_going_home  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_enter_toilet  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_leave_toilet  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_enter_toilet_cubicle  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_leave_toilet_cubicle  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_discovery_glasses  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_removable_glasses  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_tuto_phone  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_tuto_save  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_tuto_bar  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_tuto_drink  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_tuto_rapunzel  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_tuto_rowchaos  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_tuto_jukebox  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_tuto_talk_npc  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_tuto_incoming  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_tuto_going_home  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_tuto_change_voice  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_tuto_ero_glass  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_tuto_buy_ero_glass  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_visit_c03  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_visit_c50  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_going_home_c50  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_going_home_c51  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_going_home_c66  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_visit_c52  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_going_home_c52  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_visit_c53  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_going_home_c53  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_visit_c54  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_going_home_c54  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_visit_c55  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_going_home_c55  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_visit_c56  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_going_home_c56  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_going_home_c81  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_going_home_c88  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_going_home_c91  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lgc_wash_face  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_common_init_early  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_common_init_late  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_common_init_midnight  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_common_relocation  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_init_early  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_init_late  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_init_midnight  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_relocation  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_exit  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_drink  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_te_beginning_of_day  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_te_end_of_day  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_te_mail  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_te_monologue  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_day01_incoming_mail  |  lg_01.bf
+lg_te_tutorial  |  lg_01.bf, lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c03  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_talk_c03  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_visit_c03  |  lg_02.bf, lg_03.bf, lg_06_kc.bf
+lg_check_unread_c05  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_talk_c05  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c06  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_talk_c06  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c07  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_talk_c07  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c08  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_talk_c08  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c09  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_talk_c09  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c20  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_talk_c20  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c50  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_talk_c50  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c51  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_talk_c51  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c52  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_talk_c52  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c53  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_talk_c53  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_TV  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_ATM  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_piano  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_mirror  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_te_end  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_te_goto_toilet  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_te_invit_going_home  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_te_move_position  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_te_phone  |  lg_02.bf, lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c54  |  lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_talk_c54  |  lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c55  |  lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_talk_c55  |  lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c56  |  lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_talk_c56  |  lg_03.bf, lg_04.bf, lg_05.bf, lg_06_kc.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c88  |  lg_04.bf, lg_05.bf, lg_07_kc.bf, lg_07_r.bf
+lg_talk_c88  |  lg_04.bf, lg_05.bf, lg_07_kc.bf, lg_07_r.bf
+lg_te_visit_catherine  |  lg_04.bf, lg_05.bf, lg_06_r.bf, lg_07_kc.bf, lg_07_r.bf, lg_08_kc.bf, lg_08_r.bf, lg_09_r.bf
+lg_check_unread_c90  |  lg_08_kc.bf, lg_08_r.bf
+lg_talk_c90  |  lg_08_kc.bf, lg_08_r.bf
+lg_check_unread_c91  |  lg_08_kc.bf, lg_08_r.bf
+lg_talk_c91  |  lg_08_kc.bf, lg_08_r.bf
+
+NIGHTMARE LANDINGS
+mfc_setup_rin_route  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf, mf_07_04_kc.bf, mf_07_04_r.bf, mf_09_01_kc.bf, mf_09_01_r.bf, mf_09_02_kc.bf, mf_09_02_r.bf, mf_09_03_kc.bf, mf_09_03_r.bf, mf_09_04_kc.bf, mf_09_04_r.bf, mf_09_05_kc.bf, mf_09_05_r.bf, mf_10_01_r.bf, mf_10_02_r.bf, mf_10_03_r.bf
+mfc_enter_tuto  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf, mf_07_04_kc.bf, mf_07_04_r.bf, mf_09_01_kc.bf, mf_09_01_r.bf, mf_09_02_kc.bf, mf_09_02_r.bf, mf_09_03_kc.bf, mf_09_03_r.bf, mf_09_04_kc.bf, mf_09_04_r.bf, mf_09_05_kc.bf, mf_09_05_r.bf, mf_10_01_r.bf, mf_10_02_r.bf, mf_10_03_r.bf
+mfc_tuto_setup  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf, mf_07_04_kc.bf, mf_07_04_r.bf, mf_09_01_kc.bf, mf_09_01_r.bf, mf_09_02_kc.bf, mf_09_02_r.bf, mf_09_03_kc.bf, mf_09_03_r.bf, mf_09_04_kc.bf, mf_09_04_r.bf, mf_09_05_kc.bf, mf_09_05_r.bf, mf_10_01_r.bf, mf_10_02_r.bf, mf_10_03_r.bf
+mfc_tuto18  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf, mf_07_04_kc.bf, mf_07_04_r.bf, mf_09_01_kc.bf, mf_09_01_r.bf, mf_09_02_kc.bf, mf_09_02_r.bf, mf_09_03_kc.bf, mf_09_03_r.bf, mf_09_04_kc.bf, mf_09_04_r.bf, mf_09_05_kc.bf, mf_09_05_r.bf, mf_10_01_r.bf, mf_10_02_r.bf, mf_10_03_r.bf
+mfc_tuto19  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf, mf_07_04_kc.bf, mf_07_04_r.bf, mf_09_01_kc.bf, mf_09_01_r.bf, mf_09_02_kc.bf, mf_09_02_r.bf, mf_09_03_kc.bf, mf_09_03_r.bf, mf_09_04_kc.bf, mf_09_04_r.bf, mf_09_05_kc.bf, mf_09_05_r.bf, mf_10_01_r.bf, mf_10_02_r.bf, mf_10_03_r.bf
+mfc_tuto20  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf, mf_07_04_kc.bf, mf_07_04_r.bf, mf_09_01_kc.bf, mf_09_01_r.bf, mf_09_02_kc.bf, mf_09_02_r.bf, mf_09_03_kc.bf, mf_09_03_r.bf, mf_09_04_kc.bf, mf_09_04_r.bf, mf_09_05_kc.bf, mf_09_05_r.bf, mf_10_01_r.bf, mf_10_02_r.bf, mf_10_03_r.bf
+mf_common_relocation  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf, mf_07_04_kc.bf, mf_07_04_r.bf, mf_09_01_kc.bf, mf_09_01_r.bf, mf_09_02_kc.bf, mf_09_02_r.bf, mf_09_03_kc.bf, mf_09_03_r.bf, mf_09_04_kc.bf, mf_09_04_r.bf, mf_09_05_kc.bf, mf_09_05_r.bf, mf_10_01_r.bf, mf_10_02_r.bf, mf_10_03_r.bf
+mf_common_check_unread  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf, mf_07_04_kc.bf, mf_07_04_r.bf, mf_09_01_kc.bf, mf_09_01_r.bf, mf_09_02_kc.bf, mf_09_02_r.bf, mf_09_03_kc.bf, mf_09_03_r.bf, mf_09_04_kc.bf, mf_09_04_r.bf, mf_09_05_kc.bf, mf_09_05_r.bf, mf_10_01_r.bf, mf_10_02_r.bf, mf_10_03_r.bf
+mf_common_talk  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf, mf_07_04_kc.bf, mf_07_04_r.bf, mf_09_01_kc.bf, mf_09_01_r.bf, mf_09_02_kc.bf, mf_09_02_r.bf, mf_09_03_kc.bf, mf_09_03_r.bf, mf_09_04_kc.bf, mf_09_04_r.bf, mf_09_05_kc.bf, mf_09_05_r.bf, mf_10_01_r.bf, mf_10_02_r.bf, mf_10_03_r.bf
+mf_relocation  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf, mf_07_04_kc.bf, mf_07_04_r.bf, mf_09_01_kc.bf, mf_09_01_r.bf, mf_09_02_kc.bf, mf_09_02_r.bf, mf_09_03_kc.bf, mf_09_03_r.bf, mf_09_04_kc.bf, mf_09_04_r.bf, mf_09_05_kc.bf, mf_09_05_r.bf, mf_10_01_r.bf, mf_10_02_r.bf, mf_10_03_r.bf
+mf_check_unread_c73  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_talk_c73  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_check_unread_c74  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_talk_c74  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_check_unread_c58  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_talk_c58  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_check_unread_c70  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_07_01_kc.bf, mf_07_01_r.bf
+mf_talk_c70  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_07_01_kc.bf, mf_07_01_r.bf
+mf_check_unread_c58_02  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_05_02.bf, mf_06_01.bf
+mf_talk_c58_02  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_05_02.bf, mf_06_01.bf
+mf_check_unread_c70_02  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_06_01.bf
+mf_talk_c70_02  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_06_01.bf
+mf_check_unread_c58_03  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf
+mf_talk_c58_03  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf
+mf_check_unread_c58_04  |  mf_02_01.bf, mf_02_02.bf
+mf_talk_c58_04  |  mf_02_01.bf, mf_02_02.bf
+mf_check_unread_c96  |  mf_02_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_talk_c96  |  mf_02_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_check_piano  |  mf_02_01.bf, mf_02_02.bf, mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf, mf_07_04_kc.bf, mf_07_04_r.bf, mf_09_01_kc.bf, mf_09_01_r.bf, mf_09_02_kc.bf, mf_09_02_r.bf, mf_09_03_kc.bf, mf_09_03_r.bf, mf_09_04_kc.bf, mf_09_04_r.bf, mf_09_05_kc.bf, mf_09_05_r.bf, mf_10_01_r.bf, mf_10_02_r.bf, mf_10_03_r.bf
+mf_check_unread_c23  |  mf_02_02.bf, mf_03_01.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf
+mf_talk_c23  |  mf_02_02.bf, mf_03_01.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf
+mf_check_unread_c95  |  mf_02_02.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_talk_c95  |  mf_02_02.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_check_unread_c75  |  mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_talk_c75  |  mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_check_unread_c76  |  mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_talk_c76  |  mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_check_unread_c20  |  mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_10_01_r.bf, mf_10_02_r.bf, mf_10_03_r.bf
+mf_talk_c20  |  mf_03_01.bf, mf_03_02.bf, mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_10_01_r.bf, mf_10_02_r.bf, mf_10_03_r.bf
+mf_check_unread_c70_03  |  mf_03_02.bf, mf_04_01.bf, mf_05_01.bf
+mf_talk_c70_03  |  mf_03_02.bf, mf_04_01.bf, mf_05_01.bf
+mf_check_unread_c22  |  mf_03_02.bf, mf_04_01.bf, mf_05_02.bf
+mf_talk_c22  |  mf_03_02.bf, mf_04_01.bf, mf_05_02.bf
+mf_check_unread_c70_04  |  mf_03_02.bf, mf_04_01.bf
+mf_talk_c70_04  |  mf_03_02.bf, mf_04_01.bf
+mf_check_unread_c77  |  mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_talk_c77  |  mf_04_01.bf, mf_05_01.bf, mf_05_02.bf, mf_06_01.bf, mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_check_unread_c57  |  mf_04_01.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf, mf_07_04_kc.bf, mf_07_04_r.bf
+mf_talk_c57  |  mf_04_01.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf, mf_07_04_kc.bf, mf_07_04_r.bf
+mf_check_unread_c24  |  mf_05_01.bf, mf_06_02.bf
+mf_talk_c24  |  mf_05_01.bf, mf_06_02.bf
+mf_check_unread_c72  |  mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_talk_c72  |  mf_06_02.bf, mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_check_unread_c71  |  mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_talk_c71  |  mf_06_03.bf, mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf, mf_07_03_kc.bf, mf_07_03_r.bf
+mf_check_unread_c25  |  mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf
+mf_talk_c25  |  mf_07_01_kc.bf, mf_07_01_r.bf, mf_07_02_kc.bf, mf_07_02_r.bf
+mf_event_initialize  |  mf_e02_01.bf, mf_e02_02.bf, mf_e03_01.bf, mf_e05_02.bf
+mf_event_finalize  |  mf_e02_01.bf, mf_e02_02.bf, mf_e03_01.bf, mf_e05_02.bf
+mf_event_main  |  mf_e02_01.bf, mf_e02_02.bf, mf_e03_01.bf, mf_e05_02.bf
+
+PUZZLE STAGING, GOALS, DEFEATS AND TUTORIAL DIALOGUE
+pzl_common_0000  |  common.bf
+pzl_common_0001  |  common.bf
+pzl_common_0002  |  common.bf
+pzl_common_0003  |  common.bf
+pzl_common_0004  |  common.bf
+pzl_common_0005  |  common.bf
+pzl_common_0006  |  common.bf
+pzl_common_0007  |  common.bf
+pzl_common_0008  |  common.bf
+pzl_common_0009  |  common.bf
+pzl_common_0010  |  common.bf
+pzl_compe_start  |  compe.bf
+pzl_compe_advantage  |  compe.bf
+pzl_compe_win  |  compe.bf
+pzl_00_00_dead_2  |  compe.bf, p01_01.bf, p01_02.bf, p01_03.bf, p02_01.bf, p02_02.bf, p02_03.bf, p03_01.bf, p03_02.bf, p03_03.bf, p04_01.bf, p04_02.bf, p05_01.bf, p05_02.bf, p05_03.bf, p06_01.bf, p06_02.bf, p06_03.bf, p06_04.bf, p07_01.bf, p07_02.bf, p07_03.bf, p07_04.bf, p07_05.bf, p08_01.bf, p08_02.bf, p09_01.bf, p09_02.bf, p09_03.bf, p09_04.bf, p09_05.bf, p09_06.bf, p10_01.bf, p10_02.bf, p10_03.bf, p10_04.bf, r01_01.bf, t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf, t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf, t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf, t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_00_00_dead_3  |  compe.bf, p01_01.bf, p01_02.bf, p01_03.bf, p02_01.bf, p02_02.bf, p02_03.bf, p03_01.bf, p03_02.bf, p03_03.bf, p04_01.bf, p04_02.bf, p05_01.bf, p05_02.bf, p05_03.bf, p06_01.bf, p06_02.bf, p06_03.bf, p06_04.bf, p07_01.bf, p07_02.bf, p07_03.bf, p07_04.bf, p07_05.bf, p08_01.bf, p08_02.bf, p09_01.bf, p09_02.bf, p09_03.bf, p09_04.bf, p09_05.bf, p09_06.bf, p10_01.bf, p10_02.bf, p10_03.bf, p10_04.bf, r01_01.bf, t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf, t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf, t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf, t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_compe_draw  |  compe.bf
+pzl_compe_init  |  compe.bf
+pzl_compe_02  |  compe.bf
+pzl_compe_03  |  compe.bf
+pzl_compe_04  |  compe.bf
+pzl_13_01_05  |  compe.bf
+Init_REG  |  compe.bf
+Get_PlayerState  |  compe.bf
+Set_DiffandFirst  |  compe.bf
+start_diff  |  compe.bf
+Cmpr_previous  |  compe.bf
+point_start  |  compe.bf
+point_halfway  |  compe.bf
+point_goal  |  compe.bf
+Disp_msg  |  compe.bf
+check_msg  |  compe.bf
+check_error  |  compe.bf
+pzl_normal_dead  |  compe.bf, p01_01.bf, p01_02.bf, p01_03.bf, p02_01.bf, p02_02.bf, p02_03.bf, p03_01.bf, p03_02.bf, p03_03.bf, p04_01.bf, p04_02.bf, p05_01.bf, p05_02.bf, p05_03.bf, p06_01.bf, p06_02.bf, p06_03.bf, p06_04.bf, p07_01.bf, p07_02.bf, p07_03.bf, p07_04.bf, p07_05.bf, p08_01.bf, p08_02.bf, p09_01.bf, p09_02.bf, p09_03.bf, p09_04.bf, p09_05.bf, p09_06.bf, p10_01.bf, p10_02.bf, p10_03.bf, p10_04.bf, r01_01.bf, t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf, t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf, t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf, t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_boss_dead  |  compe.bf, p01_01.bf, p01_02.bf, p01_03.bf, p02_01.bf, p02_02.bf, p02_03.bf, p03_01.bf, p03_02.bf, p03_03.bf, p04_01.bf, p04_02.bf, p05_01.bf, p05_02.bf, p05_03.bf, p06_01.bf, p06_02.bf, p06_03.bf, p06_04.bf, p07_01.bf, p07_02.bf, p07_03.bf, p07_04.bf, p07_05.bf, p08_01.bf, p08_02.bf, p09_01.bf, p09_02.bf, p09_03.bf, p09_04.bf, p09_05.bf, p09_06.bf, p10_01.bf, p10_02.bf, p10_03.bf, p10_04.bf, r01_01.bf, t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf, t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf, t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf, t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_normal_dead2  |  compe.bf, p01_01.bf, p01_02.bf, p01_03.bf, p02_01.bf, p02_02.bf, p02_03.bf, p03_01.bf, p03_02.bf, p03_03.bf, p04_01.bf, p04_02.bf, p05_01.bf, p05_02.bf, p05_03.bf, p06_01.bf, p06_02.bf, p06_03.bf, p06_04.bf, p07_01.bf, p07_02.bf, p07_03.bf, p07_04.bf, p07_05.bf, p08_01.bf, p08_02.bf, p09_01.bf, p09_02.bf, p09_03.bf, p09_04.bf, p09_05.bf, p09_06.bf, p10_01.bf, p10_02.bf, p10_03.bf, p10_04.bf, r01_01.bf, t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf, t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf, t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf, t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_normal_dead3  |  compe.bf, p01_01.bf, p01_02.bf, p01_03.bf, p02_01.bf, p02_02.bf, p02_03.bf, p03_01.bf, p03_02.bf, p03_03.bf, p04_01.bf, p04_02.bf, p05_01.bf, p05_02.bf, p05_03.bf, p06_01.bf, p06_02.bf, p06_03.bf, p06_04.bf, p07_01.bf, p07_02.bf, p07_03.bf, p07_04.bf, p07_05.bf, p08_01.bf, p08_02.bf, p09_01.bf, p09_02.bf, p09_03.bf, p09_04.bf, p09_05.bf, p09_06.bf, p10_01.bf, p10_02.bf, p10_03.bf, p10_04.bf, r01_01.bf, t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf, t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf, t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf, t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_normal_dead4  |  compe.bf, p01_01.bf, p01_02.bf, p01_03.bf, p02_01.bf, p02_02.bf, p02_03.bf, p03_01.bf, p03_02.bf, p03_03.bf, p04_01.bf, p04_02.bf, p05_01.bf, p05_02.bf, p05_03.bf, p06_01.bf, p06_02.bf, p06_03.bf, p06_04.bf, p07_01.bf, p07_02.bf, p07_03.bf, p07_04.bf, p07_05.bf, p08_01.bf, p08_02.bf, p09_01.bf, p09_02.bf, p09_03.bf, p09_04.bf, p09_05.bf, p09_06.bf, p10_01.bf, p10_02.bf, p10_03.bf, p10_04.bf, r01_01.bf, t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf, t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf, t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf, t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+Alldead_voice_play  |  compe.bf, p01_01.bf, p01_02.bf, p01_03.bf, p02_01.bf, p02_02.bf, p02_03.bf, p03_01.bf, p03_02.bf, p03_03.bf, p04_01.bf, p04_02.bf, p05_01.bf, p05_02.bf, p05_03.bf, p06_01.bf, p06_02.bf, p06_03.bf, p06_04.bf, p07_01.bf, p07_02.bf, p07_03.bf, p07_04.bf, p07_05.bf, p08_01.bf, p08_02.bf, p09_01.bf, p09_02.bf, p09_03.bf, p09_04.bf, p09_05.bf, p09_06.bf, p10_01.bf, p10_02.bf, p10_03.bf, p10_04.bf, r01_01.bf, t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf, t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf, t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf, t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+colo_goal1  |  compe.bf
+colo_goal2  |  compe.bf
+colo_goal3  |  compe.bf
+colo_goal4  |  compe.bf
+winner_voice_play  |  compe.bf
+dead_voice_play  |  compe.bf
+pzl_01_01_start  |  p01_01.bf
+pzl_01_01_end  |  p01_01.bf
+pzl_00_00_dead  |  p01_01.bf, p01_02.bf, p01_03.bf, p02_01.bf, p02_02.bf, p02_03.bf, p03_01.bf, p03_02.bf, p03_03.bf, p04_01.bf, p04_02.bf, p05_01.bf, p05_02.bf, p05_03.bf, p06_01.bf, p06_02.bf, p06_03.bf, p06_04.bf, p07_01.bf, p07_02.bf, p07_03.bf, p07_04.bf, p07_05.bf, p08_01.bf, p08_02.bf, p09_01.bf, p09_02.bf, p09_03.bf, p09_04.bf, p09_05.bf, p09_06.bf, p10_01.bf, p10_02.bf, p10_03.bf, p10_04.bf, r01_01.bf, t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf, t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf, t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf, t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_01_01_0000  |  p01_01.bf
+pzl_01_01_0001  |  p01_01.bf
+pzl_01_01_0002  |  p01_01.bf
+pzl_01_01_0003  |  p01_01.bf
+pzl_01_01_0004  |  p01_01.bf
+pzl_goal_block1  |  p01_01.bf, p01_02.bf, p01_03.bf, p02_01.bf, p02_02.bf, p02_03.bf, p03_01.bf, p03_02.bf, p03_03.bf, p04_01.bf, p04_02.bf, p05_01.bf, p05_02.bf, p05_03.bf, p06_01.bf, p06_02.bf, p06_03.bf, p06_04.bf, p07_01.bf, p07_02.bf, p07_03.bf, p07_04.bf, p07_05.bf, p08_01.bf, p08_02.bf, p09_01.bf, p09_02.bf, p09_03.bf, p09_04.bf, p09_05.bf, p09_06.bf, p10_01.bf, p10_02.bf, p10_03.bf, p10_04.bf, r01_01.bf
+pzl_goal_block2  |  p01_01.bf, p01_02.bf, p01_03.bf, p02_01.bf, p02_02.bf, p02_03.bf, p03_01.bf, p03_02.bf, p03_03.bf, p04_01.bf, p04_02.bf, p05_01.bf, p05_02.bf, p05_03.bf, p06_01.bf, p06_02.bf, p06_03.bf, p06_04.bf, p07_01.bf, p07_02.bf, p07_03.bf, p07_04.bf, p07_05.bf, p08_01.bf, p08_02.bf, p09_01.bf, p09_02.bf, p09_03.bf, p09_04.bf, p09_05.bf, p09_06.bf, p10_01.bf, p10_02.bf, p10_03.bf, p10_04.bf, r01_01.bf
+pzl_goal_goal_bs1  |  p01_01.bf, p01_02.bf, p01_03.bf, p02_01.bf, p02_02.bf, p02_03.bf, p03_01.bf, p03_02.bf, p03_03.bf, p04_01.bf, p04_02.bf, p05_01.bf, p05_02.bf, p05_03.bf, p06_01.bf, p06_02.bf, p06_03.bf, p06_04.bf, p07_01.bf, p07_02.bf, p07_03.bf, p07_04.bf, p07_05.bf, p08_01.bf, p08_02.bf, p09_01.bf, p09_02.bf, p09_03.bf, p09_04.bf, p09_05.bf, p09_06.bf, p10_01.bf, p10_02.bf, p10_03.bf, p10_04.bf, r01_01.bf
+pzl_01_02_start  |  p01_02.bf
+pzl_01_02_end  |  p01_02.bf
+pzl_01_02_0000  |  p01_02.bf
+pzl_01_03_start  |  p01_03.bf
+pzl_01_03_end  |  p01_03.bf
+pzl_01_03_0000  |  p01_03.bf
+pzl_02_01_start  |  p02_01.bf
+pzl_02_01_end  |  p02_01.bf
+pzl_02_01_0000  |  p02_01.bf
+pzl_02_01_0001  |  p02_01.bf
+pzl_02_01_0002  |  p02_01.bf
+pzl_02_01_0003  |  p02_01.bf
+pzl_02_01_0004  |  p02_01.bf
+pzl_02_02_start  |  p02_02.bf
+pzl_02_02_end  |  p02_02.bf
+pzl_02_02_0000  |  p02_02.bf
+pzl_02_02_0001  |  p02_02.bf
+pzl_02_02_0002  |  p02_02.bf
+pzl_02_03_start  |  p02_03.bf
+pzl_02_03_end  |  p02_03.bf
+pzl_02_03_0000  |  p02_03.bf
+pzl_03_01_start  |  p03_01.bf
+pzl_03_01_end  |  p03_01.bf
+pzl_03_01_0000  |  p03_01.bf
+pzl_03_02_start  |  p03_02.bf
+pzl_03_02_end  |  p03_02.bf
+pzl_03_02_0000  |  p03_02.bf
+pzl_03_03_start  |  p03_03.bf
+pzl_03_03_end  |  p03_03.bf
+pzl_03_03_0000  |  p03_03.bf
+pzl_04_01_start  |  p04_01.bf
+pzl_04_01_end  |  p04_01.bf
+pzl_04_01_0000  |  p04_01.bf
+pzl_04_01_0001  |  p04_01.bf
+pzl_04_02_start  |  p04_02.bf
+pzl_04_02_end  |  p04_02.bf
+pzl_04_02_0000  |  p04_02.bf
+pzl_05_01_start  |  p05_01.bf
+pzl_05_01_end  |  p05_01.bf
+pzl_05_01_0000  |  p05_01.bf
+pzl_05_02_start  |  p05_02.bf
+pzl_05_02_end  |  p05_02.bf
+pzl_05_02_0000  |  p05_02.bf
+pzl_05_03_start  |  p05_03.bf
+pzl_05_03_end  |  p05_03.bf
+pzl_05_03_0000  |  p05_03.bf
+pzl_06_01_start  |  p06_01.bf
+pzl_06_01_end  |  p06_01.bf
+pzl_06_01_0000  |  p06_01.bf
+pzl_06_02_start  |  p06_02.bf
+pzl_06_02_end  |  p06_02.bf
+pzl_06_02_0000  |  p06_02.bf
+pzl_06_03_start  |  p06_03.bf
+pzl_06_03_end  |  p06_03.bf
+pzl_06_03_0000  |  p06_03.bf
+pzl_06_04_start  |  p06_04.bf
+pzl_06_04_end  |  p06_04.bf
+pzl_06_04_0000  |  p06_04.bf
+pzl_07_01_start  |  p07_01.bf
+pzl_07_01_end  |  p07_01.bf
+pzl_07_01_0000  |  p07_01.bf
+pzl_07_02_start  |  p07_02.bf
+pzl_07_02_end  |  p07_02.bf
+pzl_07_02_0000  |  p07_02.bf
+pzl_07_03_start  |  p07_03.bf
+pzl_07_03_end  |  p07_03.bf
+pzl_07_03_0000  |  p07_03.bf
+pzl_07_04_start  |  p07_04.bf
+pzl_07_04_end  |  p07_04.bf
+pzl_07_04_0000  |  p07_04.bf
+pzl_07_05_start  |  p07_05.bf
+pzl_07_05_end  |  p07_05.bf
+pzl_07_05_0000  |  p07_05.bf
+pzl_08_01_start  |  p08_01.bf
+pzl_08_01_end  |  p08_01.bf
+pzl_08_01_0000  |  p08_01.bf
+pzl_08_01_0001  |  p08_01.bf
+pzl_08_02_start  |  p08_02.bf
+pzl_08_02_end  |  p08_02.bf
+pzl_08_02_0000  |  p08_02.bf
+pzl_08_02_0001  |  p08_02.bf
+pzl_09_01_start  |  p09_01.bf
+pzl_09_01_end  |  p09_01.bf
+pzl_09_01_0000  |  p09_01.bf
+pzl_09_01_0001  |  p09_01.bf
+pzl_09_02_start  |  p09_02.bf
+pzl_09_02_end  |  p09_02.bf
+pzl_09_02_0000  |  p09_02.bf
+pzl_09_03_start  |  p09_03.bf
+pzl_09_03_end  |  p09_03.bf
+pzl_09_03_0000  |  p09_03.bf
+pzl_09_04_start  |  p09_04.bf
+pzl_09_04_end  |  p09_04.bf
+pzl_09_04_0000  |  p09_04.bf
+pzl_09_05_start  |  p09_05.bf
+pzl_09_05_end  |  p09_05.bf
+pzl_09_05_0000  |  p09_05.bf
+pzl_09_05_0001  |  p09_05.bf
+pzl_09_06_start  |  p09_06.bf
+pzl_09_06_end  |  p09_06.bf
+pzl_09_06_0000  |  p09_06.bf
+pzl_09_06_0001  |  p09_06.bf
+pzl_09_06_0002  |  p09_06.bf
+pzl_09_06_0003  |  p09_06.bf
+pzl_09_06_0004  |  p09_06.bf
+pzl_09_06_0005  |  p09_06.bf
+pzl_09_06_0006  |  p09_06.bf
+pzl_09_06_0007  |  p09_06.bf
+pzl_09_06_0008  |  p09_06.bf
+pzl_10_01_start  |  p10_01.bf
+pzl_10_01_end  |  p10_01.bf
+pzl_10_01_0000  |  p10_01.bf
+pzl_10_01_0001  |  p10_01.bf
+pzl_10_02_start  |  p10_02.bf
+pzl_10_02_end  |  p10_02.bf
+pzl_10_02_0000  |  p10_02.bf
+pzl_10_03_start  |  p10_03.bf
+pzl_10_03_end  |  p10_03.bf
+pzl_10_03_0000  |  p10_03.bf
+pzl_10_04_start  |  p10_04.bf
+pzl_10_04_end  |  p10_04.bf
+pzl_10_04_0000  |  p10_04.bf
+pzl_10_04_0001  |  p10_04.bf
+pzl_10_04_0002  |  p10_04.bf
+pzl_10_04_0003  |  p10_04.bf
+pzl_10_04_0004  |  p10_04.bf
+pzl_10_04_0005  |  p10_04.bf
+pzl_10_04_0006  |  p10_04.bf
+pzl_12_01_start  |  r01_01.bf
+pzl_12_01_end  |  r01_01.bf
+pzl_12_01_0000  |  r01_01.bf
+pzl_11_01_start  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_end  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0000  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0001  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0002  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0003  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0004  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0005  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0006  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0007  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0008  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0009  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0010  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0011  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0012  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0013  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0014  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0015  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0016  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0017  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0018  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0019  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0020  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0021  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0022  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0023  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0024  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0025  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0026  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0027  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0028  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0029  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0030  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0031  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0032  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0033  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_11_01_0034  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf
+pzl_goal_1p  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf, t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf, t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf, t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_goal_2p  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf, t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf, t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf, t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+push_voice_play  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf, t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf, t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf, t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+win_voice_play  |  t01_01_00.bf, t01_01_01.bf, t01_01_02.bf, t01_01_03.bf, t01_01_04.bf, t01_01_05.bf, t01_01_06.bf, t01_01_07.bf, t01_01_08.bf, t01_01_09.bf, t01_01_10.bf, t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf, t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf, t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_02_start  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_end  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0000  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0001  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0002  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0003  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0004  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0005  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0006  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0007  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0008  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0009  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0010  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0011  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0012  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0013  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0014  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0015  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0016  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0017  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0018  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0019  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0020  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0021  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0022  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0023  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0024  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0025  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0026  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0027  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0028  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0029  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0030  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0031  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0032  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0033  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0034  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0035  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0036  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0037  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0038  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0039  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0040  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0041  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0042  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_02_0043  |  t01_02_00.bf, t01_02_01.bf, t01_02_02.bf, t01_02_03.bf, t01_02_04.bf, t01_02_05.bf, t01_02_06.bf, t01_02_07.bf, t01_02_08.bf, t01_02_09.bf, t01_02_10.bf
+pzl_11_03_start  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_end  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0000  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0001  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0002  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0003  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0004  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0005  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0006  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0007  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0008  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0009  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0010  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0011  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0012  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0013  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0014  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0015  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0016  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0017  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0018  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0019  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0020  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0021  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0022  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0023  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0024  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0025  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0026  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0027  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0028  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0029  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0030  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0031  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0032  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0033  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0034  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0035  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0036  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0037  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0038  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0039  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0040  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0041  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0042  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0043  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0044  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0045  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0046  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0047  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0048  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0049  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0050  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0051  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0052  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_03_0053  |  t01_03_00.bf, t01_03_01.bf, t01_03_02.bf, t01_03_03.bf, t01_03_04.bf, t01_03_05.bf, t01_03_06.bf, t01_03_07.bf, t01_03_08.bf, t01_03_09.bf, t01_03_10.bf
+pzl_11_04_start  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_end  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0000  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0001  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0002  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0003  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0004  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0005  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0006  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0007  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0008  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0009  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0010  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0011  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0012  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0013  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0014  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0015  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0016  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0017  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0018  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0019  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0020  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0021  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0022  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0023  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0024  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0025  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0026  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0027  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0028  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0029  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0030  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0031  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0032  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0033  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0034  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0035  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0036  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0037  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0038  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0039  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0040  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0041  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0042  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0043  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0044  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0045  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0046  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0047  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0048  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0049  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0050  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0051  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0052  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+pzl_11_04_0053  |  t01_04_00.bf, t01_04_01.bf, t01_04_02.bf, t01_04_03.bf, t01_04_04.bf, t01_04_05.bf, t01_04_06.bf, t01_04_07.bf, t01_04_08.bf, t01_04_09.bf, t01_04_10.bf
+
+VERIFICATION
+Asset coverage was checked against all five installed CPK tables and both movie directories. Locale E/F/G/I/S files and per-shot cameras share the same native event ID.
+Native playback was observed for 147 of 147 movies and 89 of 90 event timelines.
+The first nightmare and these real-time events completed naturally and returned to the piano title: e101_011, e102_010, e103_020, e310_010.
+100045030 / e045_030 is listed as unavailable. The authored actor 2, costume 46, requests c02_46_4530.GAP, which is absent from all five mounted CPKs. Its packaged model c02_46.GFS is a 219-byte root-only model. The timeline later queries an absent model component. No direct CALL_TOOLEVENT for this event was found in the scanned scripts.

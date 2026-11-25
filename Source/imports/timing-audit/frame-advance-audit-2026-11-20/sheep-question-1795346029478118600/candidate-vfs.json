@@ -1,0 +1,237 @@
+{
+  "version": 0,
+  "case-sensitive": false,
+  "use-external-names": false,
+  "roots": [
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/block20_command_packet.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/block20_command_packet.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root12_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root12_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root15_command_packet.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root15_command_packet.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root15_palette_transport.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root15_palette_transport.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root9_native_api.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_native_api.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root9_replay_scope.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_replay_scope.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root9_rigid_transport.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_rigid_transport.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root9_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root9_uniform_packet.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_uniform_packet.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root9_working_set_reader.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_working_set_reader.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/nvn_state_native_packed/nvn_state_native_packed.cpp",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/nvn_state_native_packed/nvn_state_native_packed.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/nvn_draw_state_c02_uniform_v4/nvn_draw_state_c02_uniform_v4.cpp",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/nvn_draw_state_c02_uniform_v4/nvn_draw_state_c02_uniform_v4.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/nvn_binds_producer/nvn_binds_producer.cpp",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/nvn_binds_producer/nvn_binds_producer.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/owner/block20_owner_bridge.cpp",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/block20_owner_bridge.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/written/nvn_written_native_vertex.cpp",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/sheep-question-1795346029478118600/nvn_written_sheep.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/shim/c02_c04_dispatch.cpp",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/shim/c02_c04_dispatch.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/sets/nvn_sets_c02_uniform.cpp",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/nvn_sets_c02_uniform.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/replay/nvn_replay_native_targets.cpp",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/replay/nvn_replay_native_targets.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root9_native_bridge.cpp",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_native_bridge.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root15_family.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root15_family.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/block20_command_packet.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/block20_command_packet.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/block20_command_packet.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/block20_command_packet.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/rigid_late_sample_interpolation.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/rigid_late_sample_interpolation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/rigid_late_sample_interpolation.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/rigid_late_sample_interpolation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/rigid_late_sample_interpolation.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/rigid_late_sample_interpolation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/root12_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root12_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/root12_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root12_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/root15_command_packet.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root15_command_packet.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/root15_command_packet.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root15_command_packet.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/root15_family.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root15_family.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/root15_family.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root15_family.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/root15_palette_transport.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root15_palette_transport.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/root15_palette_transport.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root15_palette_transport.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/root9_native_api.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_native_api.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/root9_native_api.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_native_api.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/root9_replay_scope.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_replay_scope.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/root9_replay_scope.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_replay_scope.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/root9_rigid_transport.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_rigid_transport.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/root9_rigid_transport.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_rigid_transport.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/root9_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/root9_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/root9_uniform_packet.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_uniform_packet.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/root9_uniform_packet.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_uniform_packet.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/root9_working_set_reader.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_working_set_reader.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/root9_working_set_reader.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_working_set_reader.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/written/sheep_pose_interpolation.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/sheep-question-1795346029478118600/sheep_pose_interpolation.h"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+# Preserve the exact source/artwork bytes in this initial import.
+* -text
+*.png binary
+*.ico binary
+*.bc3 binary
+*.rgba binary
+*.zlib binary
+*.dll binary
+*.exe binary

@@ -1,0 +1,17 @@
+{
+  "version": 0,
+  "case-sensitive": false,
+  "use-external-names": false,
+  "roots": [
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-c03-controller-inactive-v323-1795318287200405300/npc_exact_root_profiles.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-lounge19-profile-candidate-1795322052030786900/candidate/npc_exact_root_profiles.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-three-profile-candidate-1795318674039219700/candidate/npc_exact_root_profiles.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-lounge19-profile-candidate-1795322052030786900/candidate/npc_exact_root_profiles.h"
+    }
+  ]
+}

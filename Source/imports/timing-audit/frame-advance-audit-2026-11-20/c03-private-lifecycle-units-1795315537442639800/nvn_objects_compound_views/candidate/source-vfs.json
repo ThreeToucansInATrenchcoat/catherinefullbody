@@ -1,0 +1,12 @@
+{
+  "version": 0,
+  "case-sensitive": false,
+  "use-external-names": false,
+  "roots": [
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-native-compound-views-2026-11-19-1795090069152835200/nvn_objects_compound_views.cpp",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/c03-private-lifecycle-units-1795315537442639800/nvn_objects_compound_views/candidate/nvn_objects_compound_views.cpp"
+    }
+  ]
+}

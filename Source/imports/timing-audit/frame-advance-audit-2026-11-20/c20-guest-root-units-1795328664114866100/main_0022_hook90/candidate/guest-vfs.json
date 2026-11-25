@@ -1,0 +1,12 @@
+{
+  "version": 0,
+  "case-sensitive": false,
+  "use-external-names": false,
+  "roots": [
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/performance-2026-11-16/hook90/main_0022_hook90.c",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/c20-guest-root-units-1795328664114866100/main_0022_hook90/candidate/main_0022_hook90.c"
+    }
+  ]
+}

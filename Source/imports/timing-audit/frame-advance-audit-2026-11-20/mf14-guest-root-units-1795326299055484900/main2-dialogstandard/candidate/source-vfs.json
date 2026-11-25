@@ -1,0 +1,12 @@
+{
+  "version": 0,
+  "case-sensitive": false,
+  "use-external-names": false,
+  "roots": [
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/c03-private-integrated-units-1795316624649106400/main2-dialogstandard/candidate/main2-dialogstandard.c",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/mf14-guest-root-units-1795326299055484900/main2-dialogstandard/candidate/main2-dialogstandard.c"
+    }
+  ]
+}

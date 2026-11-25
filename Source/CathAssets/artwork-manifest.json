@@ -1,0 +1,106 @@
+{
+  "icons": 308,
+  "tutorials": [
+    {
+      "path": "Tutorials/PS5/1.png",
+      "source": "1 (2).png",
+      "sha256": "5f6b3cd928ae7807031bd009c8ec9a63f9981e9db56dba5160f710dae851af9c"
+    },
+    {
+      "path": "Tutorials/PS5/2.png",
+      "source": "2 (2).png",
+      "sha256": "7822f5d41d67cc16e18492919f1b2093b53815bbaf068d4413833341e671e703"
+    },
+    {
+      "path": "Tutorials/PS5/3.png",
+      "source": "3.png",
+      "sha256": "e03096ddae67776e6935c5cb67c59fd529ae390b271e39b43fc36c2805651f61"
+    },
+    {
+      "path": "Tutorials/PS5/4.png",
+      "source": "4.png",
+      "sha256": "6dfdd0a71cd9c5aef4a16bb8c4dca3cc2daa42bf0adc04133a0414165285fb89"
+    },
+    {
+      "path": "Tutorials/Xbox/1.png",
+      "source": "xbox-controller-dpad.png",
+      "sha256": "4a239c889872b727699aeeee1fd3762f0f31110886c5ec9f66b7791b538aeed4"
+    },
+    {
+      "path": "Tutorials/Xbox/2.png",
+      "source": "xbox-controller-left-trigger.png",
+      "sha256": "9ff113e2ccbff9d58c49e553ba5f2e21e3efa4ce00930b68309ec4b27343cc98"
+    },
+    {
+      "path": "Tutorials/Xbox/3.png",
+      "source": "xbox-controller-right-stick.png",
+      "sha256": "33fd74def7dc0a98073eb5b4b9a41422350b00a848e96429985920ce007f01a0"
+    },
+    {
+      "path": "Tutorials/Xbox/4.png",
+      "source": "xbox-controller-right-trigger.png",
+      "sha256": "0040c7ed3b3096b94215e7e5b65ed5954efcadbdd26e735347cf8b84245979e4"
+    },
+    {
+      "path": "Tutorials/Switch/1.png",
+      "source": "switch-dpad.png",
+      "sha256": "95ef9f5a53178d8438c42393bcd8d7fcd38db50ecd535cebcf38c7ba9a8c10f9"
+    },
+    {
+      "path": "Tutorials/Switch/2.png",
+      "source": "switch-left-trigger.png",
+      "sha256": "183e7cc512ac8d371d817b019a8ec74ecbcdfe64499b4922e87f6d3f9d8eb654"
+    },
+    {
+      "path": "Tutorials/Switch/3.png",
+      "source": "switch-right-stick.png",
+      "sha256": "0b5696c2a45e73c0a986804980ad1d39323d9b49bc7ad850006bad1eaf4def06"
+    },
+    {
+      "path": "Tutorials/Switch/4.png",
+      "source": "switch-right-trigger.png",
+      "sha256": "102358eb489dc5bb68b9f033effabe0ea0d9a81c584c95e2fc88e222b16236de"
+    },
+    {
+      "path": "Tutorials/PS4/1.png",
+      "source": "ps4-dpad.png",
+      "sha256": "a607943233285a18413fda0eeb4563fa306073addcd5c8973407825a8e58e172"
+    },
+    {
+      "path": "Tutorials/PS4/2.png",
+      "source": "ps4-left-trigger.png",
+      "sha256": "44e15e2cdaba63ab34f624fae09d18c624028e903b9831bc7d24764e3349fb39"
+    },
+    {
+      "path": "Tutorials/PS4/3.png",
+      "source": "ps4-right-stick.png",
+      "sha256": "11ce208caa8d3efdb06dd3d2a2b03cecb7633612154d586d96129417d52e26a6"
+    },
+    {
+      "path": "Tutorials/PS4/4.png",
+      "source": "ps4-right-trigger.png",
+      "sha256": "4a8f4c30378721c3ccdcf0c1c102083abb6dfddb7ee7f13f5e9e75fd3c5a0e24"
+    },
+    {
+      "path": "Tutorials/KeyboardMouse/1.png",
+      "source": "kb-dpad.png",
+      "sha256": "7c48c9022647d656e97d8ee24f283a022d23c5a1b1ea81660fcfd046002a382d"
+    },
+    {
+      "path": "Tutorials/KeyboardMouse/2.png",
+      "source": "kb-left-trigger.png",
+      "sha256": "3b57c57152174de8c6655e92ae8405c4aa9eb7cf3c203033d5243cbd1946ea66"
+    },
+    {
+      "path": "Tutorials/KeyboardMouse/3.png",
+      "source": "kb-right-stick.png",
+      "sha256": "c661df21c527bca35d5c1a9cf03d19ea33b113966261a6050a7ad2f37c42c497"
+    },
+    {
+      "path": "Tutorials/KeyboardMouse/4.png",
+      "source": "keyboard-autoplay-e.png",
+      "sha256": "485c9e358d194ef1946aa87cc837e2979e7c482190f7688f505f7eddc69a988f",
+      "source_path": "Source/artwork/keyboard-autoplay-e.png"
+    }
+  ]
+}

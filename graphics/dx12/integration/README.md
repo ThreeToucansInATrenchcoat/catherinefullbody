@@ -1,0 +1,5 @@
+# Isolated live morph probe
+
+`tools/build_live_morph_probe.py` relinks an existing qualified response file in a new output directory. Run it from an x64 Developer PowerShell with the port's toolchain available. Supply `--baseline-rsp`, `--writer-receipt` and `--out`. The verified writer in this checkout is `timing-audit/pub-native-vertex-range-2026-11-19/build.json`. The script checks the selected writer's identity, compiles a patched copy, and writes the EXE, map and provenance to the new directory.
+
+Use a private run directory with the port's runtime dependencies and local assets. Launch the probe with `NX_CPU_MORPH=1` and `CATHERINE_DX12_MORPH_PROBE_DIR` set to the translated shader directory. The port's existing morph eligibility rules still apply. The probe executes at most eight eligible nonzero-weight dispatches on D3D12, compares the complete destination prefix against the existing CPU result, and publishes matching GPU bytes. A failed check keeps the CPU result. Look for `DX12 morph live:` in the runtime log. This path uses synchronous readback to validate the handoff to the current Vulkan consumer.

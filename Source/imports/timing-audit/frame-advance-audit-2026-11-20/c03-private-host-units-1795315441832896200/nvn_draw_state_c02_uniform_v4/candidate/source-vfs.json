@@ -1,0 +1,12 @@
+{
+  "version": 0,
+  "case-sensitive": false,
+  "use-external-names": false,
+  "roots": [
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/nvn_draw_state_c02_uniform_v4/nvn_draw_state_c02_uniform_v4.cpp",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/c03-private-host-units-1795315441832896200/nvn_draw_state_c02_uniform_v4/candidate/nvn_draw_state_c02_uniform_v4.cpp"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "version": 0,
+  "case-sensitive": false,
+  "use-external-names": false,
+  "roots": [
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-native-target-producer-2026-11-19-1795088129382436700/nvn_cmd_native_targets.cpp",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/c03-private-lifecycle-units-1795315537442639800/nvn_cmd_native_targets/candidate/nvn_cmd_native_targets.cpp"
+    }
+  ]
+}

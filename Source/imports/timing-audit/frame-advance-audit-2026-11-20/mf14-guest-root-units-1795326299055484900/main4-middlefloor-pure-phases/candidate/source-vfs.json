@@ -1,0 +1,12 @@
+{
+  "version": 0,
+  "case-sensitive": false,
+  "use-external-names": false,
+  "roots": [
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/deadvisual-c0-unit-1795291564986775900/candidate/main4-middlefloor-pure-phases.c",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/mf14-guest-root-units-1795326299055484900/main4-middlefloor-pure-phases/candidate/main4-middlefloor-pure-phases.c"
+    }
+  ]
+}

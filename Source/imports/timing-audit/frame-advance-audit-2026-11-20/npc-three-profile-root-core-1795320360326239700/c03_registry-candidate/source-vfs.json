@@ -1,0 +1,47 @@
+{
+  "version": 0,
+  "case-sensitive": false,
+  "use-external-names": false,
+  "roots": [
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-c03-combined-controller-v31-1795316313016391700/c03_controller.cpp",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-three-profile-candidate-1795318674039219700/candidate/c03_controller.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-c03-combined-controller-v31-1795316313016391700/c03_exports.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-three-profile-candidate-1795318674039219700/candidate/c03_exports.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-c03-combined-controller-v31-1795316313016391700/c03_native_api.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-three-profile-candidate-1795318674039219700/candidate/c03_native_api.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-c03-combined-controller-v31-1795316313016391700/c03_registry.cpp",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-three-profile-candidate-1795318674039219700/candidate/c03_registry.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-c03-combined-controller-v31-1795316313016391700/c03_registry.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-three-profile-candidate-1795318674039219700/candidate/c03_registry.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-c03-combined-controller-v31-1795316313016391700/c03_rigid_transport.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-three-profile-candidate-1795318674039219700/candidate/c03_rigid_transport.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-c03-combined-controller-v31-1795316313016391700/packed-codec-reference.h",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-three-profile-candidate-1795318674039219700/candidate/packed-codec-reference.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-c03-combined-controller-v31-1795316313016391700/scalar_history_locked.inc",
+      "external-contents": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/npc-three-profile-candidate-1795318674039219700/candidate/scalar_history_locked.inc"
+    }
+  ]
+}

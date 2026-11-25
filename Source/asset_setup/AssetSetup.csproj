@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RuntimeFrameworkVersion>10.0.7</RuntimeFrameworkVersion>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <StartupObject>Catherine.AssetSetup.EntryPoint</StartupObject>
+    <AssemblyName>CatherineAssetSetup</AssemblyName>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>none</DebugType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BaseOutputPath>../../Build/asset-setup/bin/</BaseOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="vendor/lib/*.dll" />
+    <EmbeddedResource Include="vendor/tools/*.exe" LogicalName="%(Filename)%(Extension)" />
+    <EmbeddedResource Include="vendor/licenses/*" LogicalName="licenses/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Compatibility/main-93a79c77.xor.zlib" LogicalName="Catherine.AssetSetup.Compatibility.Main93a79c77" />
+  </ItemGroup>
+</Project>

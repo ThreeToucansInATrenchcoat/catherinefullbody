@@ -1,0 +1,162 @@
+Catherine game asset setup
+
+Keep assets-required.json beside Catherine.exe. No game data or pretranslated
+game shaders are included in the executable or release archive.
+
+If assets.pak is missing, launch Catherine.exe. Setup searches Assets/ and
+Pending/ recursively and verifies each candidate's SHA-256. It reads matching
+files directly from their existing locations without moving, copying, renaming
+or deleting them. Source folders are remembered in assets-sources.json so an
+interrupted setup can scan them again. Existing Pending/ files remain usable.
+
+If files are still missing, select the folder containing your already
+extracted game files. Setup does not accept encrypted game containers and
+does not perform decryption. assets-missing.txt lists the outstanding paths.
+When only update inputs remain, setup asks for the extracted update files.
+
+The supported inputs are 3,826 original files: four base ExeFS NSOs and 3,822
+RomFS files. The RomFS set includes the updated data/Base.cpk and
+data/movie2/mov429.usm. The updated main executable, NPDM and extraction
+metadata are not port inputs. Exact sizes and hashes are in the manifest.
+
+Setup accepts both verified main executable builds 868706E7 and 93A79C77. The
+alternate is converted in memory to the port's supported module layout before
+symbols and relocations are resolved. Every generated module must still match
+its canonical SHA-256. Your extracted executables are never rewritten, and the
+same SDK, RomFS and update inputs remain required.
+
+Setup first prepares the module images and finishes building assets.pak.
+It then reads the shader sources from that package, translates them to Vulkan
+SPIR-V, and adds the completed shaders to the package. If shaders are missing
+on a later launch, setup rebuilds them from assets.pak without requesting the
+extracted files again. Cancelling shader generation preserves the built assets.
+Generated intermediates go in assets-setup-work/, separate from your originals.
+Once the package works, you may delete the supplied files yourself.
+Allow roughly 15 GB free for the package
+in addition to your supplied files. Python and .NET installation are not
+required by users; the conversion runtime is embedded in Catherine.exe.
+
+Game-assembled shader variants are translated when first encountered and
+cached under LocalAppData/Catherine/AssetTools/. Original shader bytes are
+read from the running game's supplied data, never downloaded or bundled.
+
+The first launch checks the complete package SHA-256. Later launches reuse
+that successful check while the package's file identity, size, modification
+and change timestamps, and required-files manifest remain unchanged. Changed
+packages receive a full check again. assets-verification.json stores this cache;
+deleting it requests another full verification. A mismatch warns
+that assets.pak may be corrupt and attempts to launch anyway. The game still
+checks its archive directory and individual data CRCs before using them.
+Unusable or truncated archives cannot safely run. See assets-setup.log and
+assets-errors.log beside the executable for diagnostic details.
+
+Keep CathAssets/ beside Catherine.exe. It contains the supplied keyboard,
+mouse and controller prompt artwork and five complete tutorial image sets. Game > Button
+Prompts offers Auto, Xbox, Switch, PS4 and PS5. Auto follows the active
+controller; keyboard/mouse input always displays keyboard/mouse prompts.
+Tutorial diagrams always follow the last-used input device independently of
+that option: keyboard/mouse, Xbox, Switch, PS4 or PS5. Unrecognised controllers
+use Xbox diagrams. All twenty supplied tutorial PNGs are included unchanged.
+Fresh installations default to 60 FPS, FMV interpolation off, anti-aliasing
+off, automatic resolution, 50 percent brightness and automatic Player 1
+controller selection. Existing saved preferences are preserved.
+The default gamepad scheme swaps the east/south face-button actions for both
+players: Cross/Circle on PlayStation and A/B on Xbox and Switch. Keyboard
+controls are unchanged. Untouched gamepad profiles from settings versions
+before 6 adopt this default; custom mappings remain intact.
+
+Game configuration is stored in catherine-settings.ini beside Catherine.exe.
+Launch once to create it or upgrade an older INI. Close the game before editing
+the file. Existing graphics and control settings are retained. During the first
+upgrade, missing global game preferences come from the loaded system save.
+Saving the Config menu writes this INI. Save slots and story progress use save.dat.
+
+[Catherine]
+devmenu=true enables the developer overlay. Set devmenu=false to hide it.
+Fps accepts -1 (display rate), 0 (unlimited), 30, 60, 120 or 240.
+Fullscreen accepts 0 or 1. WindowHeight accepts 0 (automatic), 720, 1080,
+1440 or 2160. AntiAliasing accepts 0 (off), 1 (FXAA), 2, 4 or 8 (MSAA).
+MovieInterpolation accepts -1 (match gameplay), 0 (off), 60, 120 or 240.
+ButtonPrompts accepts 0 (Auto), 1 (Xbox), 2 (Switch), 3 (PS4) or 4 (PS5).
+P1Device and P2Device hold the identity assigned in the Controls menu.
+Player 1 supports auto, Player 2 supports none, and either supports keyboard.
+MovementPreset and P2MovementPreset use 0 (WASD), 1 (ESDF) or 2 (arrows).
+SwapSticks and P2SwapSticks use 0 (off) or 1 (on).
+
+[Game]
+Brightness is a percentage from 0 to 100 in steps of 5. Subtitles, Vibration,
+BacksideCamera, Guidelines, RetryAssist and PuzzleTutorial accept true or false.
+InvertCameraX, InvertCameraY and VoiceLanguage use 0 or 1, in native menu order.
+PuzzleDifficulty uses 0 (Safety), 1 (Easy), 2 (Normal) or 3 (Hard). PuzzleType
+uses 0 (Classic) or 1 (Remix). These preferences are recorded when those rows
+are editable. A story slot carries its own difficulty and puzzle type on resume.
+
+[Player1.Keyboard], [Player2.Keyboard], [Player1.Gamepad], [Player2.Gamepad]
+Each line names an action, for example Grab=Space or Grab=South. For keyboard
+and mouse bindings, use a key name from the generated file, letters, digits,
+F1 through F12 or VK followed by a decimal Windows virtual-key code.
+MovementPreset selects the four movement keys. Assign each editable keyboard
+action a distinct key outside that movement set. Gamepad mappings use East,
+South, North, West, LeftStick, RightStick, LeftShoulder, RightShoulder,
+LeftTrigger, RightTrigger, Plus and Minus, each once per player.
+
+Colosseum and Babel Pair require two distinct connected input devices assigned
+to Player 1 and Player 2. Setting Player 2 to None disables both entries. They
+are greyed out, cannot be hovered or clicked, and keyboard/controller navigation
+skips them. Availability updates when an assigned controller connects or disconnects.
+
+Standard Yes/No questions support mouse hover selection and left-click confirmation.
+Right-click always chooses No, regardless of the pointer position or highlighted
+choice, even when right-click has been assigned to a different gameplay action.
+
+On the main piano menu, right-click or the configured Back input returns to the
+title screen with a smooth 0.7-second reverse camera pan and the same whoosh sound.
+Title characters are prepared before the camera reveals them. Pressing a button
+on the title screen enters the menu again normally. Leaving Config stops at the
+piano menu; returning to the title requires a fresh Back press.
+
+English button-instruction text uses the current bindings and selected Button
+Prompts style when each message opens. Keyboard/mouse input takes priority.
+An already open message keeps its text until dismissed; the next message uses
+the latest input and bindings. Tutorial diagrams still follow the actual input
+device independently of Button Prompts. English button tutorials use one stock
+voice set. When a spoken button name differs from the current binding and prompt
+style, playback skips that name with a roughly 60 ms gap and short fades. Matching names
+remain untouched; the bar tutorial handles each button independently. Rapunzel
+has no spoken word "button", so its generic line becomes "Press ... to find out."
+The voice plan is frozen when the message opens. Original audio assets are unchanged.
+
+The Game settings choices support word-only mouse hover and direct left-click
+selection, with slash separators. Hover never moves the selection brush.
+Disabled difficulty and puzzle-type choices ignore mouse hover and clicks.
+
+DEV menu: press F8 anywhere to open the in-game picker. Choose Levels or
+Cutscenes, then use search and the controller-style dropdown filters to select
+a destination. Clicking a list entry selects it; use Load map (or Play scene)
+to start it. Enter also activates the selected destination. Loading works
+from another level, a cutscene or Config. A newer selection supersedes a load
+already in progress, after the current native resource operation is safe to end.
+Set devmenu=false under [Catherine] in catherine-settings.ini to hide the menu.
+Loading replaces the current scene
+directly; it does not operate the title, piano, pause or Save/Load menus.
+Story puzzles enter the requested floor without preceding polls, story events,
+loading minigames or stage introductions. Babel, Colosseum and all Rapunzel
+books and alternate layouts are also listed. Pair/Colosseum still require two
+distinct assigned input devices. The picker shows each destination's numeric ID.
+
+Double-click Catherine DEV.cmd, or launch Catherine.exe --dev-menu, to choose a
+level before logos/title. Use
+Catherine.exe --dev-level 10906 to start directly on Stage 9 / Floor 6.
+Normal launches keep the ordinary startup. Native services and level resources
+still initialize before gameplay. DEV saves use temporary isolated copies;
+restart normally to return to the original save. Apartment cinematic and hallway
+event checkpoints are labelled separately from playable puzzle destinations.
+
+Standalone cutscenes return to the main piano menu when they finish. The
+Cutscenes list includes movies, real-time event scenes and Vincent's complete
+first-nightmare opening. CUTSCENES.txt and cutscene-catalog.json provide the
+separate asset and scene inventory, including context-dependent scripts that
+do not yet have independent playback entries.
+
+Build developers: use python build.py --pgo. The installer sources are in
+Source/asset_setup/. The canonical external manifest is in Source/resources/.
