@@ -10,6 +10,8 @@ I will say this has been a way more complicated port than anything else I've rel
 - 60 FPS by default, with an uncapped option. Code patches and interpolation enable higher frame rates, including interpolation for puzzle levels.
 - In-game PC settings and full keyboard and mouse support.
 - Button prompts switch automatically between keyboard and mouse icons and the active controller’s icons.
+- Updated Menus, Xbox controllers and more now have updated tutorials.
+- Real game configuration options that are inside of the game like a real PC game.
 - Local co-op. Online play has been removed. Babel Pair and Colosseum automatically use local co-op and stay greyed out until two distinct input devices are connected and assigned.
 - An F8 menu for jumping directly to levels and cutscenes.
 
@@ -81,4 +83,4 @@ The executable is `Build/catherine`. If your Vulkan headers are outside the comp
 
 ## AI
 
-Yes.
+Yes. I used AI.
