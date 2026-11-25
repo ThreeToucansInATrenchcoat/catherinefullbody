@@ -89,9 +89,12 @@ void catherine_linux_overlay_point(int x, int y, int width, int height) {
 }
 
 bool catherine_linux_overlay_event(const SDL_Event& event) {
-    if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_F8 && !event.key.repeat) {
-        if (overlay_open.load()) catherine_dev_overlay_close();
-        else open_overlay();
+    if ((event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) &&
+        event.key.keysym.sym == SDLK_F8 && catherine_dev_enabled()) {
+        if (event.type == SDL_KEYDOWN && !event.key.repeat) {
+            if (overlay_open.load()) catherine_dev_overlay_close();
+            else open_overlay();
+        }
         return true;
     }
     const bool opened=overlay_open.load();
