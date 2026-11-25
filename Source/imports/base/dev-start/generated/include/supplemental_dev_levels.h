@@ -13,7 +13,7 @@ void f_700023fd40(Cpu *);
 void f_7000224390(Cpu *);
 void f_70002f2ce0(Cpu *);
 extern int catherine_multiplayer_available(void);
-__declspec(dllimport) unsigned long long __stdcall GetTickCount64(void);
+#include "../../../../../platform/host_clock.h"
 
 /* All state belongs to the guest scheduler thread. Native root 16 calls the
    selector callback on the same thread once its arcade resources are ready. */
@@ -82,7 +82,7 @@ static void catherine_dev_optional_apply(Cpu *c,uint64_t config,uint32_t id) {
     catherine_optional_verified_vm = 0;
     catherine_optional_rapunzel_chosen = 0;
     if (root == 11) return;
-    catherine_optional_deadline = GetTickCount64() + 120000;
+    catherine_optional_deadline = catherine_host_milliseconds() + 120000;
     if (root == 16) {
         const uint32_t stage = catherine_optional_arcade_index(id)+1;
         ST32(config+0x7b88,stage);
@@ -203,7 +203,7 @@ static void catherine_dev_optional_tick(Cpu *cpu,uint64_t root) {
             }
         }
     }
-    if (GetTickCount64() >= catherine_optional_deadline) {
+    if (catherine_host_milliseconds() >= catherine_optional_deadline) {
         catherine_optional_target = 0;
         catherine_dev_loader_finish(-49,"The selected optional puzzle did not finish loading.");
     }

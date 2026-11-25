@@ -159,22 +159,29 @@ struct GeometryArena {
         }
         const uint64_t pages = span.bytes / kPage;
         if (!pages || pages > returned.size()) return false;
-        ULONG_PTR written = static_cast<ULONG_PTR>(pages);
-        DWORD granularity = 0;
+        size_t written = size_t(pages);
         const bool timing = watched_geometry_timing();
         const auto start = timing ? plat::monotonic_ns() : 0;
+#ifdef _WIN32
+        ULONG_PTR count = written;
+        DWORD granularity = 0;
         const UINT status = GetWriteWatch(WRITE_WATCH_FLAG_RESET, reinterpret_cast<void*>(span.first), span.bytes,
-                                          returned.data(), &written, &granularity);
+                                          returned.data(), &count, &granularity);
+        const bool valid = status == 0 && granularity == kPage;
+        written = count;
+#else
+        const bool valid = catherine_heap_watch_query(span.first, span.bytes, returned.data(), &written);
+#endif
         if (timing) stats.query_ns += plat::monotonic_ns() - start;
         ++stats.queries;
         stamp = ++epoch;
         // A failed/partial reset may have consumed notifications for overlapping ranges.
-        if (status || granularity != kPage || written > pages) {
+        if (!valid || written > pages) {
             unreliable_epoch = stamp;
             ++stats.failed;
             return false;
         }
-        for (ULONG_PTR i = 0; i < written; ++i) {
+        for (size_t i = 0; i < written; ++i) {
             const uint64_t a = uintptr_t(returned[i]);
             if ((a & (kPage - 1)) || a < span.first || a - span.first >= span.bytes) {
                 unreliable_epoch = stamp;

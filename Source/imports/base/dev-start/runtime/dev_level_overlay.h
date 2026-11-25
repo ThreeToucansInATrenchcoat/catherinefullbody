@@ -245,6 +245,12 @@ static void choose(){
 static void load(){
     const auto* t=target();
     if(!enabled(Load)||!t)return;
+#if defined(__linux__) && !defined(__ANDROID__)
+    if ((t->kind!=CATHERINE_DEV_MOVIE || t->id==40001) && !catherine_linux_checkpoint_available()) {
+        model.notice="Place dev-checkpoints.pak beside the executable.";
+        return;
+    }
+#endif
     CatherineDevLoadRequest request{};
     request.version=CATHERINE_DEV_LOADER_VERSION;request.target_id=t->id;
     request.karma_enabled=enabled(Karma)&&model.karma!=0;

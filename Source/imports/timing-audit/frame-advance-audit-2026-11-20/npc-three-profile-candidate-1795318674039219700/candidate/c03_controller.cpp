@@ -6,7 +6,7 @@
 #include <unordered_map>
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
-#include <windows.h>
+#include "../../../../../platform/host_memory.h"
 
 namespace {
 // This is the ONLY mutex for both lifecycle values and scalar history.
@@ -17,7 +17,7 @@ thread_local c03_private::RigidTransport::Flow c3flow;
 #include "scalar_history_locked.inc"
 
 bool system_read(void*,uint64_t p,void*out,size_t n){
-    SIZE_T done=0;return p && ReadProcessMemory(GetCurrentProcess(),reinterpret_cast<void*>(p),out,n,&done) && done==n;
+    return p && catherine_host_read(reinterpret_cast<void*>(p),out,n);
 }
 C03Read reader=system_read;
 void* reader_context=nullptr;

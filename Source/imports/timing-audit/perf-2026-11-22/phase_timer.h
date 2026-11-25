@@ -5,11 +5,16 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#ifdef _WIN32
 #include <intrin.h>
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#else
+#include <x86intrin.h>
+#include "../../../platform/host_clock.h"
+#endif
 
 namespace perf22 {
 enum Phase : int {
@@ -48,10 +53,18 @@ inline void add(Phase p, uint64_t t0) { if (t0) { t_acc.ticks[p] += __rdtsc() - 
 
 inline double tsc_per_us() {
     static const double v = [] {
+#ifdef _WIN32
         LARGE_INTEGER f, a, b; QueryPerformanceFrequency(&f); QueryPerformanceCounter(&a);
         const uint64_t t0 = __rdtsc();
         do QueryPerformanceCounter(&b); while (b.QuadPart - a.QuadPart < f.QuadPart / 50);
         return double(__rdtsc() - t0) / (double(b.QuadPart - a.QuadPart) * 1e6 / double(f.QuadPart));
+#else
+        const uint64_t start = catherine_host_nanoseconds();
+        const uint64_t t0 = __rdtsc();
+        uint64_t stop;
+        do stop = catherine_host_nanoseconds(); while (stop - start < 20000000);
+        return double(__rdtsc() - t0) * 1000.0 / double(stop - start);
+#endif
     }();
     return v;
 }

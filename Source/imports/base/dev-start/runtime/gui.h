@@ -1,12 +1,16 @@
 #pragma once
+#ifdef _WIN32
 #include <windows.h>
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 /* Window-thread seams. Call message before the platform WndProc switch and
    pretranslate before TranslateMessage. init is lazy; no graphics dependencies. */
+#ifdef _WIN32
 int catherine_dev_gui_window_message(HWND owner, UINT message, WPARAM w, LPARAM l, LRESULT *result);
 int catherine_dev_gui_pretranslate(MSG *message);
+#endif
 /* Any-thread, cheap atomics. Pause gameplay only at the safe guest boundary;
    keep the loader service, window, rendering and IO workers running. */
 /* Default is input-only overlay; backend must reject unsafe load states.

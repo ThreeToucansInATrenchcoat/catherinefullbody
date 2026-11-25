@@ -2,10 +2,10 @@
 #include "entry-descriptors.h"
 #include <atomic>
 #include <mutex>
-#include <windows.h>
+#include "../../../../platform/host_clock.h"
 #include "dev_loader_native.h"
 #ifndef CATHERINE_DEV_PUZZLE_NOW
-#define CATHERINE_DEV_PUZZLE_NOW() GetTickCount64()
+#define CATHERINE_DEV_PUZZLE_NOW() catherine_host_milliseconds()
 #endif
 namespace {
 std::atomic<uint32_t> pending{0};

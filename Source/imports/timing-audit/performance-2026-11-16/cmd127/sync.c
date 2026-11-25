@@ -1,10 +1,30 @@
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <errno.h>
+#include <linux/futex.h>
+#include <pthread.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#include "../../../../platform/host_clock.h"
+#endif
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "sync.h"
-typedef struct Waiter { struct Waiter *next; uint64_t address; HANDLE event; uint32_t handle; unsigned kind; int woken, close_event; int sleeping; } Waiter;
+typedef struct Waiter {
+    struct Waiter *next;
+    uint64_t address;
+    uint32_t handle;
+    unsigned kind;
+    int woken;
+#ifdef _WIN32
+    HANDLE event;
+    int close_event, sleeping;
+#endif
+} Waiter;
 #include <immintrin.h>
+#ifdef _WIN32
 /* cmd99: wake a registered waiter (under `lock`): SetEvent only when it is (about to be) blocked in the kernel. */
 static void wake_waiter(Waiter *w) {
     __atomic_store_n(&w->woken, 1, __ATOMIC_SEQ_CST);
@@ -77,6 +97,55 @@ static uint32_t sleep_waiter(Waiter *w, int64_t ns) {
     if (w->close_event) CloseHandle(w->event);
     return w->woken?0:status==WAIT_TIMEOUT?0xea01:0xe401;
 }
+#else
+typedef int32_t LONG;
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+static Waiter *waiters;
+
+static void AcquireSRWLockExclusive(pthread_mutex_t *mutex) { pthread_mutex_lock(mutex); }
+static void ReleaseSRWLockExclusive(pthread_mutex_t *mutex) { pthread_mutex_unlock(mutex); }
+static LONG InterlockedCompareExchange(volatile LONG *word, LONG value, LONG expected) {
+    __atomic_compare_exchange_n(word, &expected, value, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    return expected;
+}
+static void InterlockedExchange(volatile LONG *word, LONG value) {
+    __atomic_exchange_n(word, value, __ATOMIC_SEQ_CST);
+}
+static void wake_waiter(Waiter *w) {
+    __atomic_store_n(&w->woken, 1, __ATOMIC_SEQ_CST);
+    syscall(SYS_futex, &w->woken, FUTEX_WAKE_PRIVATE, 1, NULL, NULL, 0);
+}
+
+static uint32_t sleep_waiter(Waiter *w, int64_t ns) {
+    const uint64_t start = catherine_host_nanoseconds();
+    const uint64_t end = ns < 0 ? 0 : start + (uint64_t)ns;
+    uint32_t status = 0xe401;
+    pthread_mutex_unlock(&lock);
+    while (!__atomic_load_n(&w->woken, __ATOMIC_SEQ_CST)) {
+        struct timespec remaining;
+        const struct timespec *timeout = NULL;
+        if (ns >= 0) {
+            uint64_t now = catherine_host_nanoseconds();
+            if (now >= end) { status = 0xea01; break; }
+            uint64_t left = end - now;
+            remaining.tv_sec = left / UINT64_C(1000000000);
+            remaining.tv_nsec = left % UINT64_C(1000000000);
+            timeout = &remaining;
+        }
+        long result = syscall(SYS_futex, &w->woken, FUTEX_WAIT_PRIVATE, 0, timeout, NULL, 0);
+        if (result < 0 && errno != EAGAIN && errno != EINTR) {
+            if (errno == ETIMEDOUT) status = 0xea01;
+            break;
+        }
+    }
+    pthread_mutex_lock(&lock);
+    Waiter **entry = &waiters;
+    while (*entry != w) entry = &(*entry)->next;
+    *entry = w->next;
+    return w->woken ? 0 : status;
+}
+#endif
+
 static void unlock_guest(uint64_t address) {
     Waiter *selected=NULL;unsigned count=0;
     for(Waiter *w=waiters;w;w=w->next) if(w->kind==1 && w->address==address && !w->woken){selected=w;count++;}
@@ -91,7 +160,10 @@ static void lock_guest(uint64_t address, uint32_t handle) {
         if (InterlockedCompareExchange(word, current | 0x40000000, current) != current) continue;
 
         Waiter w = {.address = address, .kind = 1, .handle = handle};
+
+#ifdef _WIN32
         prepare_wait_event(&w);
+#endif
         w.next = waiters;
         waiters = &w;
         sleep_waiter(&w, -1);
@@ -127,7 +199,10 @@ static uint32_t wait_address(uint64_t address, uint32_t type, uint64_t value, in
         result = 0xea01;
         if (timeout) {
             Waiter w = {.address = address, .kind = ADDRESS_WAITER};
+
+#ifdef _WIN32
             prepare_wait_event(&w);
+#endif
             // Register before releasing the lock used by SignalToAddress.
             Waiter **tail = &waiters;
             while (*tail) tail = &(*tail)->next;
@@ -185,7 +260,11 @@ int sync_svc(Cpu *c,uint32_t svc,uint32_t handle) {
     if(svc==0x1b){AcquireSRWLockExclusive(&lock);unlock_guest(c->x[0]);ReleaseSRWLockExclusive(&lock);c->x[0]=0;return 1;}
     if(svc==0x1c){uint64_t mutex=c->x[0],condition=c->x[1];if((uint32_t)c->x[2]!=handle){c->x[0]=0xe401;return 1;}
         Waiter w={.address=condition,.kind=2,.handle=handle};
-        AcquireSRWLockExclusive(&lock);prepare_wait_event(&w);w.next=waiters;waiters=&w;InterlockedExchange((volatile LONG *)(uintptr_t)condition,1);
+        AcquireSRWLockExclusive(&lock);
+#ifdef _WIN32
+        prepare_wait_event(&w);
+#endif
+        w.next=waiters;waiters=&w;InterlockedExchange((volatile LONG *)(uintptr_t)condition,1);
         unlock_guest(mutex);uint32_t result=sleep_waiter(&w,(int64_t)c->x[3]);lock_guest(mutex,handle);ReleaseSRWLockExclusive(&lock);c->x[0]=result;return 1;}
     if(svc==0x1d){uint64_t address=c->x[0];int count=(int32_t)c->x[1];unsigned signaled=0;int remaining=0;
         AcquireSRWLockExclusive(&lock);for(Waiter *w=waiters;w;w=w->next)if(w->kind==2&&w->address==address&&!w->woken&&(count<=0||signaled<(unsigned)count)){wake_waiter(w);signaled++;}

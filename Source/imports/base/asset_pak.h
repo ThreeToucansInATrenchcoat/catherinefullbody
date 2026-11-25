@@ -9,6 +9,10 @@ extern "C" {
 int asset_pak_initialize(void);
 // Set the package location during startup, before any other asset access.
 int asset_pak_initialize_from(const wchar_t* path);
+#ifndef _WIN32
+// Accept a native filesystem path without a locale-dependent conversion.
+int asset_pak_initialize_from_native_path(const char* path);
+#endif
 const char* asset_pak_error(void);
 int asset_pak_read(const char* relative_path, void* output, size_t exact_size);
 int asset_pak_read_alloc(const char* relative_path, void** output, size_t* size);

@@ -20,3 +20,31 @@ The primary output is `Build/catherine.exe`. For simultaneous temporary tests, u
 On a user's first launch, the installer verifies their extracted game files, builds `assets.pak`, then generates Vulkan shaders from that completed package. Missing shaders can be regenerated on a later launch without the extracted inputs. See `Source/resources/INSTALL-ASSETS.txt` for supported inputs and setup details.
 
 Cleanup validation: all 263 compilation units compiled and linked from Source; their machine-code sections matched the previous release. Dependency resolution passed again after archival. The primary EXE, save and settings were preserved byte for byte.
+
+
+## Native Linux build
+
+The root build script uses the same 263 compilation units on Linux and writes
+the x86-64 executable to `Build/catherine`. It needs Clang, lld, Vulkan headers
+and loader, SDL2, Cairo, OpenSSL, pkg-config, and the FFmpeg development
+libraries `libavcodec`, `libavutil` and `libswscale`. Set
+`CATHERINE_VULKAN_INCLUDE` if the Vulkan headers are outside the compiler's
+include path.
+
+```sh
+CATHERINE_VULKAN_INCLUDE="$PWD/Build/obj-linux/vulkan-headers/include" python3 build.py --jobs 12
+./Build/catherine --assets-pak /path/to/assets.pak
+```
+
+The Linux launcher can use a prepared package in place. It reads the Vulkan
+shaders and index from the package and uses the executable directory for saves,
+settings, and optional `dev-checkpoints.pak`. The Windows installer continues
+to build the package first and generate shaders from it. On Linux, use a
+package that already contains the shaders.
+
+F8 opens the in-game level and cutscene picker. `--dev-menu` opens the picker on
+startup, and `--dev-level ID` requests a destination by ID. Checkpoint-based
+destinations require the separate checkpoint package. For unattended tests,
+`NX_HEADLESS=1 NX_MUTE=1 CATHERINE_TEST_ISOLATE_SAVE=1` uses a hidden Vulkan
+window, muted audio, and a private save. A Vulkan-capable desktop session is
+required for the hidden window.

@@ -1,3 +1,4 @@
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
@@ -7,6 +8,18 @@
 #include <wmcodecdsp.h>
 #include <wrl/client.h>
 #include <process.h>
+#else
+#include <cerrno>
+#include <cstdlib>
+#include <dlfcn.h>
+#include <filesystem>
+#include <thread>
+#include "../../platform/host_clock.h"
+extern "C" {
+#include <libavcodec/avcodec.h>
+#include <libswscale/swscale.h>
+}
+#endif
 
 #include <algorithm>
 #include <array>
@@ -25,6 +38,7 @@
 #include "movie_decoder.h"
 #include "guest-timing/include/movie_interpolation.h"
 
+#ifdef _WIN32
 using Microsoft::WRL::ComPtr;
 
 struct CatherineMovieDecoder {
@@ -269,6 +283,9 @@ int catherine_movie_flush(CatherineMovieDecoder *decoder) {
 int32_t catherine_movie_last_error(const CatherineMovieDecoder *decoder) {
     return decoder ? decoder->error : E_POINTER;
 }
+#else
+#include "../../platform/movie_decoder_linux.inc"
+#endif
 
 namespace {
 
@@ -309,9 +326,13 @@ InterpolationWorker* interpolation_worker() {
 }
 
 bool interpolation_expired(const InterpolationJob& job) {
+#ifdef _WIN32
     LARGE_INTEGER now;
     return job.expires_qpc && QueryPerformanceCounter(&now) &&
            static_cast<uint64_t>(now.QuadPart) >= job.expires_qpc;
+#else
+    return job.expires_qpc && catherine_host_nanoseconds() >= job.expires_qpc;
+#endif
 }
 
 inline uint32_t interpolation_bgra(uint8_t y, uint8_t u, uint8_t v) {
@@ -337,8 +358,14 @@ void interpolation_to_bgra(const uint8_t* nv12, uint8_t* bgra, uint32_t width, u
     }
 }
 
-unsigned __stdcall run_interpolation_worker(void* argument) {
+#ifdef _WIN32
+unsigned __stdcall
+#else
+unsigned
+#endif
+run_interpolation_worker(void* argument) {
     auto& worker = *static_cast<InterpolationWorker*>(argument);
+#ifdef _WIN32
     wchar_t executable[32768];
     const DWORD count = GetModuleFileNameW(nullptr, executable, ARRAYSIZE(executable));
     if (!count || count >= ARRAYSIZE(executable)) return 0;
@@ -355,23 +382,36 @@ unsigned __stdcall run_interpolation_worker(void* argument) {
             return 0;
         }
 
+        auto symbol = [module](const char* name) { return GetProcAddress(module, name); };
+        auto unload = [module] { FreeLibrary(module); };
+#else
+    try {
+        std::error_code path_error;
+        const auto path = std::filesystem::read_symlink("/proc/self/exe", path_error).parent_path() /
+                          "libCatherineInterpolation.so";
+        if (path_error) return 0;
+        void* module = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL);
+        if (!module) return 0;
+        auto symbol = [module](const char* name) { return dlsym(module, name); };
+        auto unload = [module] { dlclose(module); };
+#endif
         using Open = void* (*)();
         using Begin = int (*)(void*, const uint8_t*, const uint8_t*, uint32_t, uint32_t, unsigned);
         using Frame = int (*)(void*, unsigned, uint8_t*);
         using Close = void (*)(void*);
-        auto open = reinterpret_cast<Open>(GetProcAddress(module, "catherine_interpolation_open"));
-        auto begin = reinterpret_cast<Begin>(GetProcAddress(module, "catherine_interpolation_begin_nv12"));
-        auto frame = reinterpret_cast<Frame>(GetProcAddress(module, "catherine_interpolation_frame_nv12"));
-        auto close = reinterpret_cast<Close>(GetProcAddress(module, "catherine_interpolation_close"));
+        auto open = reinterpret_cast<Open>(symbol("catherine_interpolation_open"));
+        auto begin = reinterpret_cast<Begin>(symbol("catherine_interpolation_begin_nv12"));
+        auto frame = reinterpret_cast<Frame>(symbol("catherine_interpolation_frame_nv12"));
+        auto close = reinterpret_cast<Close>(symbol("catherine_interpolation_close"));
         if (!open || !begin || !frame || !close) {
             std::fprintf(stderr, "Catherine interpolation backend has an incompatible interface\n");
-            FreeLibrary(module);
+            unload();
             return 0;
         }
         void* context = open();
         if (!context) {
             std::fprintf(stderr, "Catherine interpolation backend could not initialize\n");
-            FreeLibrary(module);
+            unload();
             return 0;
         }
 
@@ -414,9 +454,17 @@ unsigned __stdcall run_interpolation_worker(void* argument) {
 void catherine_interpolation_worker_warmup(void) {
     auto* worker = interpolation_worker();
     if (!worker || worker->started.exchange(true, std::memory_order_acq_rel)) return;
+#ifdef _WIN32
     const uintptr_t thread = _beginthreadex(nullptr, 0, run_interpolation_worker, worker, 0, nullptr);
     if (thread) CloseHandle(reinterpret_cast<HANDLE>(thread));
     else worker->started.store(false, std::memory_order_release);
+#else
+    try {
+        std::thread(run_interpolation_worker, worker).detach();
+    } catch (const std::system_error&) {
+        worker->started.store(false, std::memory_order_release);
+    }
+#endif
 }
 
 int catherine_interpolation_worker_available(void) {
@@ -541,18 +589,26 @@ MovieInterpolation& movie_interpolation() {
 thread_local MoviePreviousFrame previous_movie_frame;
 
 uint64_t movie_qpc() {
+#ifdef _WIN32
     LARGE_INTEGER now{};
     QueryPerformanceCounter(&now);
     return now.QuadPart;
+#else
+    return catherine_host_nanoseconds();
+#endif
 }
 
 uint64_t movie_qpf() {
+#ifdef _WIN32
     static const uint64_t frequency = [] {
         LARGE_INTEGER result{};
         QueryPerformanceFrequency(&result);
         return result.QuadPart;
     }();
     return frequency;
+#else
+    return UINT64_C(1000000000);
+#endif
 }
 
 unsigned movie_intervals(unsigned target) {
@@ -560,7 +616,11 @@ unsigned movie_intervals(unsigned target) {
 }
 
 bool movie_interpolation_trace() {
+#ifdef _WIN32
     static const bool trace = GetEnvironmentVariableW(L"CATHERINE_TRACE_INTERPOLATION", nullptr, 0) != 0;
+#else
+    static const bool trace = std::getenv("CATHERINE_TRACE_INTERPOLATION") != nullptr;
+#endif
     return trace;
 }
 

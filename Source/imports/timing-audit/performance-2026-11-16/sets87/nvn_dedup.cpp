@@ -20,7 +20,9 @@
 #include <memory>
 #include <new>
 #include <unordered_map>
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 #include "catherine_heap_watch.h"
 #include "platform.h"
@@ -98,6 +100,8 @@ enum class UploadKind { General, RawIndex, RawVertex };
 
 static Upload dedup_upload_impl(const uint8_t* p, uint64_t size, uint64_t padded, uint64_t align, UploadKind kind) {
 #else
+bool texture_write_watch(const uint8_t*,uint64_t,uint64_t&,uint64_t&,bool&) { return false; }
+
 Upload dedup_upload(const uint8_t* p, uint64_t size, uint64_t padded, uint64_t align) {
 #endif
     if (!p || !size) {

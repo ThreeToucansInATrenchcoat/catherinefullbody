@@ -4,7 +4,7 @@ namespace nx::game {
 const Info kInfo={"catherine","Catherine Full Body",0x0100bf00112c0000ull,"",".",32ull<<20};
 void after_init(){} void renderer_start(){} void first_frame(){}
 }
-#if defined(_WIN32)
+#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
 extern "C" unsigned graphics_connected_player_count(){return nx::plat::connected_player_count();}
 extern "C" void graphics_read_player_pads(uint64_t *buttons,int32_t *sticks,uint32_t *connected) {
     nx::plat::PadState players[2]{};bool live[2]{};

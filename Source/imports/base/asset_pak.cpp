@@ -1,10 +1,18 @@
 // ZIP64 asset reader. Standard ZIP entries, raw Deflate, CRC on every cache fill.
 // The archive and its bounded RAM cache live for the process. Never extracts files.
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
 #include <windows.h>
+#else
+#include <cerrno>
+#include <filesystem>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
 #include "asset_pak.h"
 #include <algorithm>
 #include <array>
@@ -16,7 +24,9 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#ifdef _WIN32
 #include "asset_setup_impl.h"
+#endif
 #ifndef MINIZ_NO_ZLIB_APIS
 #define MINIZ_NO_ZLIB_APIS
 #endif
@@ -35,7 +45,11 @@ struct CachedBlock { uint64_t index=UINT64_MAX,last=0; std::vector<unsigned char
 struct State {
     std::once_flag initialized;
     std::mutex lock;
+#ifdef _WIN32
     HANDLE file=INVALID_HANDLE_VALUE;
+#else
+    int file=-1;
+#endif
     uint64_t file_size=0,romfs_size=0,tick=0;
     mz_zip_archive zip{};
     int mode=0;
@@ -46,13 +60,18 @@ struct State {
 State& state(){static State* s=new State;return *s;}
 thread_local std::string last_error;
 [[noreturn]] void fail(const std::string& why){
+    #ifdef _WIN32
     FILE* log=nullptr;fopen_s(&log,"assets-errors.log","a");
+#else
+    FILE* log=std::fopen("assets-errors.log","a");
+#endif
     if(log){fprintf(log,"assets.pak: %s\n",why.c_str());fclose(log);}
     throw std::runtime_error(why);
 }
 size_t read_archive(void* opaque,mz_uint64 offset,void* destination,size_t count){
     auto& s=*static_cast<State*>(opaque);
     if(offset>s.file_size || count>s.file_size-offset)return 0;
+#ifdef _WIN32
     LARGE_INTEGER where;where.QuadPart=static_cast<LONGLONG>(offset);
     if(!SetFilePointerEx(s.file,where,nullptr,FILE_BEGIN))return 0;
     size_t done=0;
@@ -60,6 +79,17 @@ size_t read_archive(void* opaque,mz_uint64 offset,void* destination,size_t count
         if(!ReadFile(s.file,static_cast<unsigned char*>(destination)+done,part,&got,nullptr)||!got)break;
         done+=got;
     }
+#else
+    size_t done=0;
+    while(done<count){
+        const size_t part=std::min<size_t>(count-done,1u<<20);
+        const ssize_t got=pread(s.file,static_cast<unsigned char*>(destination)+done,
+                               part,static_cast<off_t>(offset+done));
+        if(got<0 && errno==EINTR)continue;
+        if(got<=0)break;
+        done+=static_cast<size_t>(got);
+    }
+#endif
     return done;
 }
 bool valid_name(const std::string& name){
@@ -108,14 +138,16 @@ void validate_manifest(State& s){
     const uint64_t blocks=romfs/block_size+(romfs%block_size!=0);
     if(blocks>s.entries.size())fail("Package ROMFS chunk count is invalid");
     for(uint64_t i=0;i<blocks;++i){char name[64];std::snprintf(name,sizeof name,"romfs/blocks/%06llu.bin",static_cast<unsigned long long>(i));
-        const Entry& e=find(s,name);if(e.size!=std::min(block_size,romfs-i*block_size))fail("Package ROMFS chunk length mismatch");
+        const Entry& e=find(s,name);if(e.size!=std::min<uint64_t>(block_size,romfs-i*block_size))fail("Package ROMFS chunk length mismatch");
     }
     size_t actual_blocks=0;for(const auto& pair:s.entries)if(pair.first.compare(0,13,"romfs/blocks/")==0)++actual_blocks;
     if(actual_blocks!=blocks)fail("Unexpected package ROMFS chunks");
     for(const char* name:{"main.image","subsdk0.image","subsdk1.image","sdk.image","spirv/results.tsv"})
         if(!find(s,name).size)fail(std::string("Empty required package entry: ")+name);
 }
-void open(State& s,const wchar_t* supplied){
+void open_archive(State& s,const wchar_t* supplied,const char* native_path){
+#ifdef _WIN32
+    (void)native_path;
     std::wstring path;
     if(supplied)path=supplied;
     else {wchar_t name[32768];DWORD count=GetModuleFileNameW(nullptr,name,32768);
@@ -133,6 +165,25 @@ void open(State& s,const wchar_t* supplied){
         fail("Cannot open assets.pak (Windows error "+std::to_string(error)+")");
     }
     LARGE_INTEGER length;if(!GetFileSizeEx(s.file,&length)||length.QuadPart<22)fail("Package is truncated");s.file_size=uint64_t(length.QuadPart);
+#else
+    static_assert(sizeof(off_t)>=sizeof(int64_t));
+    auto path=native_path?std::filesystem::path(native_path)
+                        :supplied?std::filesystem::path(supplied)
+                                 :std::filesystem::read_symlink("/proc/self/exe").parent_path()/"assets.pak";
+    s.file=::open(path.c_str(),O_RDONLY|O_CLOEXEC|O_NONBLOCK);
+    if(s.file<0){
+        const int error=errno;
+        if(error==ENOENT||error==ENOTDIR){
+            if(supplied||native_path)fail("The specified assets.pak does not exist");
+            s.mode=0;return;
+        }
+        fail("Cannot open assets.pak: "+std::string(std::strerror(error)));
+    }
+    struct stat info{};
+    if(fstat(s.file,&info)<0||!S_ISREG(info.st_mode))fail("assets.pak is not a readable regular file");
+    if(info.st_size<22)fail("Package is truncated");
+    s.file_size=static_cast<uint64_t>(info.st_size);
+#endif
     s.zip.m_pRead=read_archive;s.zip.m_pIO_opaque=&s;
     if(!mz_zip_reader_init(&s.zip,s.file_size,0))fail("Invalid ZIP/ZIP64 package directory");
     mz_uint count=mz_zip_reader_get_num_files(&s.zip);if(!count||count>1000000)fail("Invalid package entry count");
@@ -146,15 +197,38 @@ void open(State& s,const wchar_t* supplied){
     }
     validate_manifest(s);s.mode=1;
 }
-int initialize(const wchar_t* supplied){
-    State& s=state();std::call_once(s.initialized,[&]{try{open(s,supplied);}catch(const std::exception& e){s.failure=e.what();s.mode=-1;
-        if(s.zip.m_pState)mz_zip_reader_end(&s.zip);if(s.file!=INVALID_HANDLE_VALUE){CloseHandle(s.file);s.file=INVALID_HANDLE_VALUE;}s.entries.clear();}});
+int initialize(const wchar_t* supplied,const char* native_path=nullptr){
+    State& s=state();
+    std::call_once(s.initialized,[&]{
+        try{
+            open_archive(s,supplied,native_path);
+        }catch(const std::exception& e){
+            s.failure=e.what();
+            s.mode=-1;
+            if(s.zip.m_pState)mz_zip_reader_end(&s.zip);
+#ifdef _WIN32
+            if(s.file!=INVALID_HANDLE_VALUE){
+                CloseHandle(s.file);
+                s.file=INVALID_HANDLE_VALUE;
+            }
+#else
+            if(s.file>=0){
+                close(s.file);
+                s.file=-1;
+            }
+#endif
+            s.entries.clear();
+        }
+    });
     if(s.mode<0)last_error=s.failure;return s.mode;
 }
 State& required(){if(initialize(nullptr)!=1)fail(state().mode<0?state().failure:"assets.pak is absent");return state();}
 }
 extern "C" int asset_pak_initialize(void){return initialize(nullptr);}
 extern "C" int asset_pak_initialize_from(const wchar_t* path){return initialize(path);}
+#ifndef _WIN32
+extern "C" int asset_pak_initialize_from_native_path(const char* path){return initialize(nullptr,path);}
+#endif
 #ifdef CATHERINE_PAK_TESTING
 extern "C" int asset_pak_initialize_for_test(const wchar_t* path){return initialize(path);}
 #endif

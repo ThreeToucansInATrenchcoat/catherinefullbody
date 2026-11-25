@@ -1,3 +1,4 @@
+#ifdef _WIN32
 #include "perf_background.h"
 // Windows host: memory, threads, time, files, the game window (F11 / Alt+Enter fullscreen), gamepad + keyboard,
 // XAudio2, the Vulkan loader and win32 surface, crash handler, hardware watchpoints (NX_WATCH) and main().
@@ -1460,3 +1461,7 @@ extern "C" int catherine_guest_precise_sleep(int64_t ns) {
 }
 #endif
 
+
+#else
+#include "C:/catherine/recomp/Source/platform/platform_linux.inc"
+#endif

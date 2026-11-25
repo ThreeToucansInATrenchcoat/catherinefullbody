@@ -8,11 +8,20 @@
 #include <new>
 #include <thread>
 #include <immintrin.h>
+#ifdef _WIN32
 #include <intrin.h>
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#else
+#include <climits>
+#include <linux/futex.h>
+#include <pthread.h>
+#include <sys/mman.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#endif
 #include "vk_gen.h"
 
 namespace cmdthread86 {
@@ -32,7 +41,7 @@ thread_local bool t_replay = false;
 // synchronized, and a separate present thread (nvn_vk.cpp) may call vkQueuePresentKHR.
 std::mutex g_queue_mutex;
 bool g_installed = false;
-DWORD g_owner = 0;  // the one producer: deferral is enabled on this thread only
+uint64_t g_owner = 0;  // the one producer: deferral is enabled on this thread only
 std::atomic<uint64_t> g_deferred{0}, g_drains{0}, g_fallbacks{0};
 uint64_t g_drain_ticks = 0, g_full_ticks = 0;  // replay thread: waiting for the recorder
 std::atomic<uint64_t> g_exec_ticks{0};  // recording thread: executing commands
@@ -43,9 +52,35 @@ extern const int g_fn_count;
 using Exec = void (*)(const uint8_t*);
 struct Header { Exec exec; uint32_t size, pad; };
 
+uint64_t owner_thread_id() {
+#ifdef _WIN32
+    return GetCurrentThreadId();
+#else
+    return static_cast<uint64_t>(gettid());
+#endif
+}
+
+void wait_for_records(uint64_t cursor) {
+#ifdef _WIN32
+    WaitOnAddress(&g_write, &cursor, sizeof cursor, 2);
+#else
+    // All supported hosts are x86-64. The low word can't wrap to the same
+    // value while the consumer sleeps because the producer is ring-bounded.
+    static_assert(sizeof(g_write) == sizeof(cursor));
+    const timespec timeout{0, 2000000};
+    syscall(SYS_futex, &g_write, FUTEX_WAIT_PRIVATE, uint32_t(cursor), &timeout, nullptr, 0);
+#endif
+}
+
 void wake() {  // at most one wake call per sleep: the first producer to see the flag clears it
     if (g_sleeping.load(std::memory_order_seq_cst) && g_sleeping.exchange(0, std::memory_order_seq_cst))
+    {
+#ifdef _WIN32
         WakeByAddressAll(&g_write);
+#else
+        syscall(SYS_futex, &g_write, FUTEX_WAKE_PRIVATE, INT_MAX, nullptr, nullptr, 0);
+#endif
+    }
 }
 
 uint64_t g_cached_read = 0;   // producer's last view of g_read (refreshed only when the ring looks full)
@@ -138,7 +173,11 @@ void push(const A& a, F) {
 }
 
 void worker() {
+#ifdef _WIN32
     SetThreadDescription(GetCurrentThread(), L"vk record86");
+#else
+    pthread_setname_np(pthread_self(), "vk record86");
+#endif
     uint64_t r = 0;
     for (;;) {
         uint64_t w = g_write.load(std::memory_order_acquire);
@@ -148,7 +187,7 @@ void worker() {
             for (int spin = 0, n = spin163(); spin < n && (w = g_write.load(std::memory_order_acquire)) == r; ++spin) _mm_pause();
             while (w == r) {
                 g_sleeping.store(1, std::memory_order_seq_cst);
-                if ((w = g_write.load(std::memory_order_seq_cst)) == r) WaitOnAddress(&g_write, &r, sizeof r, 2);
+                if ((w = g_write.load(std::memory_order_seq_cst)) == r) wait_for_records(r);
                 g_sleeping.store(0, std::memory_order_relaxed);
                 w = g_write.load(std::memory_order_acquire);
             }
@@ -3792,7 +3831,7 @@ const int g_fn_count = 385;
 // Installs the thunks; called on the replay thread (which then defers its commands). Idempotent.
 void install_on_replay_thread() {
     if (g_installed) {
-        t_replay = GetCurrentThreadId() == g_owner;
+        t_replay = owner_thread_id() == g_owner;
         static uint64_t submits = 0;
         if (t_replay && ++submits % 600 == 0) {
             char line[1024];
@@ -3809,7 +3848,12 @@ void install_on_replay_thread() {
     }
     const char* e = std::getenv("CATHERINE_PARALLEL86");
     if (e && e[0] == '0') { g_installed = true; return; }
+#ifdef _WIN32
     g_ring = static_cast<uint8_t*>(VirtualAlloc(nullptr, kRing, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
+#else
+    void* ring = mmap(nullptr, kRing, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (ring != MAP_FAILED) g_ring = static_cast<uint8_t*>(ring);
+#endif
     if (!g_ring) { g_installed = true; return; }
     if (p_vkCmdBeginConditionalRendering2EXT) real_vkCmdBeginConditionalRendering2EXT = p_vkCmdBeginConditionalRendering2EXT, p_vkCmdBeginConditionalRendering2EXT = thunk_vkCmdBeginConditionalRendering2EXT;
     if (p_vkCmdBeginConditionalRenderingEXT) real_vkCmdBeginConditionalRenderingEXT = p_vkCmdBeginConditionalRenderingEXT, p_vkCmdBeginConditionalRenderingEXT = thunk_vkCmdBeginConditionalRenderingEXT;
@@ -4197,7 +4241,7 @@ void install_on_replay_thread() {
     if (p_vkTrimCommandPool) real_vkTrimCommandPool = p_vkTrimCommandPool, p_vkTrimCommandPool = thunk_vkTrimCommandPool;
     if (p_vkWaitForFences) real_vkWaitForFences = p_vkWaitForFences, p_vkWaitForFences = thunk_vkWaitForFences;
     std::thread(worker).detach();
-    g_owner = GetCurrentThreadId();
+    g_owner = owner_thread_id();
     g_installed = true;
     t_replay = true;
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include "../../../../../platform/host_clock.h"
 #include "dev_loader_native.h"
 #include "karma-native.h"
 #include "difficulty-native.h"
@@ -88,7 +89,7 @@ static void catherine_dev_direct_commit(Cpu *cpu) {
  f_700009c1a0(c);ST32(c->x[0]+0x7c,elapsed);
  c->x[0]=config;c->x[1]=0x201;c->x[2]=1;f_700009a380(c);
  if(catherine_dev_direct_target==40001){dev_standalone_start(40001);return;}
- catherine_dev_direct_waiting=1;catherine_dev_direct_ticks=0;catherine_dev_direct_deadline=GetTickCount64()+120000;
+ catherine_dev_direct_waiting=1;catherine_dev_direct_ticks=0;catherine_dev_direct_deadline=catherine_host_milliseconds()+120000;
  catherine_dev_loader_progress(CATHERINE_DEV_TRANSITION,"Checkpoint restored directly; starting the requested scene.");
  fprintf(stderr,"[dev-direct] committed checkpoint, stage=%u time=%u\n",LD32(config+0x9b60),LD32(config+0x9b64));
  return;
@@ -99,7 +100,7 @@ static void catherine_dev_direct_ready(uint64_t root){
  if(!catherine_dev_direct_waiting||catherine_dev_optional_root(catherine_dev_direct_target)!=11)return;
  CatherineDevLoadStatus status={0};status.version=1;catherine_dev_loader_status(&status);
  if(!status.busy||status.phase!=CATHERINE_DEV_TRANSITION||status.target_id!=catherine_dev_direct_target){catherine_dev_direct_waiting=0;return;}
- if(GetTickCount64()>=catherine_dev_direct_deadline){catherine_dev_direct_waiting=0;catherine_dev_loader_finish(-51,"The requested scene did not become ready within two minutes.");return;}
+ if(catherine_host_milliseconds()>=catherine_dev_direct_deadline){catherine_dev_direct_waiting=0;catherine_dev_loader_finish(-51,"The requested scene did not become ready within two minutes.");return;}
  ++catherine_dev_direct_ticks;
  const int32_t current=(int32_t)LD32(root+4);
  if(LD8(root)&1)return;

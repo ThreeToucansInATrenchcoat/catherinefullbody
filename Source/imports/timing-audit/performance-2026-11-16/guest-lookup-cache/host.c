@@ -1,10 +1,16 @@
 #define WIN32_LEAN_AND_MEAN
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include "C:/catherine/recomp/Source/platform/guest_host.h"
+#endif
 #ifdef CATHERINE_HIGH_REFRESH_BUILD
 #include "catherine_heap_watch.h"
 #endif
 #include <stdio.h>
+#ifdef _WIN32
 #include <bcrypt.h>
+#endif
 #include <stdlib.h>
 #include <time.h>
 #include "cpu.h"
@@ -21,6 +27,9 @@
 #include "guest-timing/include/catherine_npad_publish.h"
 #include "movie_guest.h"
 #include "asset_pak.h"
+#ifndef _WIN32
+#include "C:/catherine/recomp/Source/platform/guest_host_linux.inc"
+#endif
 #define TABLE(n) extern const uint64_t n##_fn_addrs[], n##_fn_count; extern const GuestFn n##_fn_ptrs[];
 TABLE(main) TABLE(subsdk0) TABLE(subsdk1) TABLE(sdk)
 static struct {const uint64_t *addresses, *count; const GuestFn *functions;} tables[] = {
@@ -464,7 +473,9 @@ void rt_svc(Cpu *c,uint32_t imm,uint64_t pc) {
          lifo[1]=17;lifo[2]=0;lifo[3]=1;lifo[4]=1;lifo[5]=1;
          *(uint32_t *)(entry+0x28+0x20+8+32)=player?0:1;
      }
-     CreateThread(NULL,0,controller_main,npad,0,NULL);
+     HANDLE controller = CreateThread(NULL,0,controller_main,npad,0,NULL);
+    if (!controller) goto unhandled;
+    CloseHandle(controller);
      c->x[0]=0;puts("Mapped player 1 and player 2 controller state");return;
  }
  if(imm==6 && c->x[2]>=0x7000000000ull) {
@@ -731,7 +742,9 @@ void rt_svc(Cpu *c,uint32_t imm,uint64_t pc) {
 unhandled: if(imm==0x26) { uint64_t fp=c->x[29]; for(int i=0;i<16 && fp>=0x1000000000ull && fp<0x7000000000ull;i++){ uint64_t *f=(uint64_t *)(uintptr_t)fp; fprintf(stderr,"frame %d fp=%#llx lr=%#llx\n",i,fp,f[1]); if(f[0]<=fp || f[0]-fp>0x100000)break;fp=f[0]; } } if(imm==0x26) fprintf(stderr,"Break detail value=%#x lr=%#llx sp=%#llx\n",c->x[1] && c->x[2]>=4 ? *(uint32_t *)(uintptr_t)c->x[1] : 0,c->x[30],c->sp); fprintf(stderr,"Unhandled SVC %#x at %#llx x0=%#llx x1=%#llx x2=%#llx x3=%#llx\n",imm,pc,c->x[0],c->x[1],c->x[2],c->x[3]);exit(4);}
 void rt_udf(Cpu *c,uint64_t pc) {(void)c;fprintf(stderr,"Guest trap %#llx\n",pc);exit(5);}
 uint64_t rt_ticks(void) { LARGE_INTEGER x,f;QueryPerformanceCounter(&x);QueryPerformanceFrequency(&f);return (x.QuadPart/f.QuadPart)*19200000ull+(x.QuadPart%f.QuadPart)*19200000ull/f.QuadPart;}
+#ifdef _WIN32
 static LONG WINAPI fault(EXCEPTION_POINTERS *e) {fprintf(stderr,"Fault %#lx at guest %#llx, address %#llx lr %#llx x0 %#llx slot %u\n",e->ExceptionRecord->ExceptionCode,last_pc,(uint64_t)e->ExceptionRecord->ExceptionInformation[1],thread_lr[thread_slot],thread_x0[thread_slot],thread_slot);return EXCEPTION_EXECUTE_HANDLER;}
+#endif
 static void load(const char *name,uint64_t base,size_t size) {
     void *p=VirtualAlloc((void *)(uintptr_t)base,size,MEM_RESERVE|MEM_COMMIT,PAGE_READWRITE);
     int packed=asset_pak_initialize(),ok=0;
@@ -742,19 +755,27 @@ static void load(const char *name,uint64_t base,size_t size) {
     }
     if(!ok){fprintf(stderr,"Could not load %s%s%s\n",name,packed?": ":"",packed?asset_pak_error():"");exit(2);}
 }
+#ifdef _WIN32
 int main(void) {
+#else
+int catherine_guest_main(void) {
+#endif
     HANDLE process = GetCurrentProcess();
     if (!DuplicateHandle(process, GetCurrentThread(), process, &main_thread, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
         fprintf(stderr, "Could not initialize the main guest thread (%lu)\n", GetLastError());
         return 2;
     }
-    trace_boot=getenv("CATHERINE_TRACE_BOOT")!=NULL || getenv("CATHERINE_TEST_CONFIRM")!=NULL;g_fnprof=trace_boot;const char *lookup_cache_mode=getenv("CATHERINE_GUEST_LOOKUP_CACHE");guest_lookup_cache_enabled=!(lookup_cache_mode && strcmp(lookup_cache_mode,"0")==0);setvbuf(stdout,NULL,_IONBF,0);SetUnhandledExceptionFilter(fault);load("assets/main.image",MOD_MAIN_BASE,MOD_MAIN_SIZE);load("assets/subsdk0.image",MOD_SUBSDK0_BASE,MOD_SUBSDK0_SIZE);load("assets/subsdk1.image",MOD_SUBSDK1_BASE,MOD_SUBSDK1_SIZE);load("assets/sdk.image",MOD_SDK_BASE,MOD_SDK_SIZE);void *stack=VirtualAlloc((void *)0x3000000000ull,1ull<<30,MEM_RESERVE,PAGE_NOACCESS);if(stack && !VirtualAlloc(stack,0x100000,MEM_COMMIT,PAGE_READWRITE))return 2;void *tls=VirtualAlloc((void *)0x3100000000ull,4096,MEM_RESERVE|MEM_COMMIT,PAGE_READWRITE);if(!stack||!tls)return 2;*(uint64_t *)((char *)tls+0x1f8)=(uintptr_t)tls+0x200;
+    trace_boot=getenv("CATHERINE_TRACE_BOOT")!=NULL || getenv("CATHERINE_TEST_CONFIRM")!=NULL;g_fnprof=trace_boot;const char *lookup_cache_mode=getenv("CATHERINE_GUEST_LOOKUP_CACHE");guest_lookup_cache_enabled=!(lookup_cache_mode && strcmp(lookup_cache_mode,"0")==0);setvbuf(stdout,NULL,_IONBF,0);
+#ifdef _WIN32
+    SetUnhandledExceptionFilter(fault);
+#endif
+    load("assets/main.image",MOD_MAIN_BASE,MOD_MAIN_SIZE);load("assets/subsdk0.image",MOD_SUBSDK0_BASE,MOD_SUBSDK0_SIZE);load("assets/subsdk1.image",MOD_SUBSDK1_BASE,MOD_SUBSDK1_SIZE);load("assets/sdk.image",MOD_SDK_BASE,MOD_SDK_SIZE);void *stack=VirtualAlloc((void *)0x3000000000ull,1ull<<30,MEM_RESERVE,PAGE_NOACCESS);if(stack && !VirtualAlloc(stack,0x100000,MEM_COMMIT,PAGE_READWRITE))return 2;void *tls=VirtualAlloc((void *)0x3100000000ull,4096,MEM_RESERVE|MEM_COMMIT,PAGE_READWRITE);if(!stack||!tls)return 2;*(uint64_t *)((char *)tls+0x1f8)=(uintptr_t)tls+0x200;
 #ifdef CATHERINE_HIGH_REFRESH_BUILD
     heap=reserve_guest_heap();
 #else
     heap=VirtualAlloc((void *)0x1000000000ull,4ull<<30,MEM_RESERVE,PAGE_NOACCESS);
 #endif
-    alias=VirtualAlloc((void *)0x2000000000ull,64ull<<30,MEM_RESERVE,PAGE_NOACCESS);if(!alias)alias=VirtualAlloc((void *)0x4000000000ull,64ull<<30,MEM_RESERVE,PAGE_NOACCESS);if(!alias)alias=VirtualAlloc((void *)0x5000000000ull,64ull<<30,MEM_RESERVE,PAGE_NOACCESS);if(!heap||!alias){fputs("Guest reservation failed\\n",stderr);return 2;}Cpu c={0};c.sp=(uintptr_t)stack+0x100000;c.tpidr=c.tpidrro=(uintptr_t)tls;c.x[0]=1;c.x[2]=0x7100000010ull;c.x[3]=0x7100000020ull;c.pc=MOD_SDK_BASE+0x29d9e0;CreateThread(NULL,0,watchdog,NULL,0,NULL);puts("Entering Catherine SDK startup");rt_dispatch(&c);return 0;}
+    alias=VirtualAlloc((void *)0x2000000000ull,64ull<<30,MEM_RESERVE,PAGE_NOACCESS);if(!alias)alias=VirtualAlloc((void *)0x4000000000ull,64ull<<30,MEM_RESERVE,PAGE_NOACCESS);if(!alias)alias=VirtualAlloc((void *)0x5000000000ull,64ull<<30,MEM_RESERVE,PAGE_NOACCESS);if(!heap||!alias){fputs("Guest reservation failed\\n",stderr);return 2;}Cpu c={0};c.sp=(uintptr_t)stack+0x100000;c.tpidr=c.tpidrro=(uintptr_t)tls;c.x[0]=1;c.x[2]=0x7100000010ull;c.x[3]=0x7100000020ull;c.pc=MOD_SDK_BASE+0x29d9e0;HANDLE observer = CreateThread(NULL,0,watchdog,NULL,0,NULL);if(observer)CloseHandle(observer);puts("Entering Catherine SDK startup");rt_dispatch(&c);return 0;}
 
 
 

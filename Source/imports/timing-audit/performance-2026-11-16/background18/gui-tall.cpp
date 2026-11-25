@@ -1,3 +1,4 @@
+#ifdef _WIN32
 #include "perf_background.h"
 #include "gui.h"
 #include "dev-start/generated/include/dev_loader_native.h"
@@ -438,3 +439,7 @@ extern "C" int catherine_dev_gui_pretranslate(MSG*m){
  }
  return IsDialogMessageW(panel,m)!=0;
 }
+
+#else
+#include "C:/catherine/recomp/Source/platform/overlay_linux.inc"
+#endif

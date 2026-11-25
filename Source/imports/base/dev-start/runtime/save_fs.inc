@@ -17,7 +17,22 @@ static struct {
     unsigned mode;
 } save_files[SAVE_FILE_COUNT];
 static SRWLOCK save_lock = SRWLOCK_INIT;
+#ifndef _WIN32
+void catherine_linux_freeze_saves(void) {
+    // Retain the lock until process exit so no guest thread can modify a
+    // save after the final flush. Other save operations use this same lock.
+    AcquireSRWLockExclusive(&save_lock);
+    for (unsigned i = 0; i < SAVE_FILE_COUNT; ++i) {
+        if (save_files[i].handle && (save_files[i].mode & 2))
+            FlushFileBuffers(save_files[i].handle);
+    }
+}
+#endif
+#ifdef _WIN32
 #include "dev_save.inc"
+#else
+#include "C:/catherine/recomp/Source/platform/dev_save_linux.inc"
+#endif
 
 static unsigned save_result(DWORD error) {
     switch (error) {
@@ -42,6 +57,7 @@ static unsigned save_mount(void) {
         }
         return attributes & (FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT) ? FS_INVALID_PATH : 0;
     }
+#ifdef _WIN32
     const DWORD current = GetFileAttributesW(L"save.dat");
     if (current != INVALID_FILE_ATTRIBUTES)
         return (current & (FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT)) ? FS_INVALID_PATH : 0;
@@ -68,6 +84,28 @@ static unsigned save_mount(void) {
     }
     // RemoveDirectory leaves a legacy folder with any additional files intact.
     RemoveDirectoryW(L"save");
+#else
+    DWORD current = GetFileAttributesA("save.dat");
+    if (current != INVALID_FILE_ATTRIBUTES) return current ? FS_INVALID_PATH : 0;
+    if (!save_missing(GetLastError())) return save_result(GetLastError());
+
+    DWORD folder = GetFileAttributesA("save");
+    if (folder == INVALID_FILE_ATTRIBUTES)
+        return save_missing(GetLastError()) ? 0 : save_result(GetLastError());
+    if (folder != FILE_ATTRIBUTE_DIRECTORY) return FS_INVALID_PATH;
+
+    DWORD legacy = GetFileAttributesA("save/system_dat");
+    if (legacy == INVALID_FILE_ATTRIBUTES)
+        return save_missing(GetLastError()) ? 0 : save_result(GetLastError());
+    if (legacy) return FS_INVALID_PATH;
+    if (syscall(SYS_renameat2, AT_FDCWD, "save/system_dat", AT_FDCWD, "save.dat", RENAME_NOREPLACE) != 0) {
+        DWORD error = GetLastError();
+        current = GetFileAttributesA("save.dat");
+        if (current == INVALID_FILE_ATTRIBUTES) return save_result(error);
+        return current ? FS_INVALID_PATH : 0;
+    }
+    rmdir("save");
+#endif
     return 0;
 }
 

@@ -16,7 +16,12 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <sys/stat.h>
+#endif
+#include "../../../../../../platform/host_clock.h"
 #include "c02_guarded_io_v5.h"
 #endif
 extern "C" uint64_t catherine_camera_render_clock(void);
@@ -55,9 +60,15 @@ bool qa_enabled(){
  if(!value)return false;
  static bool latched=false;static uint64_t next_poll=0;
  if(latched)return true;
- const uint64_t now=GetTickCount64();if(now<next_poll)return false;next_poll=now+250;
+ const uint64_t now=catherine_host_milliseconds();if(now<next_poll)return false;next_poll=now+250;
+#ifdef _WIN32
  const DWORD attributes=GetFileAttributesA("c04-capture.marker");
- latched=attributes!=INVALID_FILE_ATTRIBUTES&&!(attributes&FILE_ATTRIBUTE_DIRECTORY);return latched;
+ latched=attributes!=INVALID_FILE_ATTRIBUTES&&!(attributes&FILE_ATTRIBUTE_DIRECTORY);
+#else
+ struct stat result{};
+ latched=stat("c04-capture.marker",&result)==0&&!S_ISDIR(result.st_mode);
+#endif
+ return latched;
 #endif
 }
 bool read_bytes(uint64_t p,void* out,size_t n){

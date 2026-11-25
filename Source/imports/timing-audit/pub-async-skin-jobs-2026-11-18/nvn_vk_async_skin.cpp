@@ -762,7 +762,11 @@ struct Worker {
 };
 Worker g_worker;
 void loop() {
+#ifdef _WIN32
     SetThreadDescription(GetCurrentThread(), L"nvn present");
+#else
+    plat::set_thread_name("nvn present");
+#endif
     if (const char* e = std::getenv("CATHERINE_PRESENT_THREAD_HINT"); e && e[0] == '1') plat::perf_hint_thread();
     for (;;) {
         std::unique_lock lk(g_worker.m);

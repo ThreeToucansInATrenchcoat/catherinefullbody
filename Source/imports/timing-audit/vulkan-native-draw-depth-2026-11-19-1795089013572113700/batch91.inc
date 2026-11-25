@@ -178,6 +178,11 @@ void after_capture(const ShaderInfo* vs, const ShaderInfo* fs, const ProgramLayo
     B.batchable = false;
     ++g_why[0];
     if (!T.valid || (T.legacy && !T.sets[0])) { ++g_why[1]; return; }
+#if defined(__linux__) && !defined(__ANDROID__)
+    // Linux keeps ordinary draws for this layout. The instancing descriptor-copy
+    // path faults in the NVIDIA driver after cutscene playback on the RTX 5090.
+    if (T.legacy) return;
+#endif
     if (T.matrix_value < 0 || !indexed || c.i[2] != 0 || c.i[3] > 1) { ++g_why[2]; return; }
     if (!order_free_state(g_state)) { ++g_why[3]; return; }
     if (T.uniform_ranges[0][T.matrix_recipe.slot].size != 64) { ++g_why[4]; return; }

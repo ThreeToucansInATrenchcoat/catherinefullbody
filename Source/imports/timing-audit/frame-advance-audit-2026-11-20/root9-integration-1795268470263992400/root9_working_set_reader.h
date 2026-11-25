@@ -1,4 +1,5 @@
 #pragma once
+#ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -73,3 +74,18 @@ inline bool read(uint64_t address,void* destination,size_t size,Path* selected=n
     return read_with_query(address,destination,size,selected,[](HANDLE process,void* data,DWORD size){return K32QueryWorkingSetEx(process,data,size);});
 }
 }
+
+#else
+#include <cstdint>
+#include "C:/catherine/recomp/Source/platform/host_memory.h"
+
+namespace catherine::root9::private_reader {
+enum class Path : unsigned { rejected, working_set, virtual_query };
+inline bool read(uint64_t address, void* destination, size_t size, Path* selected=nullptr) {
+    const bool ok = address && size <= UINT64_MAX - address &&
+                    catherine_host_read(reinterpret_cast<const void*>(address), destination, size);
+    if (selected) *selected = ok ? Path::virtual_query : Path::rejected;
+    return ok;
+}
+}
+#endif

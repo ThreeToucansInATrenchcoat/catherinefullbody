@@ -288,7 +288,7 @@ const ShaderInfo* shader_for(uint64_t code_host, uint64_t control) {
     std::unique_ptr<ShaderInfo>& slot = k.by_hash[hash];
     std::string bytes;
     bool loaded = read_whole(dir + hash + ".spv", bytes) && bytes.size() % 4 == 0 && !bytes.empty();
-#ifdef CATHERINE_ASSET_PAK
+#if defined(CATHERINE_ASSET_PAK) && defined(_WIN32)
     if (!loaded) {
         void* translated = nullptr; size_t translated_size = 0; char* resources = nullptr;
         if (catherine_translate_shader(hash.c_str(), code, c.code_size, ctrl, &translated, &translated_size, &resources)) {

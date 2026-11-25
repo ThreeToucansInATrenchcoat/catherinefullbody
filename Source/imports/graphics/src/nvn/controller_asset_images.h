@@ -7,10 +7,20 @@
 #include <fstream>
 #include <map>
 #include <string>
+#ifdef _WIN32
 #include <windows.h>
+#endif
 namespace nx::nvn::supplied_art {
 struct Image {unsigned w=0,h=0;std::vector<uint8_t> rgba;};
+#ifdef _WIN32
 inline std::filesystem::path root(){wchar_t exe[32768];DWORD n=GetModuleFileNameW(nullptr,exe,32768);return n&&n<32768?std::filesystem::path(exe).parent_path()/L"CathAssets":std::filesystem::path{};}
+#else
+inline std::filesystem::path root(){
+    std::error_code error;
+    const auto exe = std::filesystem::read_symlink("/proc/self/exe", error);
+    return error ? std::filesystem::path{} : exe.parent_path()/"CathAssets";
+}
+#endif
 inline const std::vector<uint8_t>& tutorial(unsigned layout){
  static std::array<std::vector<uint8_t>,5> sets;static std::array<bool,5> loaded{};
  if(layout>4)layout=1;

@@ -106,6 +106,7 @@
       "previous_object": "C:/catherine/recomp/Old/timing-audit/pub-geometry-repair-2026-11-19-1795084156536071500/win_launch_geometry_repair.obj",
       "recipe_origin": "recorded",
       "dependencies": [
+        "C:/catherine/recomp/Source/platform/renderer_defaults.h",
         "C:/catherine/recomp/Source/imports/timing-audit/pub-geometry-repair-2026-11-19-1795084156536071500/win_launch_geometry_repair.c",
         "C:/catherine/recomp/Source/imports/base/asset_pak.h",
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/catherine_refresh.h",

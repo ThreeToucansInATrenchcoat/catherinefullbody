@@ -7,7 +7,11 @@
 #include <unordered_map>
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include "C:/catherine/recomp/Source/platform/host_memory.h"
+#endif
 
 namespace {
 // This is the ONLY mutex for both lifecycle values and scalar history.
@@ -17,6 +21,7 @@ c03_private::RigidTransport rigid;
 thread_local c03_private::RigidTransport::Flow c3flow;
 #include "scalar_history_locked.inc"
 
+#ifdef _WIN32
 // perf 2026-11-22: same-process read without a kernel transition. Hot per-draw callers hold the
 // controller mutex across these reads, and ReadProcessMemory made each one a syscall. A frame-based SEH
 // handler runs before the host's unhandled-exception filter (which commits guest pages on demand), so an
@@ -33,6 +38,13 @@ bool system_read(void*,uint64_t p,void*out,size_t n){
     if(guarded_copy(reinterpret_cast<const void*>(p),out,n))return true;
     std::memset(out,0,n);return false;
 }
+#else
+bool system_read(void*, uint64_t p, void* out, size_t n) {
+    if (p && p <= UINTPTR_MAX - n && catherine_host_read(reinterpret_cast<const void*>(p), out, n)) return true;
+    std::memset(out, 0, n);
+    return false;
+}
+#endif
 C03Read reader=system_read;
 void* reader_context=nullptr;
 bool path_exact(const char*p,uint32_t kind,uint32_t variant,uint32_t resource){

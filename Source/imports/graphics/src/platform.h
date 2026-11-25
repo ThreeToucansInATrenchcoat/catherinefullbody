@@ -73,7 +73,7 @@ struct PadState {
     int32_t lx = 0, ly = 0, rx = 0, ry = 0;
 };
 void read_pad(PadState& p);  // player 1
-#if defined(_WIN32)
+#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
 void read_player_pads(PadState (&players)[2], bool (&connected)[2]);
 unsigned connected_player_count() noexcept;
 #endif
@@ -84,7 +84,7 @@ inline bool dualsense_connected() noexcept { return false; }
 #endif
 // Last meaningful device input, independent of which controllers remain connected.
 enum class InputLayout : unsigned { KeyboardMouse=0, Xbox=1, PlayStation=2, Switch=3, PS4=4 };
-#if defined(_WIN32) && defined(CATHERINE_HIGH_REFRESH_BUILD)
+#if (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))) && defined(CATHERINE_HIGH_REFRESH_BUILD)
 InputLayout active_input_layout() noexcept;
 InputLayout prompt_input_layout() noexcept;
 unsigned keyboard_binding(unsigned index) noexcept;
@@ -96,7 +96,7 @@ inline unsigned keyboard_binding(unsigned){return 0;}
 inline uint64_t keyboard_binding_version(){return 0;}
 #endif
 // Each four-bit field maps one logical NpadButton index to its physical index.
-#if defined(_WIN32) && defined(CATHERINE_HIGH_REFRESH_BUILD)
+#if (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))) && defined(CATHERINE_HIGH_REFRESH_BUILD)
 uint64_t controller_binding_map();
 #else
 inline uint64_t controller_binding_map() { return 0xfedcba9876543210ull; }

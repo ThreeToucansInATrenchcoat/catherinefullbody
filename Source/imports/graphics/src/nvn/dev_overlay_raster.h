@@ -13,6 +13,8 @@
 #define NOMINMAX
 #endif
 #include <windows.h>
+#elif (defined(__linux__) && !defined(__ANDROID__))
+#include <cairo/cairo.h>
 #endif
 extern "C" int catherine_dev_overlay_visible(void);
 
@@ -33,9 +35,10 @@ static void blend(int x,int y,uint32_t color,unsigned coverage=255){
  p[2]=static_cast<unsigned char>(((color>>8)&255)*a/255+p[2]*inv/255);
  p[3]=static_cast<unsigned char>(a+p[3]*inv/255);
 }
-#if defined(_WIN32)
+#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
 struct Glyph {int w=0,h=0;std::vector<unsigned char> mask;};
 static std::unordered_map<std::string,Glyph> glyphs;
+#if defined(_WIN32)
 static Glyph make_glyph(const std::string& value,int size){
  Glyph result;
  int count=MultiByteToWideChar(CP_UTF8,0,value.c_str(),-1,nullptr,0);
@@ -57,6 +60,9 @@ static Glyph make_glyph(const std::string& value,int size){
  }
  SelectObject(dc,old_font);DeleteObject(font);DeleteDC(dc);return result;
 }
+#else
+#include "../../../../platform/overlay_font_linux.inc"
+#endif
 #endif
 static bool refresh(){
  commands.clear();
@@ -82,7 +88,7 @@ static bool refresh(){
     }
    }else for(int py=std::max(0,y);py<bottom;++py)for(int px=std::max(0,x);px<right;++px)blend(px,py,cmd.color);
   }else{
-#if defined(_WIN32)
+#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
    const int size=std::max(8,int(cmd.h));const std::string key=std::to_string(size)+":"+cmd.text;
    auto found=glyphs.find(key);
    if(found==glyphs.end()){

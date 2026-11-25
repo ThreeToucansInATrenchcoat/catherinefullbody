@@ -1,6 +1,5 @@
 #pragma once
 
-#ifdef _WIN32
 #include <cstdarg>
 
 namespace nx {
@@ -31,9 +30,3 @@ void start_periodic_render_log();
 void periodic_log(const char* format, ...);
 
 }  // namespace nx
-#else
-namespace nx {
-class PeriodicRenderLogScope {};
-void periodic_log(const char* format, ...);
-}
-#endif

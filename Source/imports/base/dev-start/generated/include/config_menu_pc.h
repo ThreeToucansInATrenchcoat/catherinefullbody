@@ -22,15 +22,15 @@ unsigned catherine_pc_display_dialog;
 unsigned catherine_pc_question;
 
 // Use the host preview's monotonic Windows clock, independent of rendered frames.
-__declspec(dllimport) unsigned long long __stdcall GetTickCount64(void);
+#include "../../../../../platform/host_clock.h"
 static uint64_t catherine_pc_display_deadline_ms;
 
 static inline void pc_display_countdown_begin(void) {
-    catherine_pc_display_deadline_ms = GetTickCount64() + 15000;
+    catherine_pc_display_deadline_ms = catherine_host_milliseconds() + 15000;
 }
 
 unsigned catherine_config_display_countdown_seconds(void) {
-    const uint64_t now = GetTickCount64();
+    const uint64_t now = catherine_host_milliseconds();
     if (now >= catherine_pc_display_deadline_ms) return 0;
     const uint64_t seconds = (catherine_pc_display_deadline_ms - now + 999) / 1000;
     return seconds > 15 ? 15 : (unsigned)seconds;

@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(_WIN32) && defined(__x86_64__) && defined(CATHERINE_HIGH_REFRESH_BUILD)
+#if (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))) && defined(__x86_64__) && defined(CATHERINE_HIGH_REFRESH_BUILD)
 #define NX_CATHERINE_WATCHED_GEOMETRY_BUILD 1
 
 namespace nx::nvn::replay {

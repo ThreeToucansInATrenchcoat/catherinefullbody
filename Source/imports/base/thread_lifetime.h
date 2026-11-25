@@ -1,5 +1,9 @@
 #pragma once
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include "C:/catherine/recomp/Source/platform/guest_host.h"
+#endif
 
 typedef struct {
     HANDLE host;

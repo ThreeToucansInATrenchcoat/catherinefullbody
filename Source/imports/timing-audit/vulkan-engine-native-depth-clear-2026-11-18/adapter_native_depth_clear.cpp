@@ -10,10 +10,20 @@
 #include <cstdarg>
 #include <mutex>
 #include <new>
+#ifdef _WIN32
 #include <process.h>
 #include <windows.h>
+#else
+#include <semaphore>
+#include <sys/mman.h>
+#include <thread>
+#endif
 #include "platform.h"
 #include "periodic_render_log.h"
+#if defined(__linux__) && !defined(__ANDROID__)
+#include <sched.h>
+#include <fstream>
+#endif
 namespace nx {
 static std::map<std::string,HleFn>& registry() {static std::map<std::string,HleFn> m;return m;}
 HleRegistrar::HleRegistrar(const char *name,HleFn fn){registry()[name]=fn;}
@@ -43,16 +53,30 @@ struct PeriodicRenderLogQueue {
     alignas(64) std::atomic<uint64_t> head{0};
     alignas(64) std::atomic<uint64_t> tail{0};
     std::atomic<unsigned> dropped{0};
+#ifdef _WIN32
     HANDLE wake = nullptr;
+#else
+    std::binary_semaphore wake{0};
+    std::atomic<bool> wake_pending{false};
+#endif
 };
 
 namespace {
 std::atomic<PeriodicRenderLogQueue*> g_periodic_log{nullptr};
 thread_local PeriodicRenderLogScope* g_periodic_scope = nullptr;
 
-unsigned __stdcall write_periodic_render_log(void* opaque) {
+#ifdef _WIN32
+unsigned __stdcall
+#else
+unsigned
+#endif
+write_periodic_render_log(void* opaque) {
     auto& queue = *static_cast<PeriodicRenderLogQueue*>(opaque);
+#ifdef _WIN32
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
+#else
+    plat::set_thread_name("nvn log");
+#endif
     uint64_t tail = 0;
     for (;;) {
         while (tail != queue.head.load(std::memory_order_acquire)) {
@@ -62,7 +86,12 @@ unsigned __stdcall write_periodic_render_log(void* opaque) {
         }
         if (unsigned dropped = queue.dropped.exchange(0, std::memory_order_relaxed))
             std::fprintf(stderr, "nvn: renderer statistics dropped %u complete batches\n", dropped);
+#ifdef _WIN32
         if (WaitForSingleObject(queue.wake, INFINITE) != WAIT_OBJECT_0) return 1;
+#else
+        queue.wake.acquire();
+        queue.wake_pending.store(false, std::memory_order_release);
+#endif
     }
 }
 }  // namespace
@@ -74,6 +103,7 @@ void start_periodic_render_log() {
         if (sync && sync[0] == '1') return;
         auto* queue = new (std::nothrow) PeriodicRenderLogQueue;
         if (!queue) return;
+#ifdef _WIN32
         queue->wake = CreateEventW(nullptr, FALSE, FALSE, nullptr);
         if (!queue->wake) {
             delete queue;
@@ -86,7 +116,14 @@ void start_periodic_render_log() {
             return;
         }
         CloseHandle(reinterpret_cast<HANDLE>(worker));
-        // Windows closes the process-lifetime event and worker handle on exit.
+#else
+        try {
+            std::thread(write_periodic_render_log, queue).detach();
+        } catch (const std::system_error&) {
+            delete queue;
+            return;
+        }
+#endif
         g_periodic_log.store(queue, std::memory_order_release);
     });
 }
@@ -129,7 +166,11 @@ PeriodicRenderLogScope::~PeriodicRenderLogScope() {
     const bool wake = !batch_ || batch_->overflow || batch_->used;
     if (queue_->writer.load(std::memory_order_relaxed) == this)
         queue_->writer.store(nullptr, std::memory_order_release);
+#ifdef _WIN32
     if (wake) SetEvent(queue_->wake);
+#else
+    if (wake && !queue_->wake_pending.exchange(true, std::memory_order_acq_rel)) queue_->wake.release();
+#endif
 }
 
 void periodic_log(const char* format, ...) {
@@ -173,11 +214,21 @@ namespace nx {
 bool g_trace=false;
 const LoadedModule* module_at(uint64_t){return nullptr;}
 uint64_t find_symbol(const char* name){return std::strcmp(name,"nvnBootstrapLoader")==0?0x7005454d90ull:0;}
-uint64_t kernel_alloc(uint64_t size,uint64_t){void *p=VirtualAlloc(nullptr,size,MEM_COMMIT|MEM_RESERVE,PAGE_READWRITE);if(!p)fatal("Graphics memory allocation failed");return (uint64_t)p;}
+uint64_t kernel_alloc(uint64_t size,uint64_t) {
+#ifdef _WIN32
+    void* p = VirtualAlloc(nullptr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    if (!p) fatal("Graphics memory allocation failed");
+#else
+    void* p = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (p == MAP_FAILED) fatal("Graphics memory allocation failed");
+#endif
+    return reinterpret_cast<uint64_t>(p);
+}
 }
 namespace nx::plat {
 void input_script(PadState&){} size_t touch_overlay(OverlayShape*,size_t){return 0;}
 void perf_hint_thread(){
+#ifdef _WIN32
     thread_local bool done = false;
     if (done) return;
     done = true;
@@ -212,6 +263,37 @@ void perf_hint_thread(){
         return ids;
     }();
     if (!performance.empty()) SetThreadSelectedCpuSets(GetCurrentThread(), performance.data(), ULONG(performance.size()));
+#elif defined(__linux__) && !defined(__ANDROID__)
+    thread_local bool done = false;
+    if (done) return;
+    done = true;
+    const char* setting = std::getenv("CATHERINE_PARALLEL134");
+    if (setting && setting[0] == '0') return;
+    static const cpu_set_t performance = [] {
+        cpu_set_t allowed, fast;
+        CPU_ZERO(&fast);
+        if (sched_getaffinity(0, sizeof allowed, &allowed) != 0) return fast;
+        unsigned speeds[CPU_SETSIZE]{};
+        unsigned highest = 0, lowest = UINT32_MAX;
+        for (unsigned cpu = 0; cpu < CPU_SETSIZE; ++cpu) {
+            if (!CPU_ISSET(cpu, &allowed)) continue;
+            std::ifstream speed("/sys/devices/system/cpu/cpu" + std::to_string(cpu) + "/cpufreq/cpuinfo_max_freq");
+            if (!(speed >> speeds[cpu]) || !speeds[cpu]) return fast;
+            highest = std::max(highest, speeds[cpu]);
+            lowest = std::min(lowest, speeds[cpu]);
+        }
+        // Ignore small per-core turbo differences on otherwise uniform CPUs.
+        if (!highest || uint64_t(highest) * 100 <= uint64_t(lowest) * 115) return fast;
+        for (unsigned cpu = 0; cpu < CPU_SETSIZE; ++cpu)
+            if (uint64_t(speeds[cpu]) * 100 >= uint64_t(highest) * 90) CPU_SET(cpu, &fast);
+        return fast;
+    }();
+    cpu_set_t allowed, selected;
+    if (CPU_COUNT(&performance) && sched_getaffinity(0, sizeof allowed, &allowed) == 0) {
+        CPU_AND(&selected, &performance, &allowed);
+        if (CPU_COUNT(&selected)) sched_setaffinity(0, sizeof selected, &selected);
+    }
+#endif
 }
 void perf_hint_frame(int64_t){} void frame_thread_tick(int){}
 void thread_counters(uint64_t& n,long f[2],long s[2]){n=0;f[0]=f[1]=s[0]=s[1]=0;}

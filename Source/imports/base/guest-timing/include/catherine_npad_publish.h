@@ -1,7 +1,11 @@
 #pragma once
 #include <stdint.h>
 #include <string.h>
+#ifdef _WIN32
 #include <windows.h>
+#else
+#define MemoryBarrier() __atomic_thread_fence(__ATOMIC_SEQ_CST)
+#endif
 
 // Native SDK full-key Npad ring layout; separate entries are 0x5000 bytes apart.
 static inline void catherine_publish_npad(unsigned char *entry,uint64_t sample,uint64_t slot,
@@ -16,3 +20,6 @@ static inline void catherine_publish_npad(unsigned char *entry,uint64_t sample,u
     MemoryBarrier();*(volatile uint64_t *)record=sample;MemoryBarrier();
     header[2]=slot;header[3]=sample<17?sample:17;
 }
+#ifndef _WIN32
+#undef MemoryBarrier
+#endif

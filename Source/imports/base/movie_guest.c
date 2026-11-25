@@ -1,5 +1,29 @@
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+typedef SRWLOCK MovieMutex;
+typedef CONDITION_VARIABLE MovieCondition;
+#define MOVIE_MUTEX_INITIALIZER SRWLOCK_INIT
+static void movie_lock(MovieMutex *lock) { AcquireSRWLockExclusive(lock); }
+static void movie_unlock(MovieMutex *lock) { ReleaseSRWLockExclusive(lock); }
+static void movie_wait(MovieCondition *event, MovieMutex *lock) {
+    SleepConditionVariableSRW(event, lock, INFINITE, 0);
+}
+static void movie_signal(MovieCondition *event) { WakeConditionVariable(event); }
+#else
+#include <errno.h>
+#include <pthread.h>
+typedef pthread_mutex_t MovieMutex;
+typedef pthread_cond_t MovieCondition;
+#define MOVIE_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
+#define E_INVALIDARG (-EINVAL)
+#define E_OUTOFMEMORY (-ENOMEM)
+#define ARRAYSIZE(array) (sizeof(array) / sizeof((array)[0]))
+static void movie_lock(MovieMutex *lock) { pthread_mutex_lock(lock); }
+static void movie_unlock(MovieMutex *lock) { pthread_mutex_unlock(lock); }
+static void movie_wait(MovieCondition *event, MovieMutex *lock) { pthread_cond_wait(event, lock); }
+static void movie_signal(MovieCondition *event) { pthread_cond_signal(event); }
+#endif
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,9 +61,14 @@ typedef struct {
 typedef struct Movie {
     struct Movie *next;
     uint64_t object, events[4];
+#ifdef _WIN32
     HANDLE worker;
-    SRWLOCK lock;
-    CONDITION_VARIABLE work, complete;
+#else
+    pthread_t worker;
+    bool worker_started;
+#endif
+    MovieMutex lock;
+    MovieCondition work, complete;
     enum Command command;
     CatherineMovieDecoder *decoder;
     Input input[INPUT_COUNT];
@@ -61,7 +90,7 @@ typedef struct Movie {
 } Movie;
 
 static Movie *movies;
-static SRWLOCK movies_lock = SRWLOCK_INIT;
+static MovieMutex movies_lock = MOVIE_MUTEX_INITIALIZER;
 
 #define GUEST_VPTR UINT64_C(0x7004dc8308)
 #define GUEST_CTOR UINT64_C(0x7004820db0)
@@ -244,6 +273,8 @@ static int submit_packet(Movie *movie, unsigned index) {
         int status = catherine_movie_submit(movie->decoder, data, length, input->pts_us * 10);
         if (status != CATHERINE_MOVIE_OK) return status;
         movie->need_headers = false;
+        // If drain must wait for output, retry only the drain, not this packet.
+        input->length = 0;
     }
     return input->flags & MOVIE_EOS ? catherine_movie_drain(movie->decoder) : CATHERINE_MOVIE_OK;
 }
@@ -284,12 +315,17 @@ static void pump_decoder(Movie *movie) {
     }
 }
 
-static DWORD WINAPI decoder_worker(void *argument) {
+#ifdef _WIN32
+static DWORD WINAPI
+#else
+static void *
+#endif
+decoder_worker(void *argument) {
     Movie *movie = argument;
-    AcquireSRWLockExclusive(&movie->lock);
+    movie_lock(&movie->lock);
     for (;;) {
         while (movie->command == COMMAND_IDLE)
-            SleepConditionVariableSRW(&movie->work, &movie->lock, INFINITE, 0);
+            movie_wait(&movie->work, &movie->lock);
         enum Command command = movie->command;
         if (command == COMMAND_OPEN) {
             close_decoder(movie);
@@ -309,20 +345,20 @@ static DWORD WINAPI decoder_worker(void *argument) {
             close_decoder(movie);
         }
         movie->command = COMMAND_IDLE;
-        WakeConditionVariable(&movie->complete);
+        movie_signal(&movie->complete);
         if (command == COMMAND_QUIT) break;
     }
-    ReleaseSRWLockExclusive(&movie->lock);
+    movie_unlock(&movie->lock);
     return 0;
 }
 
 static void worker_call(Movie *movie, enum Command command) {
-    AcquireSRWLockExclusive(&movie->lock);
+    movie_lock(&movie->lock);
     movie->command = command;
-    WakeConditionVariable(&movie->work);
+    movie_signal(&movie->work);
     while (movie->command != COMMAND_IDLE)
-        SleepConditionVariableSRW(&movie->complete, &movie->lock, INFINITE, 0);
-    ReleaseSRWLockExclusive(&movie->lock);
+        movie_wait(&movie->complete, &movie->lock);
+    movie_unlock(&movie->lock);
 }
 
 static int configure(Cpu *cpu, Movie *movie, uint64_t md) {
@@ -339,7 +375,11 @@ static int configure(Cpu *cpu, Movie *movie, uint64_t md) {
     size_t size = avcc ? CALL(cpu, 0x7004823b70ull, avcc) : 0;
     if (!mime || strcmp(mime, "video/avc") || width < 2 || width > 4096 || height < 2 || height > 2304 ||
         ((width | height) & 1) || capacity > INPUT_LIMIT) return ST_UNSUPPORTED;
+#ifdef _WIN32
     if (!movie->worker) return ST_ERROR;
+#else
+    if (!movie->worker_started) return ST_ERROR;
+#endif
     worker_call(movie, COMMAND_CLOSE);
     if (!read_avcc(movie, data, size)) return ST_UNSUPPORTED;
     if (capacity < INPUT_DEFAULT) capacity = INPUT_DEFAULT;
@@ -505,11 +545,21 @@ static int decoder_call(Cpu *cpu, Movie *movie, uint64_t address) {
 }
 
 static void destroy(Movie *movie) {
+#ifdef _WIN32
     if (movie->worker) {
         worker_call(movie, COMMAND_QUIT);
         WaitForSingleObject(movie->worker, INFINITE);
         CloseHandle(movie->worker);
     }
+#else
+    if (movie->worker_started) {
+        worker_call(movie, COMMAND_QUIT);
+        pthread_join(movie->worker, NULL);
+    }
+    pthread_cond_destroy(&movie->complete);
+    pthread_cond_destroy(&movie->work);
+    pthread_mutex_destroy(&movie->lock);
+#endif
     for (unsigned i = 0; i < OUTPUT_COUNT; ++i) free(movie->output[i].bytes);
     free(movie->scratch);
     free(movie->input_bytes);
@@ -530,7 +580,11 @@ static bool decoder_method(uint64_t address) {
 int catherine_movie_guest_dispatch(Cpu *cpu) {
     const uint64_t address = cpu->pc, object = cpu->x[0];
     if (address == GUEST_CTOR) {
+#ifdef _WIN32
         const bool trace = GetEnvironmentVariableW(L"CATHERINE_TRACE_MOVIE", NULL, 0) != 0;
+#else
+        const bool trace = getenv("CATHERINE_TRACE_MOVIE") != NULL;
+#endif
         if (trace) {
             fprintf(stderr, "Movie %#llx constructor lr=%#llx type=%u format=%u mode=%u priority=%u\n",
                     (unsigned long long)object, (unsigned long long)cpu->x[30], (unsigned)cpu->x[1],
@@ -544,30 +598,49 @@ int catherine_movie_guest_dispatch(Cpu *cpu) {
         if (!movie) return 1;
         movie->object = object;
         movie->trace = trace;
+#ifdef _WIN32
         InitializeSRWLock(&movie->lock);
         InitializeConditionVariable(&movie->work);
         InitializeConditionVariable(&movie->complete);
         movie->worker = CreateThread(NULL, 0, decoder_worker, movie, 0, NULL);
-        AcquireSRWLockExclusive(&movies_lock);
+#else
+        if (pthread_mutex_init(&movie->lock, NULL) != 0) {
+            free(movie);
+            return 1;
+        }
+        if (pthread_cond_init(&movie->work, NULL) != 0) {
+            pthread_mutex_destroy(&movie->lock);
+            free(movie);
+            return 1;
+        }
+        if (pthread_cond_init(&movie->complete, NULL) != 0) {
+            pthread_cond_destroy(&movie->work);
+            pthread_mutex_destroy(&movie->lock);
+            free(movie);
+            return 1;
+        }
+        movie->worker_started = pthread_create(&movie->worker, NULL, decoder_worker, movie) == 0;
+#endif
+        movie_lock(&movies_lock);
         movie->next = movies;
         movies = movie;
-        ReleaseSRWLockExclusive(&movies_lock);
+        movie_unlock(&movies_lock);
         return 1;
     }
     if (!object || !decoder_method(address)) return 0;
-    AcquireSRWLockExclusive(&movies_lock);
+    movie_lock(&movies_lock);
     Movie **slot = &movies;
     while (*slot && (*slot)->object != object) slot = &(*slot)->next;
     Movie *movie = *slot;
     uint64_t *guest = (void *)(uintptr_t)object;
     if (!movie && (guest[0] != GUEST_VPTR || guest[1] != GUEST_FAILURE)) {
-        ReleaseSRWLockExclusive(&movies_lock);
+        movie_unlock(&movies_lock);
         return 0;
     }
     if (address == GUEST_D0 || address == GUEST_D2) {
         if (movie) *slot = movie->next;
         guest[1] = 0;
-        ReleaseSRWLockExclusive(&movies_lock);
+        movie_unlock(&movies_lock);
         if (movie) destroy(movie);
         guest_call_original(cpu, address);
         return 1;
@@ -586,7 +659,7 @@ int catherine_movie_guest_dispatch(Cpu *cpu) {
             if (movie->owed & (1u << i)) events[i] = movie->events[i];
         movie->owed = 0;
     } else cpu->x[0] = ST_ERROR;
-    ReleaseSRWLockExclusive(&movies_lock);
+    movie_unlock(&movies_lock);
     for (unsigned i = 0; i < ARRAYSIZE(events); ++i)
         if (events[i]) CALL(cpu, 0x700532e770ull, events[i]);
     return 1;

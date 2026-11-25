@@ -1,4 +1,10 @@
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include "C:/catherine/recomp/Source/platform/guest_host.h"
+#include <fcntl.h>
+#include <linux/fs.h>
+#endif
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>

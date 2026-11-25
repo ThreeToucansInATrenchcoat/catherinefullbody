@@ -4,10 +4,22 @@
 #include <cstdint>
 #include <string>
 
+#ifdef _WIN32
 #include <windows.h>
+#endif
 #include "catherine_keyboard.h"
 
 namespace catherine {
+
+#ifdef _WIN32
+using HostDisplay = HMONITOR;
+#else
+struct HostDisplay {
+    int width = 1280;
+    int height = 720;
+    int hz = 60;
+};
+#endif
 
 inline constexpr int kAutoFps = -1;
 inline constexpr int kUnlimitedFps = 0;
@@ -57,8 +69,11 @@ bool end_config_settings();
 int requested_anti_aliasing();
 int button_prompt_style();
 bool store_host_settings(const HostSettings& value, bool explicit_fps = false);
-unsigned display_render_height(HMONITOR monitor, bool fullscreen, int window_height);
-void update_display_mode(HMONITOR monitor);
+unsigned display_render_height(HostDisplay monitor, bool fullscreen, int window_height);
+void update_display_mode(HostDisplay monitor);
+#ifndef _WIN32
+void initialize_display_mode(HostDisplay monitor, bool fullscreen, int window_height);
+#endif
 int step_fps_limit(int effective, int direction);
 uint64_t remap_pad_buttons(uint64_t buttons);
 uint64_t pad_binding_map();

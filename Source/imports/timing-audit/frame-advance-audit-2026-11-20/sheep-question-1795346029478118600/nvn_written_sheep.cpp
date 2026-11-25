@@ -22,10 +22,12 @@
 #include <chrono>
 #include <mutex>
 
-#if defined(_WIN32) && defined(__x86_64__)
+#if defined(__x86_64__) && (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__)))
+#ifdef _WIN32
 #include <windows.h>
-#include <immintrin.h>
 #include <intrin.h>
+#endif
+#include <immintrin.h>
 #endif
 
 #include "nvn_draw_state.h"
@@ -276,7 +278,7 @@ It containing(const uint8_t* p, uint64_t size, uint64_t padded, uint64_t align, 
     return it;
 }
 
-#if defined(_WIN32) && defined(__x86_64__)
+#if defined(__x86_64__) && (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__)))
 
 // CPU computations may read prior CPU results, but they cannot read a copy whose GPU writer has not run yet.
 const uint8_t* cpu_view(const uint8_t* p, uint64_t size) {
@@ -401,10 +403,14 @@ bool cpu_compute_opt_in(const char* name) {
     static const bool compatible = [] {
         VkPhysicalDeviceProperties props{};
         p_vkGetPhysicalDeviceProperties(vk_physical(), &props);
+#ifdef _WIN32
         int cpu[4];
         __cpuid(cpu, 1);
-        return props.vendorID == 0x10de && props.deviceID == 0x2b85 &&
-               IsProcessorFeaturePresent(PF_AVX_INSTRUCTIONS_AVAILABLE) && (cpu[2] & (1 << 12));
+        const bool simd = IsProcessorFeaturePresent(PF_AVX_INSTRUCTIONS_AVAILABLE) && (cpu[2] & (1 << 12));
+#else
+        const bool simd = __builtin_cpu_supports("avx") && __builtin_cpu_supports("fma");
+#endif
+        return props.vendorID == 0x10de && props.deviceID == 0x2b85 && simd;
     }();
     return compatible;
 }
@@ -471,9 +477,20 @@ bool canonical_skin_nan_opt_in(const char* name) {
     static const bool compatible = [] {
         VkPhysicalDeviceProperties props{};
         p_vkGetPhysicalDeviceProperties(vk_physical(), &props);
-        return props.vendorID == 0x10de && props.deviceID == 0x2b85 && props.driverVersion == 0x9b404000u;
+        return props.vendorID == 0x10de && props.deviceID == 0x2b85 &&
+#ifdef _WIN32
+               props.driverVersion == 0x9b404000u;
+#else
+               props.driverVersion == 0x9b124100u;
+#endif
     }();
+#ifdef _WIN32
     return compatible;
+#else
+    // Only the tangent shader's NaN result has been compared bitwise against
+    // the Vulkan output on this Linux driver.
+    return compatible && std::strcmp(name, "NX_CPU_SKIN_NAN_TANGENTS") == 0;
+#endif
 }
 
 using SkinJoints = std::array<uint32_t, 4>;
@@ -697,7 +714,12 @@ bool run_cpu_skin_fused80(const uint8_t* source, const std::vector<SkinMatrix>& 
 #include "skin_async_validate.inc"
 #include "skin_async_compact_kernel.inc"
 #include "skin_async_jobs.inc"
-
+#else
+bool async_skin_enabled() { return false; }
+void wait_async_skin_region(Region&, SkinJoinReason) {}
+void wait_async_skin_jobs(SkinJoinReason) {}
+void async_skin_log() {}
+void trim_async_skin_arena() {}
 #endif
 
 // Read-only inspection differs from cpu_view: an upload already read by the
@@ -834,7 +856,7 @@ const uint8_t* block20_gpu_palette(const uint8_t* palette,uint64_t bytes,const S
 #include "zero_morph_checks.inc"
 
 bool try_cpu_morph(const ShaderInfo& cs, uint32_t x, uint32_t y, uint32_t z) {
-#if defined(_WIN32) && defined(__x86_64__)
+#if defined(__x86_64__) && (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__)))
     static const bool enabled = cpu_compute_opt_in("NX_CPU_MORPH");
     if (!enabled) return false;
     const MorphKernel* kernel = morph_kernel(cs);
@@ -919,7 +941,7 @@ bool try_cpu_morph(const ShaderInfo& cs, uint32_t x, uint32_t y, uint32_t z) {
 }
 
 bool try_cpu_skin(const ShaderInfo& cs, uint32_t x, uint32_t y, uint32_t z) {
-#if defined(_WIN32) && defined(__x86_64__)
+#if defined(__x86_64__) && (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__)))
     static const bool enabled = cpu_compute_opt_in("NX_CPU_SKIN");
     if (!enabled) return false;
     static CpuShaderSignature regular{"eb49fe48c6f84ebf", 0xda83f468f5fb7ec9ull};
@@ -1092,7 +1114,7 @@ void written_pose_dispatch_complete(const ShaderInfo& cs, uint32_t groups_x, boo
         const Range& args = g_state.uniforms[5][0];
         const uint8_t* arg_bytes = args.address && args.size >= 4 ? guest_bytes(args.address) : nullptr;
         // GPU-dependent counts cannot establish an exact produced prefix.
-#if defined(_WIN32) && defined(__x86_64__)
+#if defined(__x86_64__) && (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__)))
         if (arg_bytes) arg_bytes = cpu_view(arg_bytes, 4);
 #else
         if (arg_bytes && written_overlaps(arg_bytes, 4)) arg_bytes = nullptr;
@@ -1366,6 +1388,7 @@ std::vector<WriteBack> written_take() {
     std::vector<WriteBack> v;
     v.reserve(g_regions.size());
     for (auto& [p, r] : g_regions) v.push_back({r.up.ptr, const_cast<uint8_t*>(p), r.size, r.before, !r.gpu_written});
+#if defined(__x86_64__) && (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__)))
     if (mode107() == 2) {  // cmd107 verify: a guest write into a region since its snapshot
         static uint64_t regions107 = 0, changed107 = 0;
         for (const WriteBack& x : v)
@@ -1378,6 +1401,7 @@ std::vector<WriteBack> written_take() {
             log("cmd107 verify: %llu host-ready regions checked, %llu had guest bytes changed since their snapshot",
                 (unsigned long long)regions107, (unsigned long long)changed107);
     }
+#endif
     for (const WriteBack& w : v) g_verified_skin_outputs.seal_write_back(w.from, w.to, w.size);
     clear_regions();
     return v;
@@ -1392,7 +1416,9 @@ void written_reset() {
 }
 
 void written_log() {
+#if defined(__x86_64__) && (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__)))
     skin_repeat_joints::report();
+#endif
     zero_morph_log();
     async_skin_log();
     skin_mirror_log();
@@ -1421,7 +1447,7 @@ void written_log() {
             log("nvn: CPU skin canonical NaN position vertices %llu", (unsigned long long)g_skin_nan_positions);
         g_skin_seen = g_skin_done = g_skin_vertices = g_skin_nan_vertices = g_skin_nan_positions = 0;
     }
-#if defined(_WIN32) && defined(__x86_64__)
+#if defined(__x86_64__) && (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__)))
     if (trace_skin_rejection_enabled()) log_skin_rejections();
 #endif
 }
@@ -1430,7 +1456,7 @@ void written_log() {
 
 namespace nx::nvn {
 
-#if defined(_WIN32) && defined(__x86_64__)
+#if defined(__x86_64__) && (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__)))
 namespace {
 
 // A masked dword store never writes unchanged lanes: the guest may have updated them after our snapshot.
@@ -1486,10 +1512,15 @@ void apply_write_back(const WriteBack& w) {
     }
     const uint8_t* was = w.before->data();
     uint64_t k = 0;
-#if defined(_WIN32) && defined(__x86_64__)
+#if defined(__x86_64__) && (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__)))
     static const bool simd = [] {
         const char* e = std::getenv("NX_CPU_SIMD_WRITEBACK");
-        return e && e[0] == '1' && IsProcessorFeaturePresent(PF_AVX2_INSTRUCTIONS_AVAILABLE);
+#ifdef _WIN32
+        const bool available = IsProcessorFeaturePresent(PF_AVX2_INSTRUCTIONS_AVAILABLE);
+#else
+        const bool available = __builtin_cpu_supports("avx2");
+#endif
+        return e && e[0] == '1' && available;
     }();
     if (simd && w.host_ready) k = apply_host_diff80(w, was);
 #endif
@@ -1515,10 +1546,15 @@ static void write_back_diff_serial(const WriteBack& w) {
     }
     const uint8_t* was = w.before->data();
     uint64_t k = 0;
-#if defined(_WIN32) && defined(__x86_64__)
+#if defined(__x86_64__) && (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__)))
     static const bool simd = [] {
         const char* e = std::getenv("NX_CPU_SIMD_WRITEBACK");
-        return e && e[0] == '1' && IsProcessorFeaturePresent(PF_AVX2_INSTRUCTIONS_AVAILABLE);
+#ifdef _WIN32
+        const bool available = IsProcessorFeaturePresent(PF_AVX2_INSTRUCTIONS_AVAILABLE);
+#else
+        const bool available = __builtin_cpu_supports("avx2");
+#endif
+        return e && e[0] == '1' && available;
     }();
     if (simd && w.host_ready) k = apply_host_diff(w, was);
 #endif

@@ -7,7 +7,12 @@ extern uint64_t host_audio_played_samples(void);
 extern int host_audio_flush(void);
 extern void host_audio_set_volume(float volume);
 
+#ifdef _WIN32
 static INIT_ONCE audio_once = INIT_ONCE_STATIC_INIT;
+#else
+static pthread_mutex_t audio_init_lock = PTHREAD_MUTEX_INITIALIZER;
+static int audio_initialized;
+#endif
 static SRWLOCK audio_lock = SRWLOCK_INIT;
 static uint64_t completed_audio[32];
 static unsigned completed_count, audio_pending_count;
@@ -22,16 +27,21 @@ static void audio_release(void *tag) {
     ReleaseSRWLockExclusive(&audio_lock);
 }
 
-static BOOL CALLBACK audio_init(PINIT_ONCE once, PVOID parameter, PVOID *context) {
-    (void)once;
-    (void)context;
-    const uint32_t channels = (uint32_t)(uintptr_t)parameter;
+static void audio_init_channels(uint32_t channels) {
     if (host_audio_open(audio_release, channels)) {
         audio_device_channels = channels;
         host_audio_set_running(0);
     }
+}
+
+#ifdef _WIN32
+static BOOL CALLBACK audio_init(PINIT_ONCE once, PVOID parameter, PVOID *context) {
+    (void)once;
+    (void)context;
+    audio_init_channels((uint32_t)(uintptr_t)parameter);
     return TRUE;
 }
+#endif
 
 static int audio_buffer_access(uint64_t address, uint64_t size, int writable) {
     const uint64_t guest_limit = 1ull << 39;
@@ -94,12 +104,21 @@ static int audio_pcm(const uint32_t *message, unsigned descriptor, const void **
 
 static void audio_open_device(uint32_t rate, uint32_t channels) {
     const int compatible = rate == 48000 && (channels == 2 || channels == 6);
+#ifdef _WIN32
     if (compatible) InitOnceExecuteOnce(&audio_once, audio_init, (void *)(uintptr_t)channels, NULL);
+#else
+    pthread_mutex_lock(&audio_init_lock);
+    if (compatible && !audio_initialized) {
+        audio_init_channels(channels);
+        audio_initialized = 1;
+    }
+    pthread_mutex_unlock(&audio_init_lock);
+#endif
     const int available = compatible && audio_device_channels == channels;
     InterlockedExchange(&audio_native, available);
     InterlockedExchange(&audio_state, 1);
     printf("Audio output initialized %s (%u Hz, %u channels, PCM16)\n",
-           available ? "with XAudio2" : "in silent mode", rate, channels);
+           available ? "with host audio" : "in silent mode", rate, channels);
 }
 
 static unsigned audio_active_buffers(void) {

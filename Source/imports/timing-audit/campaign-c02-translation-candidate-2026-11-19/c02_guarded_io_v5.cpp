@@ -1,3 +1,4 @@
+#ifdef _WIN32
 #include "c02_guarded_read.h"
 #include <cstring>
 #include <immintrin.h>
@@ -71,3 +72,27 @@ __declspec(noinline) bool write(uint64_t destination,const void* source,size_t b
   _mm_setcsr(incoming);return result;
 }
 } // namespace c02_bridge::direct
+
+#else
+#include "c02_guarded_io_v5.h"
+#include "../../../platform/host_memory.h"
+#include <cstdint>
+
+bool c02_bridge::direct::read(uint64_t source, void* destination, size_t bytes) {
+    if (!source || (!destination && bytes) || bytes > UINTPTR_MAX - source ||
+        bytes > UINTPTR_MAX - reinterpret_cast<uintptr_t>(destination)) return false;
+    return catherine_host_read(reinterpret_cast<const void*>(source), destination, bytes);
+}
+
+bool c02_bridge::direct::write(uint64_t destination, const void* source, size_t bytes) {
+    const uintptr_t input = reinterpret_cast<uintptr_t>(source);
+    if (!destination || (!source && bytes) || bytes > UINTPTR_MAX - destination ||
+        bytes > UINTPTR_MAX - input) return false;
+    if (!bytes) return true;
+    if (destination < input + bytes && input < destination + bytes) return false;
+    const iovec local = {const_cast<void*>(source), bytes};
+    const iovec remote = {reinterpret_cast<void*>(destination), bytes};
+    const long transferred = syscall(SYS_process_vm_writev, getpid(), &local, 1UL, &remote, 1UL, 0UL);
+    return transferred >= 0 && static_cast<size_t>(transferred) == bytes;
+}
+#endif

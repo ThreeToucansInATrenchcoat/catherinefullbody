@@ -10,7 +10,6 @@
 #include <array>
 #include <filesystem>
 #include <fstream>
-#include <windows.h>
 
 namespace nx::nvn {
 using namespace nx::vk;

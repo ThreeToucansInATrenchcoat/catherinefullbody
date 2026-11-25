@@ -16,7 +16,11 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <pthread.h>
+#endif
 
 namespace nx::nvn::parallel80 {
 
@@ -48,7 +52,7 @@ public:
         Job job{fn, ctx, chunks};
         active_.store(&job, std::memory_order_seq_cst);
         generation_.fetch_add(1, std::memory_order_seq_cst);
-        WakeByAddressAll(&generation_);
+        notify_helpers();
         work(job, false);
         while (job.done.load(std::memory_order_acquire) != chunks) _mm_pause();
         active_.store(nullptr, std::memory_order_seq_cst);
@@ -72,7 +76,7 @@ public:
         async_pending_.store(true, std::memory_order_seq_cst);
         active_.store(&async_, std::memory_order_seq_cst);
         generation_.fetch_add(1, std::memory_order_seq_cst);
-        WakeByAddressAll(&generation_);
+        notify_helpers();
     }
     bool complete() const {
         return !async_pending_.load(std::memory_order_acquire) ||
@@ -111,9 +115,19 @@ private:
         const unsigned hw = std::thread::hardware_concurrency();
         helpers_ = hw >= 6 ? unsigned(setting("CATHERINE_PARALLEL80_HELPERS", 3, 0, 8)) : 0;
         spin_ = setting("CATHERINE_PARALLEL80_SPIN", 1000, 0, 100000);
+#ifdef _WIN32
         priority_ = setting("CATHERINE_PARALLEL80_PRIORITY", THREAD_PRIORITY_BELOW_NORMAL, -2, 2);
         pcore_ = setting("CATHERINE_PARALLEL80_PCORE", 0, 0, 1) != 0;
+#endif
         for (unsigned k = 0; k < helpers_; ++k) std::thread([this] { loop(); }).detach();
+    }
+
+    void notify_helpers() {
+#ifdef _WIN32
+        WakeByAddressAll(&generation_);
+#else
+        generation_.notify_all();
+#endif
     }
 
     static void work(Job& j, bool helper) {
@@ -127,16 +141,24 @@ private:
     }
 
     void loop() {
+#ifdef _WIN32
         SetThreadDescription(GetCurrentThread(), L"nvn parallel80");
         SetThreadPriority(GetCurrentThread(), priority_);
         if (pcore_) pin_performance_cores();
-        uint64_t seen = generation_.load(std::memory_order_seq_cst);
+#else
+        pthread_setname_np(pthread_self(), "nvn parallel80");
+#endif
+        uint64_t seen = 0;
         for (;;) {
             uint64_t now = seen;
             for (int spin = 0; spin < spin_ && (now = generation_.load(std::memory_order_seq_cst)) == seen; ++spin)
                 _mm_pause();
             while (now == seen) {
+#ifdef _WIN32
                 WaitOnAddress(&generation_, &seen, sizeof seen, INFINITE);
+#else
+                generation_.wait(seen, std::memory_order_seq_cst);
+#endif
                 now = generation_.load(std::memory_order_seq_cst);
             }
             seen = now;
@@ -148,6 +170,7 @@ private:
 
     // perf 2026-11-22: CATHERINE_PARALLEL80_PCORE=1 keeps helpers on the highest efficiency class (P-cores) and
     // unthrottled, like plat::perf_hint_thread does for the frame threads. Scheduling only; results are unchanged.
+#ifdef _WIN32
     static void pin_performance_cores() {
         THREAD_POWER_THROTTLING_STATE throttling{};
         throttling.Version = THREAD_POWER_THROTTLING_CURRENT_VERSION;
@@ -176,9 +199,14 @@ private:
         std::free(buffer);
     }
 
+#endif
+
     unsigned helpers_ = 0;
+    int spin_ = 0;
+#ifdef _WIN32
     bool pcore_ = false;
-    int spin_ = 0, priority_ = 0;
+    int priority_ = 0;
+#endif
     alignas(64) std::atomic<Job*> active_{nullptr};
     alignas(64) std::atomic<uint32_t> users_{0};
     alignas(64) std::atomic<uint64_t> generation_{0};

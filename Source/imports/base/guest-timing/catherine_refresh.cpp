@@ -5,6 +5,11 @@
 #include <cwchar>
 #include <charconv>
 #include <fstream>
+#include <filesystem>
+#ifndef _WIN32
+#include <cerrno>
+#include <unistd.h>
+#endif
 #include <map>
 #include <optional>
 #include <sstream>
@@ -77,7 +82,17 @@ struct DisplayMode {
     int height = 720;
 };
 
-DisplayMode query_display_mode(HMONITOR monitor) {
+HostDisplay primary_display() {
+#ifdef _WIN32
+    return MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY);
+#else
+    // The window backend updates this once it has selected a display.
+    return {};
+#endif
+}
+
+DisplayMode query_display_mode(HostDisplay monitor) {
+#ifdef _WIN32
     MONITORINFOEXW info{};
     info.cbSize = sizeof info;
     DEVMODEW mode{};
@@ -92,6 +107,9 @@ DisplayMode query_display_mode(HMONITOR monitor) {
         }
     }
     return result;
+#else
+    return {monitor.hz, monitor.width, monitor.height};
+#endif
 }
 
 int auto_height(const DisplayMode& display) {
@@ -100,12 +118,18 @@ int auto_height(const DisplayMode& display) {
     return 720;
 }
 
-std::wstring settings_path() {
+std::filesystem::path settings_path() {
+#ifdef _WIN32
     wchar_t path[32768];
     const DWORD size = GetModuleFileNameW(nullptr, path, static_cast<DWORD>(std::size(path)));
     if (!size || size >= std::size(path)) return {};
     const wchar_t* filename = std::wcsrchr(path, L'\\');
     return filename ? std::wstring(path, size_t(filename + 1 - path)) + L"catherine-settings.ini" : std::wstring{};
+#else
+    std::error_code error;
+    const auto executable = std::filesystem::read_symlink("/proc/self/exe", error);
+    return error ? std::filesystem::path{} : executable.parent_path() / "catherine-settings.ini";
+#endif
 }
 
 using Ini = std::map<std::string, std::map<std::string, std::string>>;
@@ -121,19 +145,32 @@ std::string trim(std::string_view text) {
         std::string(text.substr(first, text.find_last_not_of(" \t\r\n") - first + 1));
 }
 
-Ini read_ini(const std::wstring& path) {
-    std::ifstream file(path.c_str(), std::ios::binary);
+Ini read_ini(const std::filesystem::path& path) {
+    std::ifstream file(path, std::ios::binary);
     if (!file) return {};
     std::string bytes{std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
     // Older Win32 profile readers also accepted UTF-16LE INIs saved by Notepad.
     if (bytes.starts_with("\xff\xfe")) {
-        std::wstring wide;
+#ifdef _WIN32
+        using IniCodeUnit = wchar_t;
+#else
+        using IniCodeUnit = char16_t;
+#endif
+        std::basic_string<IniCodeUnit> wide;
         for (size_t i = 2; i + 1 < bytes.size(); i += 2)
-            wide.push_back(wchar_t(static_cast<unsigned char>(bytes[i]) |
+            wide.push_back(IniCodeUnit(static_cast<unsigned char>(bytes[i]) |
                                    (unsigned(static_cast<unsigned char>(bytes[i + 1])) << 8)));
+#ifdef _WIN32
         const int size = WideCharToMultiByte(CP_UTF8, 0, wide.data(), int(wide.size()), nullptr, 0, nullptr, nullptr);
         bytes.resize(size);
         WideCharToMultiByte(CP_UTF8, 0, wide.data(), int(wide.size()), bytes.data(), size, nullptr, nullptr);
+#else
+        try {
+            bytes = std::filesystem::path(wide).string();
+        } catch (const std::filesystem::filesystem_error&) {
+            return {};
+        }
+#endif
     }
     std::istringstream input(std::move(bytes));
     Ini ini;
@@ -336,7 +373,7 @@ NativeValues load_native(const Ini& ini) {
     return values;
 }
 
-bool write_settings(const std::wstring& path, const HostSettings& value, bool devmenu, const NativeValues& native) {
+bool write_settings(const std::filesystem::path& path, const HostSettings& value, bool devmenu, const NativeValues& native) {
     if (path.empty()) return false;
     std::ostringstream out;
     out << "[Catherine]\nVersion=7\ndevmenu=" << (devmenu ? "true" : "false")
@@ -369,8 +406,9 @@ bool write_settings(const std::wstring& path, const HostSettings& value, bool de
             out << actions[i] << '=' << pad_buttons[(profile.bindings >> (i * 4)) & 15] << '\n';
     }
     const auto content = out.str();
+#ifdef _WIN32
     const auto length = static_cast<DWORD>(content.size());
-    const std::wstring temporary = path + L"." + std::to_wstring(GetCurrentProcessId()) + L".tmp";
+    const std::wstring temporary = path.native() + L"." + std::to_wstring(GetCurrentProcessId()) + L".tmp";
     HANDLE file = CreateFileW(temporary.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS,
                               FILE_ATTRIBUTE_NORMAL, nullptr);
     if (file == INVALID_HANDLE_VALUE) return false;
@@ -382,15 +420,32 @@ bool write_settings(const std::wstring& path, const HostSettings& value, bool de
                                 MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) return true;
     DeleteFileW(temporary.c_str());
     return false;
+#else
+    std::string temporary = path.native() + ".XXXXXX";
+    const int file = mkstemp(temporary.data());
+    if (file < 0) return false;
+    size_t written = 0;
+    while (written < content.size()) {
+        const ssize_t count = write(file, content.data() + written, content.size() - written);
+        if (count < 0 && errno == EINTR) continue;
+        if (count <= 0) break;
+        written += static_cast<size_t>(count);
+    }
+    const bool complete = written == content.size() && fsync(file) == 0;
+    const bool closed = close(file) == 0;
+    if (complete && closed && rename(temporary.c_str(), path.c_str()) == 0) return true;
+    unlink(temporary.c_str());
+    return false;
+#endif
 }
 
-const Ini& initial_ini(const std::wstring& path) {
+const Ini& initial_ini(const std::filesystem::path& path) {
     static const Ini ini = read_ini(path);
     return ini;
 }
 
 struct RuntimeSettings {
-    const std::wstring path = settings_path();
+    const std::filesystem::path path = settings_path();
     std::mutex mutex;
     HostSettings values = load_settings(initial_ini(path));
     HostSettings config_original;
@@ -399,9 +454,9 @@ struct RuntimeSettings {
     HostSettings bindings_draft;
     bool bindings_editing = false;
     unsigned binding_player = 0;
-    DisplayMode display = query_display_mode(MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY));
-    const unsigned internal_height = display_render_height(
-        MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY), values.fullscreen, values.window_height);
+    DisplayMode display = query_display_mode(primary_display());
+    unsigned internal_height = display_render_height(
+        primary_display(), values.fullscreen, values.window_height);
     std::atomic<uint64_t> bindings{values.bindings};
     std::atomic<int> anti_aliasing{values.anti_aliasing};
     std::atomic<int> button_prompts{values.button_prompts};
@@ -576,7 +631,7 @@ uint64_t keyboard_binding_version(unsigned player){
     auto& state=runtime();return (player?state.player2_keyboard_version:state.keyboard_version).load(std::memory_order_acquire);
 }
 
-unsigned display_render_height(HMONITOR monitor, bool fullscreen, int window_height) {
+unsigned display_render_height(HostDisplay monitor, bool fullscreen, int window_height) {
     const int native_height = auto_height(query_display_mode(monitor));
     return unsigned(!fullscreen && window_height && window_height <= native_height ? window_height : native_height);
 }
@@ -586,13 +641,23 @@ int requested_anti_aliasing() {
 }
 int button_prompt_style(){return runtime().button_prompts.load(std::memory_order_acquire);}
 
-void update_display_mode(HMONITOR monitor) {
+void update_display_mode(HostDisplay monitor) {
     const DisplayMode display = query_display_mode(monitor);
     auto& state = runtime();
     std::lock_guard lock(state.mutex);
     state.display = display;
     state.publish_rates();
 }
+
+#ifndef _WIN32
+void initialize_display_mode(HostDisplay monitor, bool fullscreen, int window_height) {
+    auto& state = runtime();
+    std::lock_guard lock(state.mutex);
+    state.display = query_display_mode(monitor);
+    state.internal_height = display_render_height(monitor, fullscreen, window_height);
+    state.publish_rates();
+}
+#endif
 
 int step_fps_limit(int effective, int direction) {
     if (direction > 0) {

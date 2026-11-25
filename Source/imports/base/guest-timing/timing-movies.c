@@ -1,5 +1,5 @@
 #define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "../../../platform/host_memory.h"
 #include <stdatomic.h>
 #include <stdint.h>
 #include "include/catherine_refresh.h"
@@ -17,10 +17,9 @@ int catherine_fullscreen_movie_active(void) {
 
     uint64_t task = 0;
     uint32_t state = 7;
-    HANDLE self = GetCurrentProcess();
-    if (!ReadProcessMemory(self, (const void *)(uintptr_t)0x7000d063a8ull, &task, sizeof task, NULL) || !task)
+    if (!catherine_host_read((const void *)(uintptr_t)0x7000d063a8ull, &task, sizeof task) || !task)
         return 0;
-    return ReadProcessMemory(self, (const void *)(uintptr_t)0x7000d0637cull, &state, sizeof state, NULL) &&
+    return catherine_host_read((const void *)(uintptr_t)0x7000d0637cull, &state, sizeof state) &&
            state <= 6;
 }
 

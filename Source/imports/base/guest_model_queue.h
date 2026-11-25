@@ -3,6 +3,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef _WIN32
+#include "C:/catherine/recomp/Source/platform/guest_host.h"
+#endif
 
 enum { MODEL_QUEUE_CAPACITY = 10240, MODEL_SEMAPHORE_COUNT = 0x14, MODEL_SEMAPHORE_SIZE = 0x28 };
 

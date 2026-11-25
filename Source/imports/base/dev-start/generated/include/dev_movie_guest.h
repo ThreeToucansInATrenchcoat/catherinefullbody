@@ -1,4 +1,5 @@
 #pragma once
+#include "../../../../../platform/host_clock.h"
 #include "dev_loader_native.h"
 
 void f_700009da10(Cpu *);
@@ -48,7 +49,7 @@ static void dev_standalone_start(uint32_t target)
     dev_standalone_target = target;
     dev_standalone_started = 0;
     dev_standalone_reported = 0;
-    dev_standalone_deadline = GetTickCount64() + 120000;
+    dev_standalone_deadline = catherine_host_milliseconds() + 120000;
     catherine_dev_loader_progress(CATHERINE_DEV_TRANSITION, "Opening the selected cutscene.");
 }
 
@@ -57,7 +58,7 @@ static int dev_standalone_tick(Cpu *cpu, uint64_t owner)
     if (!dev_standalone_target || (LD8(owner) & 1)) return 0;
     const int root = (int32_t)LD32(owner + 4);
     if (!dev_standalone_reported && !catherine_dev_loader_pending() &&
-        GetTickCount64() >= dev_standalone_deadline) {
+        catherine_host_milliseconds() >= dev_standalone_deadline) {
         dev_standalone_reported=1;
         catherine_dev_loader_finish_request(dev_standalone_request,-53, "The selected cutscene did not begin playback in time.");
     }
