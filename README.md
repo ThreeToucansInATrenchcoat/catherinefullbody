@@ -1,6 +1,6 @@
 # Catherine: Full Body PC Port
 
-Based on the Switch version of the game, there was already a recomp of this game available that supports the PS4 version but that version is still locked to 30fps and is more of a no-frill type of recomp. I'm still going to thank and appreciate its existence though, because this was what got me interested in the game again.
+Based on the Switch version of the game, there was a shadps4 wrapper of this game available but that version is still locked to 30fps and is more of a no-frill type of recomp. I'm still going to thank and appreciate its existence though, because this was what got me interested in the game again.
 
 I will say this has been a way more complicated port than anything else I've released so I'm less confident about this one.
 
