@@ -69,10 +69,19 @@ Select the single `ExtractedGame` folder when setup asks for the game files. Thi
 ```text
 ExtractedGame/
 ├── exefs/
+│   ├── main
+│   ├── sdk
+│   └── ...
 └── romfs/
+    └── data/
+        ├── Base.cpk
+        ├── Model.cpk
+        ├── movie/
+        ├── movie2/
+        └── ...
 ```
 
-Keep all files inside both folders. Select `ExtractedGame` during setup; no separate update folder is needed. Setup reads the files in place and builds `assets.pak`, then generates the Vulkan shaders.
+Keep all files inside both folders; `...` represents contents omitted from this example. Select `ExtractedGame` during setup; no separate update folder is needed. Setup reads the files in place and builds `assets.pak`, then generates the Vulkan shaders.
 
 ## Compile from source
 
