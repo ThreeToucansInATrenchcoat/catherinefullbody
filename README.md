@@ -89,44 +89,33 @@ Select `ExtractedGame`, keeping all files inside it. `...` means other files are
 
 ## Compile from source
 
-Clone this repository and run the build commands from the checkout root. Original game files are only needed when setting up the built game, not when compiling it.
-
-### Windows
-
-Install:
-
-- Python 3 and the .NET 10 SDK.
-- Visual Studio with the **Desktop development with C++** workload, LLVM/Clang tools, and the Windows SDK.
-- The Vulkan SDK, including its headers.
-
-**Windows source builds currently require the existing developer build environment.** The build recipe still contains machine-specific paths; automatic toolchain and SDK detection has not been implemented yet. These are not portable fresh-checkout instructions. For now, use a Windows release build or compile from source on Linux.
-
-In an already configured Windows developer checkout, run this from the checkout root in a Visual Studio Developer PowerShell:
-
-```powershell
-New-Item -ItemType Directory -Force Build\obj | Out-Null
-python build.py --jobs 12
-```
-
-The executable is `Build\catherine.exe`. Build logs are written to `Build\logs`.
+Clone the repository and run these commands from its folder. Game files are not needed to compile.
 
 ### Linux
 
-Use an x86-64-v3-capable Linux system. Install Python 3, Clang, LLD, the .NET 10 SDK, pkg-config, and development files for Vulkan, SDL2, Cairo, OpenSSL, and FFmpeg (`libavcodec`, `libavutil`, and `libswscale`). The checkout can be in any directory; the Linux build script translates the recorded Windows project paths automatically.
+Install Python 3, Clang, LLD, .NET 10 SDK, pkg-config, and development packages for Vulkan, SDL2, Cairo, OpenSSL and FFmpeg (`libavcodec`, `libavutil`, `libswscale`). Then build and launch:
 
 ```sh
-python3 build.py --jobs 12
-```
-
-The executable is `Build/catherine`. Launch it with:
-
-```sh
+python3 build.py
 ./Build/catherine
 ```
 
-If your Vulkan headers are outside the compiler's default include path, set `CATHERINE_VULKAN_INCLUDE` to the directory containing the `vulkan` subdirectory. `CC` and `CXX` can select alternative Clang executables. Build logs are written to `Build/logs/linux`.
+Linux requires an x86-64-v3-capable CPU. `--pgo` is not supported.
 
-For first-time game setup on Linux, also install SPIRV-Tools (`spirv-as`, `spirv-dis`, and `spirv-val`) and either KDialog or Zenity. Linux builds currently do not support `--pgo`.
+### Windows
+
+Install Python 3, .NET 10 SDK, Vulkan SDK, and Visual Studio with the C++ desktop workload, LLVM/Clang tools and Windows SDK.
+
+**Windows compilation currently requires the configured developer environment.** For other machines, use the Windows release or build on Linux.
+
+In the configured checkout, open Developer PowerShell and run:
+
+```powershell
+New-Item -ItemType Directory -Force Build\obj | Out-Null
+python build.py
+```
+
+The executable is `Build\catherine.exe`.
 
 ## Planned
 
