@@ -8,10 +8,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <chrono>
-#include <cstdio>
-#include "dlss_backend.h"
-#include "../../../base/guest-timing/include/catherine_settings_win.h"
 #if defined(_WIN32)
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -28,15 +24,6 @@ struct Command {float x,y,w,h;uint32_t color;std::string text;};
 static std::vector<Command> commands;
 static std::vector<unsigned char> pixels;
 static uint64_t last_hash=0,version=0;
-static double measured_fps=0,displayed_fps=0;
-static uint64_t previous_presents=0;
-static unsigned counted_frames=0;
-static auto fps_epoch=std::chrono::steady_clock::now();
-static void frame_tick(){
- const auto now=std::chrono::steady_clock::now();++counted_frames;
- const double elapsed=std::chrono::duration<double>(now-fps_epoch).count();
- if(elapsed>=0.5){measured_fps=counted_frames/elapsed;const auto presents=nx::nvn::dlss_presented_count();displayed_fps=(presents-previous_presents)/elapsed;previous_presents=presents;counted_frames=0;fps_epoch=now;}
-}
 static void rect(void*,float x,float y,float w,float h,uint32_t color){commands.push_back({x,y,w,h,color,{}});}
 static void text(void*,float x,float y,float size,const char* value,uint32_t color){commands.push_back({x,y,0,size,color,value?value:""});}
 static void blend(int x,int y,uint32_t color,unsigned coverage=255){
@@ -79,13 +66,9 @@ static Glyph make_glyph(const std::string& value,int size){
 #endif
 static bool refresh(){
  commands.clear();
- if(catherine_dev_overlay_visible())catherine_dev_overlay_frame(nullptr,rect,text);
- if(catherine::host_settings().show_fps){
-  char value[80];const bool generated=nx::nvn::dlss_generating();
-  if(generated)std::snprintf(value,sizeof(value),"%.1f FPS (%.1f rendered)",displayed_fps,measured_fps);else std::snprintf(value,sizeof(value),"%.1f FPS",measured_fps);
-  rect(nullptr,12,12,generated?410:160,40,0x000000b0);text(nullptr,22,18,26,value,0xffffffff);
- }
- if(commands.empty())return false;
+ if(!catherine_dev_overlay_visible())return false;
+ catherine_dev_overlay_frame(nullptr,rect,text);
+ if(!catherine_dev_overlay_visible())return false;
  uint64_t hash=0xcbf29ce484222325ull;
  auto add=[&](const void* p,size_t n){const auto* b=static_cast<const unsigned char*>(p);while(n--){hash^=*b++;hash*=0x100000001b3ull;}};
  for(const auto& cmd:commands){add(&cmd.x,sizeof(float)*4);add(&cmd.color,4);add(cmd.text.data(),cmd.text.size());}

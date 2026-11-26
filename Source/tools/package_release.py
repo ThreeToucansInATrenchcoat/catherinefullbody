@@ -2,18 +2,15 @@
 from pathlib import Path
 import hashlib,json,time,zipfile
 ROOT=Path(__file__).resolve().parents[2];B=ROOT/'Build'
-FILES=['GRAPHICS-LICENSES.txt','GRAPHICS-SETTINGS.txt','Catherine.exe','Catherine DEV.cmd','CatherineInterpolation.dll','open_svpflow.dll','svpflow1_vs.dll','svpflow2_vs.dll','dev-checkpoints.pak','BUILD-INFO.txt','assets-required.json','INSTALL-ASSETS.txt','ASSET-TOOLS-LICENSES.txt','CUTSCENES.txt','cutscene-catalog.json']
+FILES=['Catherine.exe','Catherine DEV.cmd','CatherineInterpolation.dll','open_svpflow.dll','svpflow1_vs.dll','svpflow2_vs.dll','dev-checkpoints.pak','BUILD-INFO.txt','assets-required.json','INSTALL-ASSETS.txt','ASSET-TOOLS-LICENSES.txt','CUTSCENES.txt','cutscene-catalog.json']
 def sha(data):return hashlib.sha256(data).hexdigest()
 def main():
- files=[B/n for n in FILES]+sorted(p for p in(B/'CathAssets').rglob('*')if p.is_file())+[B/'Streamline'/p.name for p in sorted((ROOT/'Source/vendor/streamline/runtime').iterdir())if p.is_file()];temporary=B/'Catherine-Release.zip.building'
+ files=[B/n for n in FILES]+sorted(p for p in(B/'CathAssets').rglob('*')if p.is_file());temporary=B/'Catherine-Release.zip.building'
  with zipfile.ZipFile(temporary,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=6)as z:
   for p in files:z.write(p,p.relative_to(B).as_posix())
  with zipfile.ZipFile(temporary)as z:
   assert z.testzip()is None
   assert sha(z.read('Catherine.exe'))==sha((B/'Catherine.exe').read_bytes())
-  for p in (ROOT/'Source/vendor/streamline/runtime').iterdir():
-   if p.is_file():assert z.read('Streamline/'+p.name)==p.read_bytes()
-  assert not any('/development/'in n or n.endswith('.json')and n.startswith('Streamline/')for n in z.namelist())
   for p in (ROOT/'keysource').rglob('*'):
    if p.is_file():assert z.read('CathAssets/Prompts/'+p.relative_to(ROOT/'keysource').as_posix())==p.read_bytes()
   for i,n in enumerate(['1 (2).png','2 (2).png','3.png','4.png'],1):assert z.read(f'CathAssets/Tutorials/PS5/{i}.png')==(Path('C:/Users/scott/Desktop/Old')/n).read_bytes()

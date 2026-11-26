@@ -6,7 +6,6 @@
 #include <fstream>
 #include <iostream>
 
-extern "C" unsigned catherine_upscaled_render_height(unsigned);
 using namespace catherine;
 using Game = std::array<unsigned char, 0x9b60>;
 
@@ -35,18 +34,7 @@ int main(int argc, char** argv) {
     const std::string mode = argv[1];
     auto s = host_settings();
     auto game = native_fixture();
-    if (mode == "check-upscaling") {
-        assert(s.show_fps && s.upscaler==1 && s.upscale_quality==3 && s.fsr_sharpness==80 && s.frame_generation==1 && s.frame_generation_multiplier==4);
-        const unsigned heights[]={828,720,630,540};
-        for(int quality=0;quality<4;++quality){auto option=s;option.upscale_quality=quality;assert(store_host_settings(option));assert(catherine_upscaled_render_height(1080)==heights[quality]);}
-        assert(store_host_settings(s));
-        auto invalid=s;invalid.fsr_sharpness=101;assert(!store_host_settings(invalid));
-        invalid=s;invalid.upscale_quality=4;assert(!store_host_settings(invalid));
-        invalid=s;invalid.frame_generation=2;assert(!store_host_settings(invalid));
-        invalid=s;invalid.frame_generation_multiplier=5;assert(!store_host_settings(invalid));
-    } else if (mode == "check-graphics-fallback") {
-        assert(!s.show_fps&&s.upscaler==0&&s.frame_generation==0&&s.frame_generation_multiplier==4&&s.fsr_sharpness==20&&s.upscale_quality==1);
-    } else if (mode == "check-migration") {
+    if (mode == "check-migration") {
         check_persisted(s);
         catherine_load_native_config(game.data(), 1);
         assert(game[0x2fb] == static_cast<unsigned char>(-40));
@@ -89,7 +77,6 @@ int main(int argc, char** argv) {
     } else if (mode == "check-pre6" || mode == "check-v6") {
         const auto expected = mode == "check-pre6" ? kDefaultBindings : kIdentityBindings;
         assert(s.bindings == expected && s.player2.bindings == expected && catherine_dev_enabled());
-        assert(!s.show_fps && s.upscaler==0 && s.frame_generation==0);
         catherine_load_native_config(game.data(), 1);
     } else if (mode == "migrate-install-copy") {
         // The runner provides a private copy of the legacy native system record.

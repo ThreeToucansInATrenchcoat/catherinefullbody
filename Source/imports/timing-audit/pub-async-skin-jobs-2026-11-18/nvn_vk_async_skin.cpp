@@ -3,7 +3,6 @@
 #include <mutex>
 #include "C:/catherine/recomp/Source/imports/timing-audit/perf-2026-11-22/phase_timer.h"
 #include "perf-present-capture.h"
-#include "dlss_backend.h"
 // NVN's GPU side on Vulkan (docs/NVN.md, N3): the host device, a VkImage per NVN texture the GPU touches, the
 // replay of recorded command lists, and presenting a window texture on the host swapchain.
 //
@@ -114,8 +113,7 @@ bool make_surface();
 bool init() {
     if (g_ready || g_failed) return g_ready;
     g_failed = true;  // until everything below succeeds
-    auto gipa = dlss_vulkan_loader(nullptr);
-    if(!gipa)gipa=reinterpret_cast<PFN_vkGetInstanceProcAddr>(plat::vulkan_get_instance_proc_addr());
+    auto gipa = reinterpret_cast<PFN_vkGetInstanceProcAddr>(plat::vulkan_get_instance_proc_addr());
     if (!gipa) {
         log("nvn/vk: no Vulkan loader");
         return false;
@@ -158,7 +156,6 @@ bool init() {
         return false;
     }
     VkPhysicalDeviceProperties props{};
-    dlss_adapter_selected(g_physical);
     p_vkGetPhysicalDeviceProperties(g_physical, &props);
     p_vkGetPhysicalDeviceMemoryProperties(g_physical, &g_memory);
 
@@ -204,11 +201,6 @@ bool init() {
     features.pNext = &f11;
     f11.pNext = &f13;
     void** tail = &f13.pNext;
-    // VK_NV_low_latency2 (requested by Streamline Reflex) depends on present_id.
-    VkPhysicalDevicePresentIdFeaturesKHR present_id{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_ID_FEATURES_KHR};
-    if(dlss_proxy_active()&&has_extension(dext,VK_KHR_PRESENT_ID_EXTENSION_NAME)){
-        dexts.push_back(VK_KHR_PRESENT_ID_EXTENSION_NAME);*tail=&present_id;tail=&present_id.pNext;
-    }
     VkPhysicalDeviceTimelineSemaphoreFeatures ftimeline{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES};
     if (frame_timeline_requested() && props.apiVersion >= VK_API_VERSION_1_2 && p_vkWaitSemaphores) {
         *tail = &ftimeline;
@@ -306,7 +298,6 @@ bool init() {
         device_result = p_create_device(g_physical, &dci, nullptr, &g_device);
     }
     if (!check(device_result, "vkCreateDevice")) return false;
-    dlss_device_ready(g_physical);
     init_msaa_caps();
     p_vkGetDeviceQueue(g_device, g_family, 0, &g_queue);
 
@@ -691,7 +682,6 @@ void gpu_submit(const std::vector<std::shared_ptr<CmdList>>& lists, std::shared_
         free_retired_images(frame_completed());
     }
     if (!begin(true)) return;
-    dlss_render_begin();
     draw_begin_submit();
     gpu_profile_begin(g_cb);
     zero_draws_begin_submit(g_cb);
@@ -767,7 +757,7 @@ struct Worker {
     VkSwapchainKHR swapchain = VK_NULL_HANDLE;
     uint32_t index = 0;
     VkSemaphore wait = VK_NULL_HANDLE;
-    uint64_t presents = 0;void* dlss_frame=nullptr;
+    uint64_t presents = 0;
     VkResult result = VK_SUCCESS;
 };
 Worker g_worker;
@@ -785,7 +775,7 @@ void loop() {
         VkSwapchainKHR sc = g_worker.swapchain;
         uint32_t index = g_worker.index;
         VkSemaphore wait = g_worker.wait;
-        const uint64_t presents = g_worker.presents;void* dlss_frame=g_worker.dlss_frame;
+        const uint64_t presents = g_worker.presents;
         lk.unlock();
         VkPresentInfoKHR pi{VK_STRUCTURE_TYPE_PRESENT_INFO_KHR};
         pi.waitSemaphoreCount = 1;
@@ -793,9 +783,7 @@ void loop() {
         pi.swapchainCount = 1;
         pi.pSwapchains = &sc;
         pi.pImageIndices = &index;
-        dlss_present_begin(dlss_frame);
         const VkResult r = p_vkQueuePresentKHR(g_queue, &pi);
-        dlss_present_end(dlss_frame);
 #if defined(_WIN32)
         catherine_perf::record_present(presents, int32_t(r));
 #endif
@@ -817,13 +805,13 @@ bool join(VkResult& r) {
     r = g_worker.result;
     return true;
 }
-void start(VkSwapchainKHR sc, uint32_t index, VkSemaphore wait, uint64_t presents,void* dlss_frame) {
+void start(VkSwapchainKHR sc, uint32_t index, VkSemaphore wait, uint64_t presents) {
     static std::once_flag once;
     std::call_once(once, [] { std::thread(loop).detach(); });
     VkResult ignored;
     join(ignored);
     std::lock_guard lk(g_worker.m);
-    g_worker.swapchain = sc, g_worker.index = index, g_worker.wait = wait, g_worker.presents = presents;g_worker.dlss_frame=dlss_frame;
+    g_worker.swapchain = sc, g_worker.index = index, g_worker.wait = wait, g_worker.presents = presents;
     g_worker.job = true, g_worker.busy = true;
     g_worker.cv.notify_all();
 }
@@ -835,7 +823,6 @@ void gpu_present(uint64_t texture, const int32_t* crop) {
     perf22::Scope ps_present(perf22::Present);
     plat::perf_hint_thread();  // the thread that presents takes part in the frame (perf_hint.cpp)
     std::lock_guard lk(g_gpu);
-    present_pass_frame();
     if (present_thread::on()) {  // perf 2026-11-22: the previous frame's present, and its result
         VkResult previous = VK_SUCCESS;
         if (present_thread::join(previous) && g_swapchain) {
@@ -888,7 +875,6 @@ void gpu_present(uint64_t texture, const int32_t* crop) {
     // This is a cache hit after the first enabled frame; targets retire with the swapchain.
     if (present_pass_wanted() && !present_pass_failed())
         present_pass_targets(g_sc_format, g_sc_images, g_sc_extent, g_sc_transform);
-    dlss_prepare_frame(g_cb,src,g_sc_extent.width,g_sc_extent.height,unsigned(g_sc_images.size()));
     bool drawn = src && present_pass_record(g_cb, *src, crop, index);  // nvn_present.cpp: leaves dst PRESENT_SRC
     if (src && !drawn) transition(g_cb, *src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
     if (!drawn) transition(g_cb, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
@@ -904,8 +890,7 @@ void gpu_present(uint64_t texture, const int32_t* crop) {
         p_vkCmdBlitImage(g_cb, src->image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dst.image,
                          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit, VK_FILTER_LINEAR);
     }
-    if (!drawn) transition(g_cb, dst, dlss_backbuffer_layout());
-    dlss_backbuffer_ready(dst.image,present_pass_image_view(index),g_sc_format,g_sc_extent.width,g_sc_extent.height);
+    if (!drawn) transition(g_cb, dst, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
     static uint64_t presents = 0;
     presents++;
     if (presents % 60 == 0) {
@@ -917,11 +902,9 @@ void gpu_present(uint64_t texture, const int32_t* crop) {
     }
     frame_sig_flush(presents);
     const bool due = frame_dump_due(presents);
-    GpuImage* dump_source=dlss_debug_hudless();if(!dump_source)dump_source=src;
-    bool dump = dump_source && due;
-    if (dump) transition(g_cb, *dump_source, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);  // the present pass left it sampled
-    dump = dump && frame_dump_record(g_cb, *dump_source);
-    if(dump)dlss_debug_record(g_cb);
+    bool dump = src && due;
+    if (dump) transition(g_cb, *src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);  // the present pass left it sampled
+    dump = dump && frame_dump_record(g_cb, *src);
     VkSemaphore rendered = g_present_ready[index];
     perf22::add(perf22::PrRecord, ps_rec);
     const uint64_t ps_sub = perf22::start();
@@ -929,8 +912,7 @@ void gpu_present(uint64_t texture, const int32_t* crop) {
         frame_submit(acquired, rendered, {}, dump);
     else
         end_and_wait(acquired, rendered);
-    void* dlss_frame=dlss_render_end();
-    if (dump){frame_dump_write(*dump_source, presents);dlss_debug_write();}
+    if (dump) frame_dump_write(*src, presents);
     if (due) debug_dump_textures(presents);
     VkPresentInfoKHR pi{VK_STRUCTURE_TYPE_PRESENT_INFO_KHR};
     pi.waitSemaphoreCount = 1;
@@ -941,14 +923,12 @@ void gpu_present(uint64_t texture, const int32_t* crop) {
     perf22::add(perf22::PrSubmit, ps_sub);
     const uint64_t ps_q = perf22::start();
     if (present_thread::on()) {
-        present_thread::start(g_swapchain, index, rendered, presents,dlss_frame);
+        present_thread::start(g_swapchain, index, rendered, presents);
         perf22::add(perf22::PrQueue, ps_q);
         plat::frame_presented();
         return;
     }
-    dlss_present_begin(dlss_frame);
     r = p_vkQueuePresentKHR(g_queue, &pi);
-    dlss_present_end(dlss_frame);
     perf22::add(perf22::PrQueue, ps_q);
 #if defined(_WIN32)
     catherine_perf::record_present(presents, int32_t(r));

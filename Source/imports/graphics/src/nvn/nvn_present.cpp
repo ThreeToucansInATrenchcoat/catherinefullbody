@@ -16,7 +16,6 @@
 #include "nvn_descriptor_bytes.h"
 #include "platform.h"
 #include "dev_overlay_raster.h"
-#include "dlss_backend_win.inc"
 
 namespace nx::nvn {
 
@@ -68,7 +67,7 @@ const uint32_t kVertex[] = {
 constexpr size_t kOverlayMax = 32;  // Overlay.shape[32] in present.frag
 
 struct Push {
-    float rot[4], off[4], box[4], crop[4], aa[4], fsr[4];
+    float rot[4], off[4], box[4], crop[4], aa[4];
 };
 
 struct Pass {
@@ -85,58 +84,6 @@ struct Pass {
     VkSurfaceTransformFlagBitsKHR transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
     bool failed = false;
 } g;
-
-struct FsrTarget {GpuImage image;VkFramebuffer framebuffer=VK_NULL_HANDLE;};
-std::vector<FsrTarget> fsr_targets,hud_targets,hud_upscale_targets;
-VkRenderPass fsr_render_pass=VK_NULL_HANDLE,hud_render_pass=VK_NULL_HANDLE,hud_upscale_pass=VK_NULL_HANDLE;
-void destroy_offscreen_targets(std::vector<FsrTarget>& targets,VkRenderPass& render_pass){
-    const VkDevice device=vk_device();
-    for(auto& target:targets){
-        if(target.framebuffer)p_vkDestroyFramebuffer(device,target.framebuffer,nullptr);
-        if(target.image.view)p_vkDestroyImageView(device,target.image.view,nullptr);
-        if(target.image.image)p_vkDestroyImage(device,target.image.image,nullptr);
-        if(target.image.memory)p_vkFreeMemory(device,target.image.memory,nullptr);
-    }
-    targets.clear();
-    if(render_pass)p_vkDestroyRenderPass(device,render_pass,nullptr);
-    render_pass=VK_NULL_HANDLE;
-}
-bool prepare_offscreen_targets(std::vector<FsrTarget>& targets,VkRenderPass& render_pass,unsigned count,unsigned width,unsigned height){
-    if(targets.size()==count&&!targets.empty()&&targets[0].image.width==width&&targets[0].image.height==height&&targets[0].image.format==g.format)return true;
-    const VkDevice device=vk_device();p_vkDeviceWaitIdle(device);destroy_offscreen_targets(targets,render_pass);
-    VkAttachmentDescription attachment{};attachment.format=g.format;attachment.samples=VK_SAMPLE_COUNT_1_BIT;
-    attachment.loadOp=VK_ATTACHMENT_LOAD_OP_DONT_CARE;attachment.storeOp=VK_ATTACHMENT_STORE_OP_STORE;
-    attachment.stencilLoadOp=VK_ATTACHMENT_LOAD_OP_DONT_CARE;attachment.stencilStoreOp=VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    attachment.initialLayout=VK_IMAGE_LAYOUT_UNDEFINED;attachment.finalLayout=VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    VkAttachmentReference reference{0,VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
-    VkSubpassDescription subpass{};subpass.pipelineBindPoint=VK_PIPELINE_BIND_POINT_GRAPHICS;subpass.colorAttachmentCount=1;subpass.pColorAttachments=&reference;
-    VkSubpassDependency dependency{};dependency.srcSubpass=VK_SUBPASS_EXTERNAL;dependency.dstSubpass=0;
-    dependency.srcStageMask=dependency.dstStageMask=VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;dependency.dstAccessMask=VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    VkRenderPassCreateInfo render{VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO};render.attachmentCount=1;render.pAttachments=&attachment;render.subpassCount=1;render.pSubpasses=&subpass;render.dependencyCount=1;render.pDependencies=&dependency;
-    if(p_vkCreateRenderPass(device,&render,nullptr,&render_pass)!=VK_SUCCESS)return false;
-    targets.resize(count);
-    for(auto& target:targets){
-        auto& image=target.image;
-        VkImageCreateInfo create{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};create.imageType=VK_IMAGE_TYPE_2D;create.format=g.format;create.extent={width,height,1};create.mipLevels=create.arrayLayers=1;create.samples=VK_SAMPLE_COUNT_1_BIT;create.tiling=VK_IMAGE_TILING_OPTIMAL;create.usage=VK_IMAGE_USAGE_SAMPLED_BIT|VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-        if(p_vkCreateImage(device,&create,nullptr,&image.image)!=VK_SUCCESS){destroy_offscreen_targets(targets,render_pass);return false;}
-        VkMemoryRequirements requirements{};p_vkGetImageMemoryRequirements(device,image.image,&requirements);
-        VkMemoryAllocateInfo allocate{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};allocate.allocationSize=requirements.size;allocate.memoryTypeIndex=memory_type(requirements.memoryTypeBits,VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        if(p_vkAllocateMemory(device,&allocate,nullptr,&image.memory)!=VK_SUCCESS||p_vkBindImageMemory(device,image.image,image.memory,0)!=VK_SUCCESS){destroy_offscreen_targets(targets,render_pass);return false;}
-        image.format=g.format;image.width=width;image.height=height;
-        VkImageViewCreateInfo view{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};view.image=image.image;view.viewType=VK_IMAGE_VIEW_TYPE_2D;view.format=g.format;view.subresourceRange={VK_IMAGE_ASPECT_COLOR_BIT,0,1,0,1};
-        if(p_vkCreateImageView(device,&view,nullptr,&image.view)!=VK_SUCCESS){destroy_offscreen_targets(targets,render_pass);return false;}
-        VkFramebufferCreateInfo framebuffer{VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO};framebuffer.renderPass=render_pass;framebuffer.attachmentCount=1;framebuffer.pAttachments=&image.view;framebuffer.width=width;framebuffer.height=height;framebuffer.layers=1;
-        if(p_vkCreateFramebuffer(device,&framebuffer,nullptr,&target.framebuffer)!=VK_SUCCESS){destroy_offscreen_targets(targets,render_pass);return false;}
-    }
-    return true;
-}
-
-void destroy_fsr_targets(){destroy_offscreen_targets(fsr_targets,fsr_render_pass);destroy_offscreen_targets(hud_targets,hud_render_pass);destroy_offscreen_targets(hud_upscale_targets,hud_upscale_pass);}
-bool prepare_fsr_targets(unsigned width,unsigned height){
-    const bool recreate=fsr_targets.empty()||fsr_targets[0].image.width!=width||fsr_targets[0].image.height!=height;
-    const bool result=prepare_offscreen_targets(fsr_targets,fsr_render_pass,unsigned(g.images.size()),width,height);
-    if(result&&recreate)log("nvn/vk: FSR 1 EASU + RCAS output %ux%u",width,height);return result;
-}
 
 GpuImage dev_ui_image;
 uint64_t dev_ui_uploaded=UINT64_MAX;
@@ -188,7 +135,6 @@ VkShaderModule module(const uint32_t* code, size_t bytes) {
 }
 
 void destroy_targets() {
-    destroy_fsr_targets();
     VkDevice d = vk_device();
     for (VkFramebuffer f : g.framebuffers) p_vkDestroyFramebuffer(d, f, nullptr);
     for (VkImageView v : g.views) p_vkDestroyImageView(d, v, nullptr);
@@ -217,8 +163,7 @@ bool make_pipeline(VkFormat format) {
     color.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     color.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     color.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    // Streamline returns proxy images, which its pacer copies into the real swapchain.
-    color.finalLayout = dlss_backbuffer_layout();
+    color.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
     VkAttachmentReference ref{0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
     VkSubpassDescription sub{};
     sub.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -298,7 +243,7 @@ bool present_pass_wanted() {
     }();
 #ifdef CATHERINE_HIGH_REFRESH_BUILD
     // Runtime selection: Off and MSAA keep the original blit; FXAA draws once.
-    return dev_overlay_raster::refresh() || on || plat::anti_aliasing() == 1 || catherine::host_settings().upscaler==1 || catherine::host_settings().frame_generation==1;
+    return dev_overlay_raster::refresh() || on || plat::anti_aliasing() == 1;
 #else
     return on;
 #endif
@@ -349,11 +294,11 @@ bool present_pass_targets(VkFormat format, const std::vector<VkImage>& images, V
     return true;
 }
 
-bool record_picture(VkCommandBuffer cb, GpuImage& src, const int32_t* crop, uint32_t index,VkFramebuffer target,VkExtent2D extent,int fsr_mode,bool scene_only=false,VkRenderPass scene_pass=VK_NULL_HANDLE) {
+bool present_pass_record(VkCommandBuffer cb, GpuImage& src, const int32_t* crop, uint32_t index) {
     if (!present_pass_wanted() || g.failed || !g.pipeline || !src.width || !src.height || index >= g.framebuffers.size() || !src.view || src.levels != 1 || src.layers != 1 ||
         src.view_type != VK_IMAGE_VIEW_TYPE_2D || !(src.aspect & VK_IMAGE_ASPECT_COLOR_BIT))
         return false;
-    GpuImage* menu=fsr_mode==1||scene_only?nullptr:overlay_texture(cb);
+    GpuImage* menu=overlay_texture(cb);
     transition(cb, src, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     // The set and the circles' uniform data come from this submit's slot (descriptor pool and upload ring, reset when
     // the slot is retired): nothing a frame still in flight reads is written. Per swapchain image they were not safe
@@ -373,10 +318,7 @@ bool record_picture(VkCommandBuffer cb, GpuImage& src, const int32_t* crop, uint
     p_vkUpdateDescriptorSets(vk_device(), 3, w, 0, nullptr);
 
     Push p{};
-    p.aa[3]=menu&&!dev_overlay_raster::commands.empty()?1.0f:0.0f;
-    p.fsr[0]=float(fsr_mode);p.fsr[1]=2.0f*(1.0f-float(catherine::host_settings().fsr_sharpness)/100.0f);
-    if(catherine::host_settings().fsr_sharpness==0)p.fsr[1]=-1.0f;
-    p.fsr[2]=float(extent.width);p.fsr[3]=float(extent.height);
+    p.aa[3]=menu&&catherine_dev_overlay_visible()?1.0f:0.0f;
     p.aa[0] = 1.0f / float(src.width), p.aa[1] = 1.0f / float(src.height);
 #ifdef CATHERINE_HIGH_REFRESH_BUILD
     p.aa[2] = plat::anti_aliasing() == 1 ? 1.0f : 0.0f;
@@ -397,7 +339,7 @@ bool record_picture(VkCommandBuffer cb, GpuImage& src, const int32_t* crop, uint
     p.crop[0] = cx / float(src.width), p.crop[1] = cy / float(src.height);
     p.crop[2] = cw / float(src.width), p.crop[3] = ch / float(src.height);
     bool sideways = r == 1 || r == 3;
-    float tw = float(sideways ? extent.height : extent.width), th = float(sideways ? extent.width : extent.height);
+    float tw = float(sideways ? g.extent.height : g.extent.width), th = float(sideways ? g.extent.width : g.extent.height);
     float scale = std::min(tw / cw, th / ch), bw = cw * scale / tw, bh = ch * scale / th;
     p.box[0] = (1 - bw) / 2, p.box[1] = (1 - bh) / 2, p.box[2] = bw, p.box[3] = bh;
     // The touch controls (platform_android_input.cpp), in upright uv; none elsewhere.
@@ -409,10 +351,10 @@ bool record_picture(VkCommandBuffer cb, GpuImage& src, const int32_t* crop, uint
     p.off[2] = float(count), p.off[3] = tw / th;
 
     VkRenderPassBeginInfo rb{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
-    rb.renderPass = scene_pass?scene_pass:(fsr_mode==1?fsr_render_pass:g.render_pass);rb.framebuffer=target;rb.renderArea={{0,0},extent};
+    rb.renderPass = g.render_pass, rb.framebuffer = g.framebuffers[index], rb.renderArea = {{0, 0}, g.extent};
     p_vkCmdBeginRenderPass(cb, &rb, VK_SUBPASS_CONTENTS_INLINE);
-    VkViewport v{0, 0, float(extent.width), float(extent.height), 0, 1};
-    VkRect2D sc{{0, 0}, extent};
+    VkViewport v{0, 0, float(g.extent.width), float(g.extent.height), 0, 1};
+    VkRect2D sc{{0, 0}, g.extent};
     p_vkCmdSetViewport(cb, 0, 1, &v);
     p_vkCmdSetScissor(cb, 0, 1, &sc);
     p_vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, g.pipeline);
@@ -422,56 +364,6 @@ bool record_picture(VkCommandBuffer cb, GpuImage& src, const int32_t* crop, uint
     p_vkCmdDraw(cb, 3, 1, 0, 0);
     p_vkCmdEndRenderPass(cb);
     return true;
-}
-
-bool present_pass_record(VkCommandBuffer cb,GpuImage& source,const int32_t* crop,uint32_t index){
-    if(index>=g.framebuffers.size()||!source.width||!source.height)return false;
-    dev_overlay_raster::refresh();
-    const auto settings=catherine::host_settings();
-    const bool cropped=crop&&crop[2]>0&&crop[3]>0&&crop[0]>=0&&crop[1]>=0&&crop[0]+crop[2]<=int(source.width)&&crop[1]+crop[3]<=int(source.height);
-    const unsigned width=cropped?unsigned(crop[2]):source.width,height=cropped?unsigned(crop[3]):source.height;
-    const bool sideways=g.transform==VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR||g.transform==VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR;
-    const unsigned output_width=sideways?g.extent.height:g.extent.width,output_height=sideways?g.extent.width:g.extent.height;
-    const float scale=std::min(float(output_width)/width,float(output_height)/height);
-    static bool reported_scale=false;
-    if(settings.upscaler==1&&!reported_scale){log("nvn/vk: FSR 1 input %ux%u output area %ux%u scale %.3f",width,height,output_width,output_height,scale);reported_scale=true;}
-    const unsigned scaled_width=std::max(1u,unsigned(width*scale)),scaled_height=std::max(1u,unsigned(height*scale));
-    if(settings.upscaler==1&&scale>1.01f&&prepare_fsr_targets(scaled_width,scaled_height)){
-        auto& target=fsr_targets[index];
-        if(record_picture(cb,source,crop,index,target.framebuffer,{scaled_width,scaled_height},1)){
-            target.image.layout=VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            return record_picture(cb,target.image,nullptr,index,g.framebuffers[index],g.extent,2);
-        }
-    }
-    return record_picture(cb,source,crop,index,g.framebuffers[index],g.extent,0);
-}
-
-// Apply exactly the display's filtering to the pre-HUD image, without host UI.
-// Its format/size matches the swapchain even when FSR changes render resolution.
-GpuImage* present_scene_only_record(VkCommandBuffer cb,GpuImage& source,unsigned width,unsigned height){
-    if(!g.pipeline||g.failed||g.extent.width!=width||g.extent.height!=height)return nullptr;
-    if(!prepare_offscreen_targets(hud_targets,hud_render_pass,1,width,height))return nullptr;
-    auto& output=hud_targets[0];
-    const float scale=std::min(float(width)/source.width,float(height)/source.height);
-    const unsigned area_width=std::max(1u,unsigned(source.width*scale)),area_height=std::max(1u,unsigned(source.height*scale));
-    const bool fsr=catherine::host_settings().upscaler==1&&scale>1.01f;
-    GpuImage* input=&source;
-    if(fsr){
-        if(!prepare_offscreen_targets(hud_upscale_targets,hud_upscale_pass,1,area_width,area_height))return nullptr;
-        auto& temporary=hud_upscale_targets[0];
-        if(!record_picture(cb,source,nullptr,0,temporary.framebuffer,{area_width,area_height},1,true,hud_upscale_pass))return nullptr;
-        temporary.image.layout=VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;input=&temporary.image;
-    }
-    if(!record_picture(cb,*input,nullptr,0,output.framebuffer,{width,height},fsr?2:0,true,hud_render_pass))return nullptr;
-    output.image.layout=VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    transition(cb,output.image,VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);return &output.image;
-}
-
-VkImageView present_pass_image_view(unsigned index){return index<g.views.size()?g.views[index]:VK_NULL_HANDLE;}
-void present_pass_frame(){
-    static bool reported=false;
-    if(!reported){const auto settings=catherine::host_settings();log("nvn/vk: presentation options upscaler=%d quality=%d sharpness=%d fps_counter=%d",settings.upscaler,settings.upscale_quality,settings.fsr_sharpness,int(settings.show_fps));reported=true;}
-    dev_overlay_raster::frame_tick();
 }
 
 // NX_PRESENT_TEST=<w>x<h>[:<90|180|270>] (headless, with NX_DUMP_FRAMES): the pass draws into an offscreen image

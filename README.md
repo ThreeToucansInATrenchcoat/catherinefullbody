@@ -87,26 +87,6 @@ ExtractedGame/
 
 Select `ExtractedGame`, keeping all files inside it. `...` means other files are omitted from this example.
 
-## Upscaling and frame generation
-
-Edit `catherine-settings.ini` beside the executable, then restart. These options are INI-only for now:
-
-```ini
-[Catherine]
-Upscaler=off
-UpscaleQuality=quality
-FsrSharpness=20
-FrameGeneration=off
-FrameGenerationMultiplier=4
-ShowFps=false
-```
-
-Use `Upscaler=fsr1` for FSR 1. Quality choices are `ultraquality`, `quality`, `balanced`, and `performance`; sharpness ranges from 0 to 100.
-
-Set `FrameGeneration=dlssg` to enable DLSS Frame Generation. It currently supports Windows with a compatible NVIDIA GPU. The multiplier is limited to what the GPU supports. It uses the bundled `Streamline` folder and falls back to normal rendering if unavailable. Generation pauses during loading and video playback. FSR 1 also works alongside it.
-
-`Fps` caps rendered frames: `Fps=60` with 4× targets 240 displayed FPS. The counter shows actual displayed FPS and rendered FPS when generation is running. Set `ShowFps=true` to show it. Upscaling, frame generation, and the counter all default to off.
-
 ## Compile from source
 
 Clone the repository and run these commands from its folder. Game files are not needed to compile.
@@ -141,7 +121,7 @@ The executable is `Build\catherine.exe`.
 
 - Further optimisation.
 - A custom level editor.
-- DLSS Super Resolution and further graphics options.
+- More configuration options like FSR and DLSS.
 - Restore the voting system. Other online features are outside my plans, but forks and pull requests are welcome.
 
 ## AI

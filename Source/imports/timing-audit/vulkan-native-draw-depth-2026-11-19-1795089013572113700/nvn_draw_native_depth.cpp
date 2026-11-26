@@ -14,7 +14,6 @@
 #include <set>
 
 #include "nvn_draw_state.h"
-#include "dlss_backend.h"
 #include "engine_vk_indexed.h"
 namespace nx::nvn::replay { void raster_dynamic_values(VkCommandBuffer, const uint32_t*); }
 #include "nvn_descriptor_bytes.h"
@@ -512,7 +511,6 @@ void begin_rendering(VkCommandBuffer cb, const Targets& t, bool allow_msaa = tru
     GpuImage* dimg = native_targets.complete ? native_targets.attachments[8].resource.get()
                                               : (t.depth ? image_of(t.depth) : nullptr);
     g_pass_images[8] = dimg;
-    dlss_scene_targets(g_pass_images,t.color_count);
     if (dimg && dimg->aspect != VK_IMAGE_ASPECT_COLOR_BIT) {
         keep_msaa_samples(*dimg, g_msaa_requested);
         if (dimg->layout == VK_IMAGE_LAYOUT_UNDEFINED && !load_undefined) fresh |= 1u << 8;
@@ -725,10 +723,6 @@ bool draw(VkCommandBuffer cb, const Targets& t, uint32_t mode, bool indexed, con
     if (!vs) {
         g_stats.no_vertex++;
         return false;
-    }
-    if(dlss_ui_needed(vs->hash.c_str())){
-        draw_end_rendering(cb,2);const auto targets=native_resources::prepare_targets(t);
-        dlss_capture_hudless(cb,targets.complete?targets.attachments[0].resource.get():(t.colors[0]?image_of(t.colors[0]):nullptr));
     }
     perf22::add(perf22::PreHead, ps_pre);
     std::vector<const ShaderInfo*> swapped;  // NX_SWAP_FS / NX_SKIP_FS (nvn_draw_trace.cpp)
@@ -1193,8 +1187,6 @@ void pass_end_only(VkCommandBuffer cb, int reason) {
     }
     if (lazy148::on() && (reason == 0 || (reason == 5 && !lazy148::copy159()) || (!lazy148::clear155() && (reason == 3 || reason == 4))))
         lazy148::flush_all(cb, reason == 0 ? lazy148::SubmitEnd : lazy148::ClearCopy);
-    if(dlss_depth_snapshot_pending()&&lazy148::on())lazy148::flush_all(cb,lazy148::ClearCopy);
-    dlss_scene_capture(cb);
     gpu_profile_mark(cb, "outside passes (clears, uploads, copies)");
 }
 void draw_end_rendering(VkCommandBuffer cb, int reason) {  // and the pending clears (nvn_clears.cpp)

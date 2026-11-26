@@ -66,9 +66,6 @@ bool vk_1d_images();
 void transition(VkCommandBuffer cb, GpuImage& img, VkImageLayout to);
 // nvn_present.cpp: the window texture drawn into the swapchain (rotated, fit, alpha 1) instead of blitted.
 bool present_pass_wanted();
-void present_pass_frame();
-VkImageView present_pass_image_view(unsigned index);
-GpuImage* present_scene_only_record(VkCommandBuffer cb,GpuImage& source,unsigned width,unsigned height);
 bool present_pass_targets(VkFormat format, const std::vector<VkImage>& images, VkExtent2D extent,
                           VkSurfaceTransformFlagBitsKHR transform);
 bool present_pass_record(VkCommandBuffer cb, GpuImage& src, const int32_t* crop, uint32_t index);

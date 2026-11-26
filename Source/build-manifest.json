@@ -6953,8 +6953,7 @@
         "C:/catherine/recomp/Source/imports/graphics/src/nvn/pass-pipeline-attachments.inc",
         "C:/catherine/recomp/Source/imports/timing-audit/vulkan-native-draw-depth-2026-11-19-1795089013572113700/fast89.inc",
         "C:/catherine/recomp/Source/imports/timing-audit/vulkan-native-draw-depth-2026-11-19-1795089013572113700/batch91.inc",
-        "C:/catherine/recomp/Source/imports/timing-audit/performance-2026-11-16/cmd159/inst91_sources.inc",
-        "C:/catherine/recomp/Source/imports/graphics/src/nvn/dlss_backend.h"
+        "C:/catherine/recomp/Source/imports/timing-audit/performance-2026-11-16/cmd159/inst91_sources.inc"
       ]
     },
     {
@@ -7753,26 +7752,7 @@
         "C:/catherine/recomp/Source/imports/graphics/src/nvn/nvn_shaders.h",
         "C:/catherine/recomp/Source/imports/graphics/src/nvn/nvn_present_fragment.inc",
         "C:/catherine/recomp/Source/imports/graphics/src/nvn/dev_overlay_raster.h",
-        "C:/catherine/recomp/Source/imports/base/dev-start/include/dev_overlay_draw.h",
-        "C:/catherine/recomp/Source/imports/base/guest-timing/include/catherine_settings_win.h",
-        "C:/catherine/recomp/Source/vendor/streamline/include/sl.h",
-        "C:/catherine/recomp/Source/vendor/streamline/include/sl_appidentity.h",
-        "C:/catherine/recomp/Source/vendor/streamline/include/sl_consts.h",
-        "C:/catherine/recomp/Source/vendor/streamline/include/sl_core_api.h",
-        "C:/catherine/recomp/Source/vendor/streamline/include/sl_core_types.h",
-        "C:/catherine/recomp/Source/vendor/streamline/include/sl_device_wrappers.h",
-        "C:/catherine/recomp/Source/vendor/streamline/include/sl_dlss_g.h",
-        "C:/catherine/recomp/Source/vendor/streamline/include/sl_pcl.h",
-        "C:/catherine/recomp/Source/vendor/streamline/include/sl_reflex.h",
-        "C:/catherine/recomp/Source/vendor/streamline/include/sl_result.h",
-        "C:/catherine/recomp/Source/vendor/streamline/include/sl_security.h",
-        "C:/catherine/recomp/Source/vendor/streamline/include/sl_struct.h",
-        "C:/catherine/recomp/Source/vendor/streamline/include/sl_version.h",
-        "C:/catherine/recomp/Source/imports/graphics/src/nvn/dlss_backend_win.inc",
-        "C:/catherine/recomp/Source/imports/graphics/src/nvn/dlss_backend.h",
-        "C:/catherine/recomp/Source/imports/graphics/src/nvn/dlss_camera.h",
-        "C:/catherine/recomp/Source/imports/graphics/src/nvn/dlss_motion_win.inc",
-        "C:/catherine/recomp/Source/imports/graphics/src/nvn/dlss_motion_shader.inc"
+        "C:/catherine/recomp/Source/imports/base/dev-start/include/dev_overlay_draw.h"
       ]
     },
     {
@@ -8789,8 +8769,7 @@
         "C:/catherine/recomp/Source/imports/timing-audit/pub-async-skin-jobs-2026-11-18/native_texture_bindings.h",
         "C:/catherine/recomp/Source/imports/timing-audit/pub-async-skin-jobs-2026-11-18/native_image_contract.h",
         "C:/catherine/recomp/Source/imports/graphics/src/periodic_render_log.h",
-        "C:/catherine/recomp/Source/imports/graphics/include/nx/game.h",
-        "C:/catherine/recomp/Source/imports/graphics/src/nvn/dlss_backend.h"
+        "C:/catherine/recomp/Source/imports/graphics/include/nx/game.h"
       ]
     },
     {

@@ -82,7 +82,7 @@ static int invalid(unsigned height,unsigned line) {
 int catherine_resolution_heap_prepare(void *opaque,unsigned height) {
     Cpu *c=opaque;
     if (held.active) abort();
-    if (height<360 || height>2160 || height%18u!=0) return invalid(height,__LINE__);
+    if (height!=720 && height!=1080 && height!=1440 && height!=2160) return invalid(height,__LINE__);
     memset(&held,0,sizeof held);
     uint64_t root=LD64(0x7000cc9498ull);
     if (!root || !(LD32(root+0x648c)&1)) return invalid(height,__LINE__);
