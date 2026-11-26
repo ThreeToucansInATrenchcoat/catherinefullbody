@@ -42,7 +42,7 @@ struct HostSettings : InputProfile {
     int window_height = 0;
     int anti_aliasing = 0;
     int movie_interpolation = 0;
-    bool show_fps = true;
+    bool show_fps = false;
     int upscaler = 0; // 0: native, 1: AMD FSR 1 (EASU + RCAS).
     int upscale_quality = 1; // Ultra Quality / Quality / Balanced / Performance.
     int fsr_sharpness = 20; // 0..100.

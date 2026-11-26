@@ -11,7 +11,7 @@ Implemented: FSR 1 EASU/RCAS, optional FPS overlay, and NVIDIA DLSS Frame Genera
 - The UI vertex shader `266d0aa411f67ef5` marks the pre-HUD capture boundary. That capture was visually checked. It receives the same display filtering as the final image before tagging, including FSR and letterboxing.
 - Tagged inputs are GPU-owned and remain alive through presentation. Tokens travel with each present job. Loading, missing inputs, and discontinuities clear/reset history; ordinary presentation continues.
 - INI requests remain separate from device support. GPU maximums clamp the requested multiplier. Missing runtime/plugin and the simulated unsupported-adapter path fall back to normal rendering. Unsupported plugins are unloaded before device creation.
-- The counter uses `numFramesActuallyPresented`, not the requested multiplier. Frame generation defaults off; the counter defaults on. INI edits require a restart.
+- The counter uses `numFramesActuallyPresented`, not the requested multiplier. Upscaling, frame generation, and the counter default off. INI edits require a restart.
 
 ## Evidence
 

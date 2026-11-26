@@ -305,7 +305,7 @@ HostSettings load_settings(const Ini& ini) {
     if (valid_movie_interpolation(movie)) settings.movie_interpolation = movie;
     if (prompts >= 0 && prompts <= 4) settings.button_prompts = prompts;
     settings.fullscreen = boolean(value("Fullscreen"), false);
-    settings.show_fps = boolean(value("ShowFps"), true);
+    settings.show_fps = boolean(value("ShowFps"), false);
     if (lower(value("Upscaler")) == "fsr1") settings.upscaler = 1;
     const auto quality = lower(value("UpscaleQuality"));
     if(quality=="ultraquality")settings.upscale_quality=0;

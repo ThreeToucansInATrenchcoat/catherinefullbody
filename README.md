@@ -97,16 +97,16 @@ Edit `catherine-settings.ini` beside the executable, then restart. These options
 Upscaler=off
 UpscaleQuality=quality
 FsrSharpness=20
-FrameGeneration=dlssg
+FrameGeneration=off
 FrameGenerationMultiplier=4
-ShowFps=true
+ShowFps=false
 ```
 
 Use `Upscaler=fsr1` for FSR 1. Quality choices are `ultraquality`, `quality`, `balanced`, and `performance`; sharpness ranges from 0 to 100.
 
-DLSS Frame Generation currently supports Windows with a compatible NVIDIA GPU. The multiplier is limited to what the GPU supports. It uses the bundled `Streamline` folder and falls back to normal rendering if unavailable. Generation pauses during loading and video playback. FSR 1 also works alongside it.
+Set `FrameGeneration=dlssg` to enable DLSS Frame Generation. It currently supports Windows with a compatible NVIDIA GPU. The multiplier is limited to what the GPU supports. It uses the bundled `Streamline` folder and falls back to normal rendering if unavailable. Generation pauses during loading and video playback. FSR 1 also works alongside it.
 
-`Fps` caps rendered frames: `Fps=60` with 4× targets 240 displayed FPS. The counter shows actual displayed FPS and rendered FPS when generation is running. Set `ShowFps=false` to hide it. Frame generation defaults to off.
+`Fps` caps rendered frames: `Fps=60` with 4× targets 240 displayed FPS. The counter shows actual displayed FPS and rendered FPS when generation is running. Set `ShowFps=true` to show it. Upscaling, frame generation, and the counter all default to off.
 
 ## Compile from source
 

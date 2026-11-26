@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
         invalid=s;invalid.frame_generation=2;assert(!store_host_settings(invalid));
         invalid=s;invalid.frame_generation_multiplier=5;assert(!store_host_settings(invalid));
     } else if (mode == "check-graphics-fallback") {
-        assert(s.show_fps&&s.upscaler==0&&s.frame_generation==0&&s.frame_generation_multiplier==4&&s.fsr_sharpness==20&&s.upscale_quality==1);
+        assert(!s.show_fps&&s.upscaler==0&&s.frame_generation==0&&s.frame_generation_multiplier==4&&s.fsr_sharpness==20&&s.upscale_quality==1);
     } else if (mode == "check-migration") {
         check_persisted(s);
         catherine_load_native_config(game.data(), 1);
@@ -89,6 +89,7 @@ int main(int argc, char** argv) {
     } else if (mode == "check-pre6" || mode == "check-v6") {
         const auto expected = mode == "check-pre6" ? kDefaultBindings : kIdentityBindings;
         assert(s.bindings == expected && s.player2.bindings == expected && catherine_dev_enabled());
+        assert(!s.show_fps && s.upscaler==0 && s.frame_generation==0);
         catherine_load_native_config(game.data(), 1);
     } else if (mode == "migrate-install-copy") {
         // The runner provides a private copy of the legacy native system record.
