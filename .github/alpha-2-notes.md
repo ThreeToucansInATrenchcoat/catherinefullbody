@@ -1,3 +1,5 @@
+**THIS IS AN ALPHA BUILD, EXPECT BUGS. I coukd've done with more testers, thats where you guys come in**
+
 - Fixed controller assignments in Babel Pair and Colosseum.
 - Fixed Player 2’s movement speed and added smooth model interpolation.
 - Fixed menus and player introductions running too fast with unlimited FPS.
