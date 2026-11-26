@@ -8,6 +8,7 @@ I will say this has been a way more complicated port than anything else I've rel
 
 - Native Windows and Linux support.
 - 60 FPS by default, with an uncapped option. Code patches and interpolation enable higher frame rates, You'd be surprised just how many things broke when you go over 30 fps, most have been fixed but there may be minor things left that still run at the wrong speed.
+- FSR 1 upscaling, NVIDIA DLSS Frame Generation (2× / 3× / 4× on supported hardware), and an optional on-screen FPS counter.
 - Full keyboard and mouse support.
 - Button prompts switch automatically between keyboard and mouse icons and the active controller’s icons.
 - Updated Menus, Xbox controllers and more now have updated tutorials.
@@ -87,6 +88,26 @@ ExtractedGame/
 
 Select `ExtractedGame`, keeping all files inside it. `...` means other files are omitted from this example.
 
+## Upscaling and frame generation
+
+Edit `catherine-settings.ini` beside the executable, then restart. These options are INI-only for now:
+
+```ini
+[Catherine]
+Upscaler=off
+UpscaleQuality=quality
+FsrSharpness=20
+FrameGeneration=dlssg
+FrameGenerationMultiplier=4
+ShowFps=true
+```
+
+Use `Upscaler=fsr1` for FSR 1. Quality choices are `ultraquality`, `quality`, `balanced`, and `performance`; sharpness ranges from 0 to 100.
+
+DLSS Frame Generation currently supports Windows with a compatible NVIDIA GPU. The multiplier is limited to what the GPU supports. It uses the bundled `Streamline` folder and falls back to normal rendering if unavailable. Generation pauses during loading and video playback. FSR 1 also works alongside it.
+
+`Fps` caps rendered frames: `Fps=60` with 4× targets 240 displayed FPS. The counter shows actual displayed FPS and rendered FPS when generation is running. Set `ShowFps=false` to hide it. Frame generation defaults to off.
+
 ## Compile from source
 
 Clone the repository and run these commands from its folder. Game files are not needed to compile.
@@ -121,7 +142,7 @@ The executable is `Build\catherine.exe`.
 
 - Further optimisation.
 - A custom level editor.
-- More configuration options like FSR and DLSS.
+- DLSS Super Resolution and further graphics options.
 - Restore the voting system. Other online features are outside my plans, but forks and pull requests are welcome.
 
 ## AI

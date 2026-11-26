@@ -42,6 +42,12 @@ struct HostSettings : InputProfile {
     int window_height = 0;
     int anti_aliasing = 0;
     int movie_interpolation = 0;
+    bool show_fps = true;
+    int upscaler = 0; // 0: native, 1: AMD FSR 1 (EASU + RCAS).
+    int upscale_quality = 1; // Ultra Quality / Quality / Balanced / Performance.
+    int fsr_sharpness = 20; // 0..100.
+    int frame_generation = 0; // 0: off, 1: NVIDIA DLSS-G.
+    int frame_generation_multiplier = 4;
     InputProfile player2;
     // "auto"/"keyboard"/backend identity; P2 uses "none" instead of "auto".
     std::array<std::string,2> input_devices{"auto","none"};

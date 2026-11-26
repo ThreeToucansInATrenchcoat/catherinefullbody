@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstdio>
 extern "C" unsigned catherine_internal_render_height(void);
+extern "C" unsigned catherine_upscaled_render_height(unsigned);
 namespace {
 struct State {
     std::mutex lock;
@@ -26,7 +27,7 @@ void trace(const char* event,unsigned height=0) {
         std::fprintf(stderr,"LiveResolution event=%s generation=%llu desired=%u previous=%u height=%u phase=%u attempt=%u\n",
             event,(unsigned long long)tx.generation,tx.desired,tx.previous,height,unsigned(tx.phase),tx.attempts);
 }
-bool valid(unsigned h) { return h==720 || h==1080 || h==1440 || h==2160; }
+bool valid(unsigned h) { return h>=360 && h<=2160 && h%18u==0; }
 void complete(bool success) {
     trace(success ? "applied" : "rejected",catherine_resolution_applied_height());
     auto& s=state(); std::lock_guard guard(s.lock);
@@ -40,6 +41,7 @@ void set_applied(unsigned h) { auto& s=state(); std::lock_guard guard(s.lock); s
 void later() { tx.event_ready=false; tx.cooldown=3; }
 }
 extern "C" uint64_t catherine_resolution_request(unsigned h) {
+    h=catherine_upscaled_render_height(h);
     if (!valid(h)) return 0;
     auto& s=state(); std::lock_guard guard(s.lock);
     s.desired_height=h; s.desired_generation=++s.issued;

@@ -305,6 +305,17 @@ HostSettings load_settings(const Ini& ini) {
     if (valid_movie_interpolation(movie)) settings.movie_interpolation = movie;
     if (prompts >= 0 && prompts <= 4) settings.button_prompts = prompts;
     settings.fullscreen = boolean(value("Fullscreen"), false);
+    settings.show_fps = boolean(value("ShowFps"), true);
+    if (lower(value("Upscaler")) == "fsr1") settings.upscaler = 1;
+    const auto quality = lower(value("UpscaleQuality"));
+    if(quality=="ultraquality")settings.upscale_quality=0;
+    else if(quality=="balanced")settings.upscale_quality=2;
+    else if(quality=="performance")settings.upscale_quality=3;
+    const int sharpness=number("FsrSharpness",20);
+    if(sharpness>=0&&sharpness<=100)settings.fsr_sharpness=sharpness;
+    if(lower(value("FrameGeneration"))=="dlssg")settings.frame_generation=1;
+    const int multiplier=number("FrameGenerationMultiplier",4);
+    if(multiplier>=2&&multiplier<=4)settings.frame_generation_multiplier=multiplier;
     for (unsigned player = 0; player < 2; ++player) {
         load_profile(ini, settings, player, number("Version", 0));
         const auto device = value(player ? "P2Device" : "P1Device");
@@ -379,7 +390,13 @@ bool write_settings(const std::filesystem::path& path, const HostSettings& value
     out << "[Catherine]\nVersion=7\ndevmenu=" << (devmenu ? "true" : "false")
         << "\nFps=" << value.fps << "\nFullscreen=" << int(value.fullscreen)
         << "\nWindowHeight=" << value.window_height << "\nAntiAliasing=" << value.anti_aliasing
-        << "\nMovieInterpolation=" << value.movie_interpolation << "\nButtonPrompts=" << value.button_prompts;
+        << "\nMovieInterpolation=" << value.movie_interpolation << "\nButtonPrompts=" << value.button_prompts
+        << "\nShowFps=" << (value.show_fps?"true":"false")
+        << "\nUpscaler=" << (value.upscaler==1?"fsr1":"off")
+        << "\nUpscaleQuality=" << std::array<const char*,4>{"ultraquality","quality","balanced","performance"}[value.upscale_quality]
+        << "\nFsrSharpness=" << value.fsr_sharpness
+        << "\nFrameGeneration=" << (value.frame_generation==1?"dlssg":"off")
+        << "\nFrameGenerationMultiplier=" << value.frame_generation_multiplier;
     for (unsigned player = 0; player < 2; ++player) {
         const auto& profile = input_profile(value, player);
         const char* prefix = player ? "P2" : "";
@@ -516,7 +533,7 @@ HostSettings host_settings() {
 bool store_host_settings(const HostSettings& value, bool explicit_fps) {
     if (!valid_fps(value.fps) || !valid_resolution(value.window_height) ||
         !valid_anti_aliasing(value.anti_aliasing) || !valid_movie_interpolation(value.movie_interpolation) ||
-        !valid_input_settings(value)||value.button_prompts<0||value.button_prompts>4) return false;
+        !valid_input_settings(value)||value.button_prompts<0||value.button_prompts>4||value.upscaler<0||value.upscaler>1||value.upscale_quality<0||value.upscale_quality>3||value.fsr_sharpness<0||value.fsr_sharpness>100||value.frame_generation<0||value.frame_generation>1||value.frame_generation_multiplier<2||value.frame_generation_multiplier>4) return false;
     auto& state = runtime();
     std::lock_guard lock(state.mutex);
     // Config choices take effect for preview, but only Save Settings writes them.
@@ -698,9 +715,13 @@ extern "C" int catherine_requested_movie_interpolation(void) {
     return catherine::runtime().effective_movie.load(std::memory_order_acquire);
 }
 
-extern "C" unsigned catherine_internal_render_height(void) {
-    return catherine::runtime().internal_height;
+extern "C" unsigned catherine_upscaled_render_height(unsigned height) {
+    const auto settings=catherine::host_settings();
+    if(settings.upscaler!=1)return height;
+    const float ratio=std::array<float,4>{1.3f,1.5f,1.7f,2.0f}[settings.upscale_quality];
+    return (std::max)(360u,unsigned(float(height)/ratio/18.0f)*18u);
 }
+extern "C" unsigned catherine_internal_render_height(void) {return catherine_upscaled_render_height(catherine::runtime().internal_height);}
 
 extern "C" int catherine_dev_enabled(void) {
     return catherine::runtime().devmenu;

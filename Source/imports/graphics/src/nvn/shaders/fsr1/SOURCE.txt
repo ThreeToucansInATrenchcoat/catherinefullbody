@@ -1,0 +1,5 @@
+AMD FidelityFX FSR 1, v1.20210629
+https://github.com/GPUOpen-Effects/FidelityFX-FSR
+Files retain their upstream MIT notices.
+ffx_a.h SHA256 f60e2722fcd13989523b9164d776ab382b3692791767f3bf8bb19967f763f3fb
+ffx_fsr1.h SHA256 93c3922362ea7fc99cbcc698ca30c98de4f8c246d1fbb0b09e015ddef38ce3a5

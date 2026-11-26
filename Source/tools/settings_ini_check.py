@@ -24,7 +24,7 @@ def main():
     unit = next(u for u in json.loads((ROOT / "Source/build-manifest.json").read_text())["units"]
                 if u["source"].endswith("/catherine_refresh.cpp"))
     command = unit["command"]
-    subprocess.run(command[:command.index("-c")] + [str(ROOT / "Source/tools/settings_ini_check.cpp"),
+    subprocess.run(command[:command.index("-c")] + ["-UNDEBUG",str(ROOT / "Source/tools/settings_ini_check.cpp"),
                    "-luser32", "-o", str(EXE)], cwd=OUT, check=True)
     protected = {name: (BUILD / name).read_bytes() for name in ("save.dat", "catherine-settings.ini")}
     try:
@@ -91,6 +91,16 @@ Brightness=200
 vOiCeLaNgUaGe=1
 """)
         check("check-invalid")
+
+        INI.write_text("[Catherine]\nVersion=7\nShowFps=true\nUpscaler=FSR1\nUpscaleQuality=performance\nFsrSharpness=80\nFrameGeneration=DLSSG\nFrameGenerationMultiplier=4\n",encoding="utf-8")
+        check("check-upscaling")
+        config=load()["Catherine"]
+        assert config["ShowFps"]=="true" and config["Upscaler"]=="fsr1"
+        assert config["UpscaleQuality"]=="performance" and config["FsrSharpness"]=="80"
+        assert config["FrameGeneration"]=="dlssg" and config["FrameGenerationMultiplier"]=="4"
+
+        INI.write_text("[Catherine]\nVersion=7\nShowFps=invalid\nUpscaler=unknown\nFrameGeneration=unknown\nFrameGenerationMultiplier=100\nFsrSharpness=101\nUpscaleQuality=unknown\n",encoding="utf-8")
+        check("check-graphics-fallback")
 
         # Exercise the actual installation's effective values without writing to it.
         (OUT / "installed.original.ini").write_bytes(protected["catherine-settings.ini"])
