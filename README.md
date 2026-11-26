@@ -51,9 +51,23 @@ I will say this has been a way more complicated port than anything else I've rel
 
 ## Compile from source
 
+Clone this repository and run the build commands from the checkout root. Original game files are only needed when setting up the built game, not when compiling it.
+
 ### Windows
 
-Clone to `C:\catherine\recomp`. Install Python 3, the .NET 10 SDK, and Visual Studio with the C++ desktop workload, LLVM/Clang tools, and Windows SDK. The recorded build expects Vulkan headers at `C:\recomp\wetrix_dc\VulkanSDK\Include` and uses the Visual Studio paths in [the build manifest](Source/build-manifest.json).
+Install:
+
+- Python 3 and the .NET 10 SDK.
+- Visual Studio with the **Desktop development with C++** workload, LLVM/Clang tools, and the Windows SDK.
+- The Vulkan SDK, including its headers.
+
+The Windows build recipe currently uses absolute paths. Place the checkout at `C:\catherine\recomp`, then configure [Source/build-manifest.json](Source/build-manifest.json) for your installed tools:
+
+- Set `compiler`, `linker`, and `resource.compiler` to your `clang.exe`, `clang++.exe`, and `llvm-rc.exe` paths.
+- Update the compiler path at the start of each compilation unit's `command` array to match those tools.
+- Replace the Vulkan SDK include paths in those arrays with `-I` followed by your installed SDK's `Include` directory, which must contain `vulkan/vulkan.h`.
+
+The recorded SDK paths are build-machine settings, not additional projects or folders you need to download. Keeping the checkout at the path above preserves the remaining project paths in the build and resource recipes.
 
 From the checkout root in a Visual Studio Developer PowerShell:
 
@@ -62,17 +76,25 @@ New-Item -ItemType Directory -Force Build\obj | Out-Null
 python build.py --jobs 12
 ```
 
-The executable is `Build\catherine.exe`.
+The executable is `Build\catherine.exe`. Build logs are written to `Build\logs`.
 
 ### Linux
 
-Use an x86-64-v3-capable system with Python 3, Clang, LLD, the .NET 10 SDK, pkg-config, and development files for Vulkan, SDL2, Cairo, OpenSSL, and FFmpeg (`libavcodec`, `libavutil`, and `libswscale`).
+Use an x86-64-v3-capable Linux system. Install Python 3, Clang, LLD, the .NET 10 SDK, pkg-config, and development files for Vulkan, SDL2, Cairo, OpenSSL, and FFmpeg (`libavcodec`, `libavutil`, and `libswscale`). The checkout can be in any directory; the Linux build script translates the recorded Windows project paths automatically.
 
 ```sh
 python3 build.py --jobs 12
 ```
 
-The executable is `Build/catherine`. If your Vulkan headers are outside the compiler's default include path, set `CATHERINE_VULKAN_INCLUDE` to the directory containing `vulkan/vulkan.h`.
+The executable is `Build/catherine`. Launch it with:
+
+```sh
+./Build/catherine
+```
+
+If your Vulkan headers are outside the compiler's default include path, set `CATHERINE_VULKAN_INCLUDE` to the directory containing the `vulkan` subdirectory. `CC` and `CXX` can select alternative Clang executables. Build logs are written to `Build/logs/linux`.
+
+For first-time game setup on Linux, also install SPIRV-Tools (`spirv-as`, `spirv-dis`, and `spirv-val`) and either KDialog or Zenity. Linux builds currently do not support `--pgo`.
 
 ## Planned
 
