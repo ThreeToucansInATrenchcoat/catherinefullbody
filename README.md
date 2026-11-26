@@ -13,7 +13,6 @@ I will say this has been a way more complicated port than anything else I've rel
 - Updated Menus, Xbox controllers and more now have updated tutorials.
 - Real game configuration options that are inside of the game like a real PC game.
 - Local co-op. Online play has been removed. Babel Pair and Colosseum automatically use local co-op and stay greyed out until two distinct input devices are connected and assigned.
-- An F8 menu for jumping directly to levels and cutscenes.
 
 ## Screenshots
 
