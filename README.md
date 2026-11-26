@@ -61,15 +61,9 @@ Install:
 - Visual Studio with the **Desktop development with C++** workload, LLVM/Clang tools, and the Windows SDK.
 - The Vulkan SDK, including its headers.
 
-The Windows build recipe currently uses absolute paths. Place the checkout at `C:\catherine\recomp`, then configure [Source/build-manifest.json](Source/build-manifest.json) for your installed tools:
+**Windows source builds currently require the existing developer build environment.** The build recipe still contains machine-specific paths; automatic toolchain and SDK detection has not been implemented yet. These are not portable fresh-checkout instructions. For now, use a Windows release build or compile from source on Linux.
 
-- Set `compiler`, `linker`, and `resource.compiler` to your `clang.exe`, `clang++.exe`, and `llvm-rc.exe` paths.
-- Update the compiler path at the start of each compilation unit's `command` array to match those tools.
-- Replace the Vulkan SDK include paths in those arrays with `-I` followed by your installed SDK's `Include` directory, which must contain `vulkan/vulkan.h`.
-
-The recorded SDK paths are build-machine settings, not additional projects or folders you need to download. Keeping the checkout at the path above preserves the remaining project paths in the build and resource recipes.
-
-From the checkout root in a Visual Studio Developer PowerShell:
+In an already configured Windows developer checkout, run this from the checkout root in a Visual Studio Developer PowerShell:
 
 ```powershell
 New-Item -ItemType Directory -Force Build\obj | Out-Null
