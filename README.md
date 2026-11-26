@@ -58,13 +58,17 @@ A 64-bit x86-64-v3-capable CPU and a Vulkan-capable graphics card with current d
 
 ## Installation
 
-1. Use your own copy of the North American or European Nintendo Switch release (title ID `0100BF00112C0000`) and its 1.0.1 update. Decrypt and extract the update together with the base game to produce one merged extraction folder. You can use a tool such as NSPUnpacker to prepare the files. The port accepts extracted files only.
-2. On Windows, launch `Catherine.exe` and point setup at the extracted files when prompted. Setup builds `assets.pak`, then generates the Vulkan shaders. See the [Windows setup guide](Source/resources/INSTALL-ASSETS.txt) for details.
-3. On Linux, launch `./Build/catherine` and select the merged extraction folder when prompted. The built-in installer creates `assets.pak` and then generates the Vulkan shaders. First-time setup uses SPIRV-Tools and KDialog or Zenity. Building the executable requires the .NET 10 SDK.
+1. Decrypt and extract your own North American or European Switch copy (`0100BF00112C0000`) with update **1.0.1**, using a tool such as NSPUnpacker.
+2. Launch `Catherine.exe` on Windows or `./Build/catherine` on Linux, then select the extracted folder.
+3. Setup builds `assets.pak`, then generates the Vulkan shaders.
+
+The update is usually unpacked with the main game. It can also be extracted separately; if so, select its folder when setup asks for the update files.
+
+Linux setup also needs SPIRV-Tools and either KDialog or Zenity. See the [Windows setup guide](Source/resources/INSTALL-ASSETS.txt) for more details.
 
 ### Example extracted folder structure
 
-Select the single `ExtractedGame` folder when setup asks for the game files. This folder contains the base game with the 1.0.1 update applied during extraction. The folder name is an example; it can be stored anywhere.
+Typical layout when the game and update are extracted together:
 
 ```text
 ExtractedGame/
@@ -81,7 +85,7 @@ ExtractedGame/
         └── ...
 ```
 
-Keep all files inside both folders; `...` represents contents omitted from this example. Select `ExtractedGame` during setup; no separate update folder is needed. Setup reads the files in place and builds `assets.pak`, then generates the Vulkan shaders.
+Select `ExtractedGame`, keeping all files inside it. `...` means other files are omitted from this example.
 
 ## Compile from source
 
