@@ -9,6 +9,6 @@
 - Babel and Colosseum introductions now play only once.
 - Fixed the unwanted wine-glass zoom when returning to the title screen.
 - Fixed a crash after answering confessional questions.
-- Fixed missing shadows beneath the piano keys in the main menu.
+- Fixed missing shadows, from the entire game!
 - FFmpeg is now included with the Linux version, which should prevent a possible crash caused by missing or incompatible FFmpeg libraries.
 - Scott struck with Stupid Hammer, Not fixed
