@@ -93,14 +93,15 @@ Clone the repository and run these commands from its folder. Game files are not 
 
 ### Linux
 
-Install Python 3, Clang, LLD, .NET 10 SDK, pkg-config, and development packages for Vulkan, SDL2, Cairo, OpenSSL and FFmpeg (`libavcodec`, `libavutil`, `libswscale`). Then build and launch:
+Install Python 3, Clang, LLD, .NET 10 SDK, pkg-config, make, xz, and development packages for Vulkan, SDL2, Cairo, and OpenSSL. Then build FFmpeg and the game:
 
 ```sh
+bash Source/tools/build_bundled_ffmpeg.sh
 python3 build.py
 ./Build/catherine
 ```
 
-Linux requires an x86-64-v3-capable CPU. `--pgo` is not supported.
+Keep `ffmpeg-runtime/` beside the executable for bundled playback. Linux requires an x86-64-v3-capable CPU. `--pgo` is not supported.
 
 ### Windows
 

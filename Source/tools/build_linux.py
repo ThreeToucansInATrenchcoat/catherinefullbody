@@ -45,14 +45,14 @@ def make_overlays(root, manifest, output):
     return overlays
 
 
-def native_command(unit, root, objects, overlays, compilers, vulkan_include):
+def native_command(unit, root, objects, overlays, compilers, vulkan_include, ffmpeg_environment):
     recipe = unit["command"]
     cplusplus = Path(unit["source"]).suffix in {".cpp", ".cxx", ".cc"}
     command = [compilers[cplusplus], "-pthread", "-march=x86-64-v3"]
     command += ["-I", str(objects / "include")]
     if Path(unit["source"]).name == "movie_decoder.cpp":
         command += subprocess.check_output(
-            ["pkg-config", "--cflags", "libavcodec", "libavutil", "libswscale"], text=True
+            ["pkg-config", "--cflags", "libavcodec", "libavutil", "libswscale"], text=True, env=ffmpeg_environment
         ).split()
     if not cplusplus:
         command += ["-std=gnu17"]
@@ -148,6 +148,15 @@ def run_linux(root, manifest, options):
     dotnet = str(local_dotnet) if local_dotnet.is_file() else shutil.which("dotnet")
     if not dotnet and not options.check_dependencies:
         raise SystemExit("The .NET 10 SDK is required to embed the Linux asset installer.")
+    ffmpeg_prefix = build / "ffmpeg" / "install"
+    ffmpeg_lib = ffmpeg_prefix / "lib"
+    bundled_ffmpeg = (ffmpeg_lib / "pkgconfig/libavcodec.pc").is_file()
+    ffmpeg_environment = dict(os.environ)
+    if bundled_ffmpeg:
+        ffmpeg_environment["PKG_CONFIG_LIBDIR"] = str(ffmpeg_lib / "pkgconfig")
+        ffmpeg_environment.pop("PKG_CONFIG_PATH", None)
+    elif os.environ.get("CATHERINE_REQUIRE_BUNDLED_FFMPEG") == "1":
+        raise SystemExit("Build the bundled FFmpeg with Source/tools/build_bundled_ffmpeg.sh first.")
     objects = build / "obj-linux"
     overlays_dir = objects / "vfs"
     logs = build / "logs" / "linux"
@@ -170,7 +179,7 @@ def run_linux(root, manifest, options):
     overlays = make_overlays(root, manifest, overlays_dir)
 
     def compile_unit(unit):
-        command, obj = native_command(unit, root, objects, overlays, compilers, vulkan_include)
+        command, obj = native_command(unit, root, objects, overlays, compilers, vulkan_include, ffmpeg_environment)
         if options.check_dependencies:
             command.remove("-c")
             index = command.index("-o")
@@ -230,12 +239,23 @@ def run_linux(root, manifest, options):
         link.append(str(objects / (Path(arg).stem + ".o")) if arg.endswith(".obj") else arg)
     # Link to a fresh output so a failed link preserves any previous build.
     temporary = objects / (output + ".link")
+    if bundled_ffmpeg:
+        # RPATH also locates dependencies between the bundled libraries.
+        link += ["-L" + str(ffmpeg_lib), "-Wl,--disable-new-dtags,-rpath,$ORIGIN/ffmpeg-runtime"]
     link += [str(payload), "-ldl", "-lavcodec", "-lavutil", "-lswscale", "-lSDL2", "-lcrypto", "-lcairo", "-o", str(temporary)]
     result = subprocess.run(link, cwd=root, capture_output=True, text=True, errors="replace")
     (logs / "link.log").write_text(shlex.join(link) + "\n" + result.stdout + result.stderr)
     if result.returncode:
         temporary.unlink(missing_ok=True)
         raise SystemExit(f"Linux link failed. See {logs / 'link.log'}.")
+    if bundled_ffmpeg:
+        runtime = build / "ffmpeg-runtime"
+        runtime.mkdir(exist_ok=True)
+        for library in ("avcodec", "avutil", "swscale"):
+            files = [path for path in ffmpeg_lib.glob(f"lib{library}.so.*") if path.name.count(".") == 2]
+            if len(files) != 1:
+                raise SystemExit(f"Expected one bundled {library} SONAME in {ffmpeg_lib}.")
+            shutil.copy2(files[0], runtime / files[0].name)
     temporary.replace(build / output)
     shutil.copytree(root / "Source" / "CathAssets", build / "CathAssets", dirs_exist_ok=True)
     shutil.copy2(root / "Source" / "resources" / "assets-required.json", build)

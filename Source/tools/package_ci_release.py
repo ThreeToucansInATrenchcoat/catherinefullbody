@@ -32,6 +32,21 @@ if platform == 'Windows':
     shutil.copy2(root / 'Source/resources/INSTALL-ASSETS.txt', stage)
 else:
     shutil.copy2(build / 'catherine.png', stage)
+    runtime = stage / 'ffmpeg-runtime'
+    if runtime.exists():
+        shutil.rmtree(runtime)
+    shutil.copytree(build / 'ffmpeg-runtime', runtime)
+    ffmpeg_source = root / 'Source/third_party/ffmpeg'
+    sources = list(ffmpeg_source.glob('ffmpeg-*.tar.xz'))
+    assert len(sources) == 1
+    shutil.copy2(sources[0], runtime)
+    shutil.copy2(ffmpeg_source / 'COPYING.LGPLv2.1', runtime)
+    shutil.copy2(root / 'Source/tools/build_bundled_ffmpeg.sh', runtime)
+    (runtime / 'README.txt').write_text(
+        'FFmpeg is dynamically linked under the GNU LGPL v2.1 or later.\n'
+        'The corresponding source archive and build script are included here.\n'
+        'https://ffmpeg.org/\n'
+    )
 commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
 (stage / 'BUILD-INFO.txt').write_text(f'{version}\nCommit: {commit}\nPlatform: {platform} x86-64\nBuilt by GitHub Actions.\n')
 readme = 'Catherine: Full Body PC Port - ' + version + '\n\n'
@@ -41,7 +56,7 @@ readme += 'When updating, keep your existing assets.pak, save.dat and catherine-
 if platform == 'Windows':
     readme += 'Run Catherine.exe.\n'
 else:
-    readme += 'Run ./catherine. Requires an x86-64-v3 CPU, Vulkan, SDL2, Cairo, OpenSSL and FFmpeg libraries.\n'
+    readme += 'Run ./catherine. Requires an x86-64-v3 CPU, Vulkan, SDL2, Cairo, and OpenSSL. FFmpeg is bundled.\n'
     readme += 'Asset setup also requires SPIRV-Tools and KDialog or Zenity.\n'
 (stage / 'README.txt').write_text(readme)
 artwork = json.loads((stage / 'CathAssets/artwork-manifest.json').read_text())
