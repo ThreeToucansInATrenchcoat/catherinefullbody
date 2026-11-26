@@ -58,13 +58,13 @@ A 64-bit x86-64-v3-capable CPU and a Vulkan-capable graphics card with current d
 
 ## Installation
 
-1. Use your own fully decrypted, extracted copy of the North American or European Nintendo Switch release (title ID `0100BF00112C0000`) and its 1.0.1 update. You can use a tool such as NSPUnpacker to prepare the files. The port accepts extracted files only.
+1. Use your own copy of the North American or European Nintendo Switch release (title ID `0100BF00112C0000`) and its 1.0.1 update. Decrypt and extract the update together with the base game to produce one merged extraction folder. You can use a tool such as NSPUnpacker to prepare the files. The port accepts extracted files only.
 2. On Windows, launch `Catherine.exe` and point setup at the extracted files when prompted. Setup builds `assets.pak`, then generates the Vulkan shaders. See the [Windows setup guide](Source/resources/INSTALL-ASSETS.txt) for details.
-3. On Linux, launch `./Build/catherine` and select the extracted game and update folders when prompted. The built-in installer creates `assets.pak` and then generates the Vulkan shaders. First-time setup uses SPIRV-Tools and KDialog or Zenity. Building the executable requires the .NET 10 SDK.
+3. On Linux, launch `./Build/catherine` and select the merged extraction folder when prompted. The built-in installer creates `assets.pak` and then generates the Vulkan shaders. First-time setup uses SPIRV-Tools and KDialog or Zenity. Building the executable requires the .NET 10 SDK.
 
 ### Example extracted folder structure
 
-Select the `ExtractedGame` folder when setup asks for the game files, and `ExtractedUpdate` when it asks for the update files. The folder names are examples; they can be stored anywhere.
+Select the single `ExtractedGame` folder when setup asks for the game files. This folder contains the base game with the 1.0.1 update applied during extraction. The folder name is an example; it can be stored anywhere.
 
 ```text
 ExtractedGame/
@@ -75,6 +75,7 @@ ExtractedGame/
 │   └── subsdk1
 └── romfs/
     └── data/
+        ├── Base.cpk
         ├── Keyfree.cpk
         ├── Model.cpk
         ├── Patch.cpk
@@ -82,17 +83,13 @@ ExtractedGame/
         ├── movie/
         │   ├── mov000.usm
         │   └── ...
+        ├── movie2/
+        │   ├── mov429.usm
+        │   └── ...
         └── ...
-
-ExtractedUpdate/
-└── romfs/
-    └── data/
-        ├── Base.cpk
-        └── movie2/
-            └── mov429.usm
 ```
 
-Keep **all** extracted game files and subfolders; `...` represents files omitted from this example. The update tree shows the two update files the asset builder needs. A folder containing the already merged, supported game and update files also works.
+Keep **all** extracted game files and subfolders; `...` represents files omitted from this example. The updated `Base.cpk` and `movie2/mov429.usm` should already be present in this merged folder. You do not need to locate a separate update folder.
 
 Setup scans subfolders and reads the files in place, so you do not need to copy them into the port's folder. The `exefs` files above have no file extension. Setup requires decrypted, extracted files, not an NSP/XCI container or a single `romfs.bin` image. It creates `assets.pak` in the game's build/release folder and then generates the Vulkan shaders from that package.
 
