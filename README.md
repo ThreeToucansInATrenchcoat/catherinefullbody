@@ -7,7 +7,7 @@ I will say this has been a way more complicated port than anything else I've rel
 ## Features
 
 - Native Windows and Linux support.
-- 60 FPS by default, with an uncapped option. Code patches and interpolation enable higher frame rates, including interpolation for puzzle levels.
+- 60 FPS by default, with an uncapped option. Code patches and interpolation enable higher frame rates, You'd be surprised just how many things broke when you go over 30 fps, most have been fixed but there may be minor things left that still run at the wrong speed.
 - Full keyboard and mouse support.
 - Button prompts switch automatically between keyboard and mouse icons and the active controller’s icons.
 - Updated Menus, Xbox controllers and more now have updated tutorials.
