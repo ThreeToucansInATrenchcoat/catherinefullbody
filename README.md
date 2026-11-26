@@ -43,19 +43,6 @@ I will say this has been a way more complicated port than anything else I've rel
 
 </details>
 
-## System requirements
-
-These are estimated hardware targets for 1080p with anti-aliasing off, not verified minimum requirements. Performance will vary by scene and settings; Linux hardware targets have not been separately validated.
-
-| Component | 1080p / 60 FPS target | 1080p / 120 FPS target |
-| --- | --- | --- |
-| CPU | Intel Core i5-10400 / AMD Ryzen 5 3600 or equivalent | Intel Core i5-12400F / AMD Ryzen 5 5600 or equivalent |
-| GPU | NVIDIA GeForce GTX 1660 Super / AMD Radeon RX 5600 XT or equivalent | NVIDIA GeForce RTX 3060 Ti / AMD Radeon RX 6700 XT or equivalent |
-| RAM | 8 GB estimated minimum; 16 GB recommended | 16 GB |
-| Storage | 20 GB free for the installed game; allow approximately 35 GB during setup, including extracted game files | Same |
-
-A 64-bit x86-64-v3-capable CPU and a Vulkan-capable graphics card with current drivers are required.
-
 ## Installation
 
 1. Decrypt and extract your own North American or European Switch copy (`0100BF00112C0000`) with update **1.0.1**, using a tool such as NSPUnpacker.
