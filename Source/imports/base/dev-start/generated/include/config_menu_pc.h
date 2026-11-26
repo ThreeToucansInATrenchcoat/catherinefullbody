@@ -2,6 +2,7 @@
 
 #include <uchar.h>
 #include "config_pc_host.h"
+#include "menu_mouse_pc.h"
 #include "config_bindings_ui.h"
 #include "pc_dialogs.h"
 #include "pc_dropdown.h"
@@ -404,6 +405,7 @@ static inline void catherine_config_pc_release(Cpu *c, uint64_t menu) {
     pc_brightness.menu = 0;
     pc_config_arrow_key = pc_config_arrow_repeat = 0;
     pc_config_arrow_wait = 0;
+    catherine_menu_cursor_set(8, 0);
     catherine_config_setting(PC_CONFIG_END, 1);
     for (unsigned slot = 0; slot < PC_TEXT_SLOTS; ++slot) pc_destroy_text(c, slot);
     memset(&catherine_config_pc, 0, sizeof catherine_config_pc);
@@ -414,6 +416,7 @@ static inline void catherine_config_pc_prepare(Cpu *c, uint64_t menu) {
     catherine_config_pc_release(c, catherine_config_pc.menu);
     catherine_config_setting(PC_CONFIG_BEGIN, 1);
     catherine_config_setting(PC_BINDING_PLAYER, 1);
+    catherine_menu_cursor_set(8, 1);
     catherine_config_setting(PC_CURSOR_HIDDEN, 0);
     catherine_config_pc.menu = menu;
     catherine_config_pc.previous_tab = (unsigned)-1;
@@ -1082,7 +1085,7 @@ static inline enum CatherineConfigPcInput catherine_config_pc_input(Cpu *c, uint
 
     catherine_config_pc_sync_tab(menu);
     pc_config_update_arrow_keys();
-    if (!native_rows && !catherine_config_pc_added_rows(menu, tab)) return CATHERINE_CONFIG_INPUT_NATIVE;
+    // Co-op can disable every Game row; pointer tabs/footer must still work.
 
     const uint64_t pad = LD64(0x7000cc9070ull);
     if (catherine_config_bindings_visible(menu) || catherine_bindings_ui.save_applying ||

@@ -28,6 +28,7 @@ def main():
                    "-luser32", "-o", str(EXE)], cwd=OUT, check=True)
     protected = {name: (BUILD / name).read_bytes() for name in ("save.dat", "catherine-settings.ini")}
     try:
+        check("cursor-policy")
         for version in range(1, 7):
             encoding = "utf-16" if version == 5 else "utf-8"
             INI.write_text(f"[Catherine]\nVersion={version}\nBindings=FEDCBA9876543210\nP2Bindings=FEDCBA9876543210\n", encoding=encoding)
@@ -91,6 +92,12 @@ Brightness=200
 vOiCeLaNgUaGe=1
 """)
         check("check-invalid")
+        check("intro-first")
+        check("intro-repeat")
+        assert load()["Progress"]["BabelIntroSeen"] == "true"
+        assert load()["Progress"]["ColosseumIntroSeen"] == "true"
+        assert load()["Progress"]["JokerIntroSeen"] == "true"
+
 
         # Exercise the actual installation's effective values without writing to it.
         (OUT / "installed.original.ini").write_bytes(protected["catherine-settings.ini"])

@@ -11,7 +11,8 @@ static float catherine_menu_frame_step(uint32_t frame_delta_bits, int *scaled) {
     if (!*scaled) return 1.0f;
     float delta;
     memcpy(&delta, &frame_delta_bits, sizeof delta);
-    if (!isfinite(delta) || delta < 0.001f || delta > 0.100f) return 1.0f;
+    // Sub-millisecond frames are valid at unlimited FPS; zero pauses the timeline.
+    if (!isfinite(delta) || delta < 0.0f || delta > 0.100f) return 1.0f;
     return delta * 30.0f;
 }
 

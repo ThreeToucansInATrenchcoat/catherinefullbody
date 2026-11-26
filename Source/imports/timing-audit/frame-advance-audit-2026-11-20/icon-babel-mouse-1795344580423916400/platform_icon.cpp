@@ -401,7 +401,7 @@ static std::atomic<unsigned> g_pointer_move_serial{0},g_pointer_click_serial{0};
 static std::atomic<unsigned> g_pointer_right_click_serial{0};
 static std::atomic<int> g_pointer_wheel_delta{0};
 static int g_pointer_last_x=INT_MIN,g_pointer_last_y=INT_MIN;
-InputLayout active_input_layout() noexcept{return InputLayout(g_input_layout.load(std::memory_order_relaxed));}
+InputLayout active_input_layout() noexcept;
 InputLayout prompt_input_layout() noexcept{
     return InputLayout(catherine::resolve_button_prompt_layout(unsigned(active_input_layout()),catherine::button_prompt_style()));
 }
@@ -416,6 +416,14 @@ static std::atomic<uint64_t> g_camera_keyboard_serial{0};
 static std::atomic<unsigned> g_p1_camera_layout{unsigned(InputLayout::KeyboardMouse)};
 static P1InputOwner g_p1_input_owner;
 static std::atomic<bool> g_input_menu_mode{true};
+static std::atomic<bool> g_p1_prompt_assigned{false};
+InputLayout active_input_layout() noexcept {
+    // Gameplay's shared prompts belong to P1; P2 activity must not replace them.
+    return InputLayout(g_input_menu_mode.load(std::memory_order_relaxed) &&
+        !g_p1_prompt_assigned.load(std::memory_order_acquire)
+        ? g_input_layout.load(std::memory_order_relaxed)
+        : g_p1_camera_layout.load(std::memory_order_acquire));
+}
 static std::atomic<unsigned> g_raw_player_pad[2]{};
 static std::atomic<unsigned> g_connected_players{1};
 unsigned connected_player_count() noexcept{return g_connected_players.load(std::memory_order_acquire);}
@@ -593,6 +601,9 @@ extern "C" const char* catherine_keyboard_label(unsigned i){
     return catherine::keyboard_key_name(i<catherine::kKeyboardBindings?profile.keyboard[i]:0);
 }
 static int pointer_field(unsigned field) {
+    // Mouse confirmations are edge-triggered even when a new page opens.
+    if(field==7)return perf_background_window()?qa_input()->key==VK_LBUTTON:
+        g_window&&GetForegroundWindow()==g_window&&(GetAsyncKeyState(VK_LBUTTON)&0x8000);
     // A cumulative counter lets each active menu consume every wheel detent once.
     if(field==5)return g_pointer_wheel_delta.load(std::memory_order_relaxed);
     if(field==6)return int(g_pointer_right_click_serial.load(std::memory_order_relaxed));
@@ -623,6 +634,7 @@ extern "C" int catherine_dev_overlay_mouse(unsigned field) {
     return pointer_field(field);
 }
 
+extern "C" int catherine_menu_cursor_visible(void);
 extern "C" int catherine_config_setting(unsigned field, int change) {
     if(field==PC_BINDING_PLAYER){if(change==1||change==2)g_binding_player.store(unsigned(change-1));return int(g_binding_player.load());}
     if(field==PC_INPUT_MENU_MODE){if(change){g_input_menu_mode.store(change==2);if(change==2)g_keyboard_glyph_player.store(0);}return g_input_menu_mode.load();}
@@ -638,6 +650,7 @@ extern "C" int catherine_config_setting(unsigned field, int change) {
     if (field == PC_INPUT_LAYOUT) return int(active_input_layout());
     if (field == PC_CAMERA_INPUT_LAYOUT) return int(g_p1_camera_layout.load(std::memory_order_acquire));
     if (field == PC_CURSOR_HIDDEN) {
+        change = change && !catherine_menu_cursor_visible();
         if(g_hide_cursor.exchange(change!=0)!=bool(change) && g_window)
             PostMessageW(g_window,kCursorPolicy,0,0);
         return change!=0;
@@ -1055,7 +1068,7 @@ static void read_player_pads_native(PadState (&players)[2],bool (&connected)[2])
     std::vector<std::string> live_ids;for(const auto&device:controllers)live_ids.push_back(device.identity);
     config.input_devices=catherine::effective_input_devices(config.input_devices,live_ids);
     const bool menus=g_input_menu_mode.load(std::memory_order_relaxed);
-    g_keyboard_glyph_player.store(catherine::keyboard_glyph_owner(menus,config.input_devices),std::memory_order_release);
+    g_keyboard_glyph_player.store(0,std::memory_order_release);
     const bool focused=g_window&&GetForegroundWindow()==g_window;
     static auto last=std::chrono::steady_clock::now();const auto now=std::chrono::steady_clock::now();
     const double dt=std::chrono::duration<double>(now-last).count();last=now;
@@ -1110,6 +1123,7 @@ static void read_player_pads_native(PadState (&players)[2],bool (&connected)[2])
         // P2's native character-select ring also uses P1 controls in menus.
     }
     g_p1_camera_layout.store(unsigned(p1_source.layout),std::memory_order_release);
+    g_p1_prompt_assigned.store(config.input_devices[0]!="auto",std::memory_order_release);
     g_connected_players.store(unsigned(connected[0])+unsigned(connected[1]),std::memory_order_release);
     g_apply_button.store((players[0].buttons&kX)!=0,std::memory_order_relaxed);
     publish_qa_pad_status(players,connected);
@@ -1147,7 +1161,7 @@ void read_player_pads(PadState (&players)[2],bool (&connected)[2]) {
     std::vector<std::string> live_ids;for(const auto&device:controllers)live_ids.push_back(device.identity);
     config.input_devices=catherine::effective_input_devices(config.input_devices,live_ids);
     const bool menus=g_input_menu_mode.load(std::memory_order_relaxed);
-    g_keyboard_glyph_player.store(catherine::keyboard_glyph_owner(menus,config.input_devices),std::memory_order_release);
+    g_keyboard_glyph_player.store(0,std::memory_order_release);
     const bool focused=true;
     static unsigned previous_key=0,previous_serial=0,previous_click=0;
     g_raw_key.store(bench->key);
@@ -1211,6 +1225,7 @@ void read_player_pads(PadState (&players)[2],bool (&connected)[2]) {
         // P2's native character-select ring also uses P1 controls in menus.
     }
     g_p1_camera_layout.store(unsigned(p1_source.layout),std::memory_order_release);
+    g_p1_prompt_assigned.store(config.input_devices[0]!="auto",std::memory_order_release);
     g_connected_players.store(unsigned(connected[0])+unsigned(connected[1]),std::memory_order_release);
     g_apply_button.store((players[0].buttons&kX)!=0,std::memory_order_relaxed);
     publish_qa_pad_status(players,connected);

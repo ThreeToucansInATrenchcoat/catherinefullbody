@@ -373,7 +373,7 @@ NativeValues load_native(const Ini& ini) {
     return values;
 }
 
-bool write_settings(const std::filesystem::path& path, const HostSettings& value, bool devmenu, const NativeValues& native) {
+bool write_settings(const std::filesystem::path& path, const HostSettings& value, bool devmenu, const NativeValues& native, const std::array<bool, 3>& intros) {
     if (path.empty()) return false;
     std::ostringstream out;
     out << "[Catherine]\nVersion=7\ndevmenu=" << (devmenu ? "true" : "false")
@@ -387,7 +387,10 @@ bool write_settings(const std::filesystem::path& path, const HostSettings& value
             << "\n" << prefix << "SwapSticks=" << int(profile.swap_sticks)
             << "\nP" << player + 1 << "Device=" << value.input_devices[player];
     }
-    out << "\n\n[Game]\n";
+    out << "\n\n[Progress]\nBabelIntroSeen=" << (intros[0] ? "true" : "false")
+        << "\nColosseumIntroSeen=" << (intros[1] ? "true" : "false")
+        << "\nJokerIntroSeen=" << (intros[2] ? "true" : "false") << "\n";
+    out << "\n[Game]\n";
     for (unsigned i = 0; i < native.size(); ++i) {
         if (!native[i]) continue;
         const auto& option = native_options[i];
@@ -480,6 +483,10 @@ struct RuntimeSettings {
 
     const bool devmenu = boolean(field(initial_ini(path), "Catherine", "devmenu"), true);
     NativeValues native = load_native(initial_ini(path));
+    std::array<bool, 3> intros{
+        bool(boolean(field(initial_ini(path), "Progress", "BabelIntroSeen"), false)),
+        bool(boolean(field(initial_ini(path), "Progress", "ColosseumIntroSeen"), false)),
+        bool(boolean(field(initial_ini(path), "Progress", "JokerIntroSeen"), false))};
 
     int resolve_rate() const {
         if (debug_rate != kAutoFps) return debug_rate;
@@ -520,7 +527,7 @@ bool store_host_settings(const HostSettings& value, bool explicit_fps) {
     auto& state = runtime();
     std::lock_guard lock(state.mutex);
     // Config choices take effect for preview, but only Save Settings writes them.
-    if (!state.config_editing && !write_settings(state.path, value, state.devmenu, state.native)) return false;
+    if (!state.config_editing && !write_settings(state.path, value, state.devmenu, state.native, state.intros)) return false;
     if (explicit_fps || value.fps != state.values.fps) state.debug_rate = kAutoFps;
     const bool keyboard_changed=state.values.keyboard!=value.keyboard||state.values.player2.keyboard!=value.player2.keyboard;
     state.values = value;
@@ -568,7 +575,7 @@ bool save_bindings_settings() {
     // Input Apply is an independent transaction: do not persist the main Config draft.
     auto persisted=state.config_editing?state.config_original:state.values;
     input_profile(persisted,state.binding_player)=input_profile(state.bindings_draft,state.binding_player);
-    if(!write_settings(state.path, persisted, state.devmenu, state.native))return false;
+    if(!write_settings(state.path, persisted, state.devmenu, state.native, state.intros))return false;
     const bool keyboard_changed=state.values.keyboard!=state.bindings_draft.keyboard||state.values.player2.keyboard!=state.bindings_draft.player2.keyboard;
     input_profile(state.values,state.binding_player)=input_profile(state.bindings_draft,state.binding_player);
     if(state.config_editing)input_profile(state.config_original,state.binding_player)=input_profile(state.bindings_draft,state.binding_player);
@@ -599,7 +606,7 @@ bool save_config_settings() {
     auto& state = runtime();
     std::lock_guard lock(state.mutex);
     if (!state.config_editing) return true;
-    if (!write_settings(state.path, state.values, state.devmenu, state.native)) return false;
+    if (!write_settings(state.path, state.values, state.devmenu, state.native, state.intros)) return false;
     state.config_original = state.values;
     state.config_original_debug_rate = state.debug_rate;
     return true;
@@ -721,7 +728,7 @@ extern "C" void catherine_load_native_config(unsigned char* game, int load_campa
         }
         if (i >= 2 || load_campaign_defaults) apply_native(game, option, *state.native[i]);
     }
-    if (missing && !write_settings(state.path, state.values, state.devmenu, state.native))
+    if (missing && !write_settings(state.path, state.values, state.devmenu, state.native, state.intros))
         std::fprintf(stderr, "Could not initialize catherine-settings.ini\n");
 }
 
@@ -735,9 +742,42 @@ extern "C" int catherine_save_native_config(const unsigned char* game, int campa
         const int value = read_native(game, native_options[i]);
         if (valid_native(native_options[i], value)) next[i] = value;
     }
-    if (!write_settings(state.path, state.values, state.devmenu, next)) return 0;
+    if (!write_settings(state.path, state.values, state.devmenu, next, state.intros)) return 0;
     state.native = next;
     state.config_original = state.values;
     state.config_original_debug_rate = state.debug_rate;
     return 1;
+}
+
+// Returns whether the requested optional-mode introduction should run.
+// An explicit DEV cutscene bypasses this policy at the guest call site.
+extern "C" int catherine_mode_intro_should_play(unsigned group, unsigned scene) {
+    const int mode = group == 102 && scene == 10 ? 0 : group == 101 && scene == 11 ? 1 :
+        group == 450 && scene == 10 ? 2 : -1;
+    if (mode < 0) return 1;
+    auto& state = catherine::runtime();
+    std::lock_guard lock(state.mutex);
+    if (state.intros[mode]) return 0;
+    state.intros[mode] = true;
+    if (!catherine::write_settings(state.path, state.values, state.devmenu, state.native, state.intros))
+        std::fprintf(stderr, "Could not save optional-mode introduction progress.\n");
+    return 1;
+}
+
+// Title menus accept a pointer for either keyboard assignment or P1 Auto.
+extern "C" int catherine_title_mouse_enabled() {
+    const auto settings = catherine::host_settings();
+    return settings.input_devices[0] == "auto" ||
+           settings.input_devices[0] == "keyboard" ||
+           settings.input_devices[1] == "keyboard";
+}
+
+// Transient native menu ownership; never persisted to the user's settings.
+static std::atomic<unsigned> catherine_menu_cursor_owners{0};
+extern "C" void catherine_menu_cursor_set(unsigned owner, int visible) {
+    if (visible) catherine_menu_cursor_owners.fetch_or(owner, std::memory_order_relaxed);
+    else catherine_menu_cursor_owners.fetch_and(~owner, std::memory_order_relaxed);
+}
+extern "C" int catherine_menu_cursor_visible(void) {
+    return catherine_menu_cursor_owners.load(std::memory_order_relaxed) != 0;
 }

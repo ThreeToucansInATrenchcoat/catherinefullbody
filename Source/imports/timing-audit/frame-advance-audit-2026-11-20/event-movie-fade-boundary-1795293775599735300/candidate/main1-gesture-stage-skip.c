@@ -6,6 +6,7 @@
 #include "camera_filter_clock.h"
 #include "menu_timing.h"
 #include "config_menu_pc.h"
+#include "dev_loader_native.h"
 extern int catherine_dev_title_request(Cpu *c);
 
 void f_70000001c0(Cpu *c);
@@ -49436,6 +49437,20 @@ L_7000056330:;
 
 void f_7000056350(Cpu *c) {
     FN_ENTER(0x7000056350ull);
+    extern int catherine_mode_intro_should_play(unsigned, unsigned);
+    CatherineDevLoadStatus intro_request = {0};
+    intro_request.version = CATHERINE_DEV_LOADER_VERSION;
+    catherine_dev_loader_status(&intro_request);
+    const unsigned intro_group = LD32(c->x[0] + 0x10);
+    const unsigned intro_scene = LD32(c->x[0] + 0x14);
+    const int explicit_playback = intro_request.busy &&
+        intro_request.target_id == 100000000u + intro_group * 1000u + intro_scene;
+    if (!explicit_playback && !catherine_mode_intro_should_play(intro_group, intro_scene)) {
+        /* Match the completed request state without creating an event task.
+         * The common script continues into its normal mode selector. */
+        ST8(0x7000d00084ull, 1);
+        return;
+    }
     Flags F = {0};
     uint64_t x0 = c->x[0], x8 = c->x[8], x9 = c->x[9], x19 = c->x[19], x30 = c->x[30], sp_ = c->sp;
     sp_ = (uint64_t)(sp_ - 0x50ull);

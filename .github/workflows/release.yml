@@ -1,0 +1,96 @@
+name: Build release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag to create after both builds pass (blank builds artifacts only)'
+        required: false
+        default: ''
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2025
+            platform: Windows
+          - os: ubuntu-24.04
+            platform: Linux
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Prepare Windows compiler and headers
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force C:/catherine | Out-Null
+          New-Item -ItemType Junction -Path C:/catherine/recomp -Target $env:GITHUB_WORKSPACE | Out-Null
+          $vswhere = "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
+          $vs = & $vswhere -latest -products '*' -property installationPath
+          $candidates = @('C:/Program Files/LLVM/bin/clang.exe', "$vs/VC/Tools/Llvm/x64/bin/clang.exe")
+          $compiler = $candidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+          if (-not $compiler) { throw 'LLVM compiler not found on runner' }
+          & $compiler --version
+          git clone --depth 1 --branch v1.4.321 https://github.com/KhronosGroup/Vulkan-Headers.git Build/vulkan-headers
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python Source/tools/prepare_windows_ci.py --clang "$compiler"
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld pkg-config libvulkan-dev libsdl2-dev libcairo2-dev libssl-dev libavcodec-dev libavutil-dev libswscale-dev
+      - name: Build
+        run: python build.py --jobs 2
+      - name: Run input and timing checks
+        if: runner.os == 'Windows'
+        run: python Source/tools/release_input_checks.py
+      - name: Fetch unchanged Windows video libraries
+        if: runner.os == 'Windows'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download v1.0.0-alpha.1 --pattern '*Windows-x86_64.zip' --dir Build/previous
+      - name: Package
+        env:
+          RELEASE_VERSION: ${{ inputs.release_tag || github.ref_name }}
+        run: python Source/tools/package_ci_release.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Catherine-${{ matrix.platform }}
+          path: Build/release/*
+          if-no-files-found: error
+      - name: Upload build logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ matrix.platform }}
+          path: Build/logs/
+  publish:
+    if: startsWith(github.ref, 'refs/tags/') || inputs.release_tag != ''
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: Catherine-*
+          path: release
+          merge-multiple: true
+      - name: Publish Alpha 2
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" release/* --target "$GITHUB_SHA" --prerelease --title "Alpha 2" --notes-file .github/alpha-2-notes.md

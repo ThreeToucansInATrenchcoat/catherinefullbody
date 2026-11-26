@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
-#include "config_pc_host.h"
+#include "menu_mouse_pc.h"
 #include "pc_dialogs.h"
 
 extern unsigned catherine_pc_display_dialog;
@@ -15,11 +15,20 @@ static struct {
     unsigned move_serial, click_serial, ready, right_click_serial;
 } catherine_pc_question_mouse;
 
+/* A closed persistent dialog must not keep hiding the title menu cursor.
+ * Relinquish its cursor ownership once, on dismissal. */
+static inline void catherine_pc_question_cursor(unsigned type, unsigned phase) {
+    static CatherineMenuPointer pointer;
+    if (type != 0x3a && type != 0x19 && !pointer.active) return;
+    const int visible = (type == 0x3a || type == 0x19) && phase == 4;
+    catherine_menu_pointer_show(&pointer, 4, visible);
+}
+
 /* Use the same authored choice count as the native Up/Down handler. This
  * includes New Game and other Yes/No questions, not just Config questions.
  * One-button notices and questions with other layouts remain untouched. */
 static inline int catherine_pc_question_mouse_eligible(unsigned type) {
-    return (int16_t)LD16(0x70007a1210ull + (uint64_t)type * 0x14ull + 4) == 2;
+    return type == 0x19 || (int16_t)LD16(0x70007a1210ull + (uint64_t)type * 0x14ull + 4) == 2;
 }
 
 /* Call when an eligible question opens, before its opening animation.
@@ -46,10 +55,13 @@ static inline int catherine_pc_question_mouse_row(uint64_t dialog, int x, int y)
      * The authored 720p captures independently verify these sprite bounds. */
     const float base = catherine_pc_question_mouse_float(dialog + 0x5c);
     if (!isfinite(base) || base < -100 || base > 500) return -1;
-    if (x < 565.f * 1.5f || x > (565.f + 156.f) * 1.5f) return -1;
+    const unsigned type = LD32(dialog + 0xc);
+    const int wide = LD16(0x70007a1210ull + (uint64_t)type * 0x14ull + 0xa) == 0;
+    const float left = wide ? 428.f : 565.f, width = wide ? 430.f : 156.f;
+    if (x < left * 1.5f || x > (left + width) * 1.5f) return -1;
     const float first = (191.f + base + 19.f) * 1.5f;
     const float pitch = 23.f * 1.5f;
-    for (int row = 0; row < 2; ++row) {
+    for (int row = 0; row < (type == 0x19 ? 3 : 2); ++row) {
         const float centre = first + row * pitch;
         if (y >= centre - pitch * .5f && y < centre + pitch * .5f) return row;
     }
@@ -58,7 +70,8 @@ static inline int catherine_pc_question_mouse_row(uint64_t dialog, int x, int y)
 
 static inline void catherine_pc_question_mouse_select(Cpu *c, uint64_t dialog, unsigned row) {
     const unsigned old = LD32(dialog + 0xec);
-    if (old == row || old >= 2 || row >= 2) return;
+    const unsigned count = LD32(dialog + 0xc) == 0x19 ? 3 : 2;
+    if (old == row || old >= count || row >= count) return;
 
     /* Mirror the native Up/Down branch, including its brush fade and cursor
      * refresh. The original confirm branch remains responsible for the result. */
@@ -112,6 +125,10 @@ static inline uint32_t catherine_pc_question_mouse_input(Cpu *c, uint64_t dialog
      * highlighted choice and user-configured gameplay bindings. */
     if (right_clicked) {
         pressed &= ~(confirm | 0x4008u);
+        if (LD32(dialog + 0xc) == 0x19) {
+            if (LD32(dialog + 0xe8) >= 15 && !LD32(dialog + 0xf0)) pressed |= 0x4000u;
+            return pressed;
+        }
         catherine_pc_question_mouse_select(c, dialog, 1);
         if (LD32(dialog + 0xe8) >= 15 && !LD32(dialog + 0xf0)) pressed |= confirm;
         return pressed;

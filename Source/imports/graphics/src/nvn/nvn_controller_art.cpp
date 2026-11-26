@@ -152,6 +152,17 @@ std::vector<Patch> patches(unsigned kind,bool keyboard) {
             add(bottom[i], x[i], 36, 32, 32);
         }
     }
+    if (kind == 15) {
+        // Character/stage selection has its own face-button atlas, with both
+        // lettered and positional rows. Use the same CathAssets substitutions.
+        constexpr unsigned buttons[] = {0, 2, 3, 1};
+        constexpr int xs[] = {664, 704, 748, 788};
+        for (int y : {216, 260})
+            for (unsigned i=0; i<4; ++i) {
+                const unsigned button = keyboard && buttons[i] < 2 ? 20 + buttons[i] : buttons[i];
+                add(button, xs[i], y, 36, 36);
+            }
+    }
     if(kind==14){for(unsigned i=0;i<4;++i)add(i&1,276+40*i,640,32,36);}
     if (kind == 13) {
         // Question & Answer has its own Confirm badge and two platform rows.

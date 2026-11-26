@@ -21341,6 +21341,9 @@ L_70000f28b8:;
     fp_op_s(c, FOP_ADD, 0, 3, 1);
     { uint64_t ea = x19 + 0x2cull; ST32(ea, VS32(0)); }
 L_70000f28f8:;
+    /* Skipped animation ticks bypass the earlier calls that publish sp_.
+     * Publish this frame before drawing, or the child overwrites saved registers. */
+    c->sp = sp_;
     { uint64_t ea = x19 + 0x0ull; uint64_t v = LD64(ea); x8 = (uint64_t)(v); }
     { uint64_t ea = x8 + 0x40ull; uint64_t v = LD64(ea); x8 = (uint64_t)(v); }
     c->x[0] = (uint64_t)(0ull | x19);
@@ -21519,6 +21522,9 @@ L_70000f2b0c:;
     fp_op_s(c, FOP_ADD, 0, 3, 1);
     { uint64_t ea = x19 + 0x2cull; ST32(ea, VS32(0)); }
 L_70000f2b54:;
+    /* Skipped animation ticks bypass the earlier calls that publish sp_.
+     * Publish this frame before drawing, or the child overwrites saved registers. */
+    c->sp = sp_;
     { uint64_t ea = x19 + 0x0ull; uint64_t v = LD64(ea); x8 = (uint64_t)(v); }
     { uint64_t ea = x8 + 0x40ull; uint64_t v = LD64(ea); x8 = (uint64_t)(v); }
     c->x[0] = (uint64_t)(0ull | x19);

@@ -20,7 +20,7 @@ using namespace catherine::visual;using namespace catherine::visual::babel;
 Matrix translation(float x){return {1,0,0,x,0,1,0,0,0,0,1,0,0,0,0,1};}
 void clock_at(unsigned tick,float phase){uint32_t b;std::memcpy(&b,&phase,4);visual=(uint64_t(tick)<<32)|b|0x80000000u;}
 void setup(unsigned player,uint64_t base,unsigned id){using namespace fixture;
- region(base,0x4000);put(0x10000+8*player,base);put(base,uint64_t(0x7000abff90));put(base+0x20,base+0x1000);
+ region(base,0x4000);put(0x10000+8*player,base);put(base,uint64_t(0x7000abff90));put(base+0xe0,uint32_t(player));put(base+0x20,base+0x1000);
  put(base+0x1000,uint64_t(0x70009f5a10));uint32_t ids[]={id,30,1,0};assert(copy(base+0x15a0,ids,16,true));put(base+0x1468,base+0x2000);put(base+0x14a8,base+0x3000);put(base+0x2138,base+0x2800);put(base+0x2800,uint32_t(126));
  put(base+0x3020,transpose(translation(900)));put(base+0x3120,transpose(translation(910)));
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "timing_clock.h"
+#include "puzzle_player_timing.h"
 
 static inline int catherine_is_floor_two_sheep(uint64_t actor) {
     if (LD64(actor) != 0x7000ac46e0ull || LD32(actor + 0x190) != 0)
@@ -36,7 +37,7 @@ static inline int catherine_hold_floor_two_sheep_queue(uint64_t actor, uint64_t 
 
 static inline int catherine_hold_puzzle_action_step(uint64_t player, uint64_t steps) {
     if ((LD8(0x7000d06360ull)&1u) || catherine_timing_tick() || steps != 1) return 0;
-    if (LD32(player + 0xe0) != 0) {
+    if (!catherine_puzzle_player_timing(player)) {
         const uint32_t state = LD32(player + 0x18c);
         if ((state != 0x10001 && state != 0x2001) || !catherine_is_floor_two_sheep(player)) return 0;
         const uint32_t action = LD32(player + 0x178);

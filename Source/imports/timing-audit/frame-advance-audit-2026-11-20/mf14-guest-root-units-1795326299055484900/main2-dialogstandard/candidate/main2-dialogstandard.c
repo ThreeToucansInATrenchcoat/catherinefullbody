@@ -29303,6 +29303,9 @@ L_7000072878:;
     (void)(fsub32(&F, (uint32_t)c->x[26], 0x4ull));
     if (fc_sub32(&F, CC_NE)) { goto L_7000072704; }
 L_7000072884:;
+    /* Optional-mode quit modal: expose the pointer only while its choices
+     * are on screen, then restore the character selector's hidden cursor. */
+    catherine_pc_question_cursor(LD32(x19 + 0xc), LD32(x19 + 8));
     x0 = (uint64_t)(c->sp + 0x18ull);
     c->x[30] = 0x700007288cull; c->x[0] = x0; c->x[8] = x8; c->x[9] = x9; c->x[10] = x10; c->x[13] = x13; f_700009dad0(c); x0 = c->x[0]; x8 = c->x[8]; x9 = c->x[9]; x10 = c->x[10]; x13 = c->x[13];
     x0 = (uint64_t)(0ull | 0ull);

@@ -1950,7 +1950,10 @@ void f_7000291490(Cpu *c) {
     catherine_title_screen(c, 0);
 }
 
+extern int catherine_title_mouse_enabled(void);
+
 static void catherine_title_screen(Cpu *c, int returning_from_piano) {
+    catherine_config_setting(PC_CURSOR_HIDDEN, !catherine_title_mouse_enabled());
 
     FN_ENTER(0x7000291490ull);
     CatherineReturnPan return_pan = {0};
@@ -2229,6 +2232,16 @@ L_700029186c:;
     if (((x8 >> 3) & 1) != 0) { goto L_700029186c; }
     }
     if (return_pan.active) catherine_piano_return_pan(c, c->x[19], &return_pan, 0);
+    if (return_pan.active) {
+        /* Camera 0 is the wine-glass opening; native startup queues idle 2
+         * after it. A return must install idle 2 directly after the reverse. */
+        Cpu idle = *c;
+        idle.x[0] = c->x[19]; idle.x[1] = 8;
+        idle.x[2] = 2; idle.x[3] = 0xffffffffu;
+        idle.v[0] = 0; idle.v[1] = 0;
+        f_7000292b90(&idle);
+        goto L_7000291900;
+    }
     { uint64_t ea = c->x[19] + 0x2ecull; uint64_t v = LD32(ea); x8 = (uint64_t)(v); }
     if ((uint32_t)x8 == 0) { goto L_70002918e8; }
     x30 = 0x7000291888ull; c->x[8] = x8; c->x[30] = x30; f_700009c1a0(c); x0 = c->x[0]; x1 = c->x[1]; x2 = c->x[2]; x8 = c->x[8]; x30 = c->x[30];
@@ -2489,7 +2502,7 @@ void f_7000291be0(Cpu *c) {
     FN_ENTER(0x7000291be0ull);
     extern void catherine_pc_exit_game(void);
     extern int catherine_config_setting(unsigned,int);
-    catherine_config_setting(PC_CURSOR_HIDDEN,0); // Initial main menu owns the pointer.
+    catherine_config_setting(PC_CURSOR_HIDDEN, !catherine_title_mouse_enabled()); // Main menu owns the pointer.
     Flags F = {0};
     uint64_t x0 = c->x[0], x1 = c->x[1], x2 = c->x[2], x8 = c->x[8], x24 = c->x[24], x30 = c->x[30];
     c->sp = (uint64_t)(c->sp - 0x1d0ull);
@@ -2547,7 +2560,7 @@ void f_7000291be0(Cpu *c) {
     c->x[23] = (uint64_t)(c->x[23] + 0xfa0ull);
     { uint64_t ea = c->sp + 0x0ull; ST32(ea, VS32(0)); }
 L_7000291c8c:;
-    catherine_config_setting(PC_CURSOR_HIDDEN, 0);
+    catherine_config_setting(PC_CURSOR_HIDDEN, !catherine_title_mouse_enabled());
     x30 = 0x7000291c90ull; c->x[8] = x8; c->x[24] = x24; c->x[30] = x30; f_70002907f0(c); x0 = c->x[0]; x1 = c->x[1]; x2 = c->x[2]; x8 = c->x[8]; x30 = c->x[30];
     { uint64_t ea = c->x[22] + 0x0ull; uint64_t v = LD16(ea); x8 = (uint64_t)(v); }
     (void)(fsub32(&F, (uint32_t)x8, (uint32_t)((uint32_t)c->x[28])));
@@ -5488,7 +5501,7 @@ void f_7000294530(Cpu *c) {
     const int pc_difficulty_piano = c->x[21] == x19 + 0xbaull && c->x[3] == 4;
     const int pc_puzzle_type_piano = c->x[21] == x19 + 0xbcull && c->x[3] == 2;
     if (pc_main_piano || pc_story_piano || pc_babel_piano || pc_difficulty_piano || pc_puzzle_type_piano) {
-        catherine_config_setting(PC_CURSOR_HIDDEN, 0);
+        catherine_config_setting(PC_CURSOR_HIDDEN, !catherine_title_mouse_enabled());
         if (pc_main_piano && catherine_piano_exit_pending(c, x19)) { x22 = 0; goto L_7000294848; }
         if (pc_main_piano) catherine_piano_exit_help(c, x19, LD32(c->x[20] + 4 * 0x30ull + 0x18ull));
         if (pc_main_piano || pc_babel_piano) {

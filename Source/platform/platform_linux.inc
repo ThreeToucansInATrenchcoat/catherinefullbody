@@ -304,7 +304,7 @@ void update_input() {
     const auto owners=catherine::effective_input_devices(config.input_devices,controller_ids());
     const bool menus=input_menu.load();
     const unsigned key_owner=catherine::keyboard_glyph_owner(menus,owners);
-    keyboard_glyph_player.store(key_owner,std::memory_order_release);
+    keyboard_glyph_player.store(0,std::memory_order_release);
     PadState keyboard;
     keyboard_mouse_pad(keyboard,catherine::input_profile(config,key_owner).keyboard,key_held,
                        MouseLookFilter::axis(mouse_look.x),MouseLookFilter::axis(mouse_look.y));
@@ -338,6 +338,11 @@ void update_input() {
         }
     }
     if (menus) pad_state[0]=catherine::menu_input_pad(keyboard,live,config.bindings,config.swap_sticks);
+    if (owners[0] == "keyboard") input_layout.store(unsigned(InputLayout::KeyboardMouse));
+    else if (owners[0] != "auto") {
+        for (unsigned i=0;i<2;++i) if (controller_identity[i].id==owners[0])
+            input_layout.store(unsigned(controller_identity[i].layout));
+    }
     unsigned overlay=0;
     const uint64_t buttons=menu_pad.buttons;
     for (auto [mask,action]:std::array<std::pair<uint64_t,unsigned>,6>{
@@ -773,6 +778,7 @@ extern "C" void catherine_pc_exit_game() {
 extern "C" int catherine_dev_overlay_mouse(unsigned field);
 extern "C" int catherine_pc_mouse(unsigned field) {
     if (catherine_dev_gui_input_blocked()) return 0;
+    if (field==7) return key_held(1);
     const int value=catherine_dev_overlay_mouse(field);
     return field==5?int(unsigned(value)*120):value;
 }
@@ -797,6 +803,7 @@ extern "C" const char* catherine_input_device_label(unsigned player,unsigned ind
     return "Disconnected";
 }
 
+extern "C" int catherine_menu_cursor_visible(void);
 extern "C" int catherine_config_setting(unsigned field,int change) {
     using namespace catherine;
     auto config=host_settings();
@@ -808,7 +815,7 @@ extern "C" int catherine_config_setting(unsigned field,int change) {
         if (change) input_menu.store(change==2);
         return input_menu.load();
     }
-    if (field==PC_CURSOR_HIDDEN) {hide_cursor.store(change!=0);return change!=0;}
+    if (field==PC_CURSOR_HIDDEN) {change = change && !catherine_menu_cursor_visible();hide_cursor.store(change!=0);return change!=0;}
     if (field==PC_MENU_KEYBOARD_ALLOWED) return 1;
     if (field==PC_CONNECTED_PLAYERS) return connected_player_count();
     if (field==PC_INPUT_LAYOUT || field==PC_CAMERA_INPUT_LAYOUT) return input_layout.load();

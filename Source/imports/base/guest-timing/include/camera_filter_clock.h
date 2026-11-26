@@ -9,9 +9,10 @@ static uint32_t catherine_camera_filter_weight(uint32_t b,int retention){
  memcpy(&b,&g,4);return b;
 }
 
-#include "config_pc_host.h"
+#include "menu_mouse_pc.h"
 /* Only manual look targets are retained; scripted camera transforms still run. */
 static int catherine_mouse_camera_hold(void) {
+ if (catherine_menu_cursor_visible()) return 0;
  catherine_config_setting(PC_CURSOR_HIDDEN,1);
  return catherine_config_setting(PC_CAMERA_INPUT_LAYOUT,0)==0;
 }

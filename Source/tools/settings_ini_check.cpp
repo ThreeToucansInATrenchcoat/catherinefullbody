@@ -6,6 +6,8 @@
 #include <fstream>
 #include <iostream>
 
+extern "C" int catherine_mode_intro_should_play(unsigned, unsigned);
+extern "C" int catherine_title_mouse_enabled();
 using namespace catherine;
 using Game = std::array<unsigned char, 0x9b60>;
 
@@ -34,7 +36,32 @@ int main(int argc, char** argv) {
     const std::string mode = argv[1];
     auto s = host_settings();
     auto game = native_fixture();
-    if (mode == "check-migration") {
+    if (mode == "cursor-policy") {
+        for (const auto& p1 : {"auto", "keyboard", "qa:Pad 1", "disconnected-pad"}) {
+            for (const auto& p2 : {"none", "keyboard", "qa:Pad 2"}) {
+                s.input_devices = {p1, p2};
+                assert(store_host_settings(s));
+                const bool expected = std::string(p1) == "auto" || std::string(p1) == "keyboard" || std::string(p2) == "keyboard";
+                assert(bool(catherine_title_mouse_enabled()) == expected);
+            }
+        }
+        return 0;
+    }
+    if (mode == "intro-first" || mode == "intro-repeat") {
+        const int expected = mode == "intro-first";
+        assert(catherine_mode_intro_should_play(102, 10) == expected);
+        assert(catherine_mode_intro_should_play(101, 11) == expected);
+        assert(catherine_mode_intro_should_play(450, 10) == expected);
+        assert(catherine_mode_intro_should_play(102, 10) == 0);
+        assert(catherine_mode_intro_should_play(101, 11) == 0);
+        assert(catherine_mode_intro_should_play(103, 10) == 1);
+        assert(catherine_mode_intro_should_play(101, 10) == 1);
+        begin_config_settings();
+        s.fps = 30;
+        assert(store_host_settings(s));
+        assert(end_config_settings());
+        assert(store_host_settings(host_settings()));
+    } else if (mode == "check-migration") {
         check_persisted(s);
         catherine_load_native_config(game.data(), 1);
         assert(game[0x2fb] == static_cast<unsigned char>(-40));

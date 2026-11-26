@@ -78,6 +78,7 @@ static struct {
     int pending_click;
     unsigned right_click_serial;
     int back_release_pending;
+    uint32_t page_release_mask;
 } catherine_piano_mouse;
 
 static inline void catherine_piano_mouse_sync(uint64_t menu) {
@@ -86,6 +87,8 @@ static inline void catherine_piano_mouse_sync(uint64_t menu) {
     catherine_piano_mouse.click_serial = (unsigned)catherine_pc_mouse(3);
     catherine_piano_mouse.right_click_serial = (unsigned)catherine_pc_mouse(6);
     catherine_piano_mouse.pending_click = -1;
+    const uint64_t pad = LD64(0x7000cc9070ull);
+    catherine_piano_mouse.page_release_mask = pad ? LD32(pad) & ((1u<<13)|(1u<<14)) : 0;
     catherine_piano_mouse.rows = 0;
     catherine_piano_mouse.page = 0;
 }
@@ -102,12 +105,22 @@ static inline void catherine_piano_mouse_begin(uint64_t menu) {
 static inline int catherine_piano_mouse_input(uint64_t menu, unsigned rows, unsigned page,
                                              int selected, uint32_t *pressed) {
     const uint32_t confirm = 1u << 13;
+    // The mapped mouse button also appears in native held/repeat input. Only
+    // the click serial below may confirm; holding across a page must not.
+    if (catherine_pc_mouse(7)) *pressed &= ~confirm;
     if (catherine_piano_mouse.menu != menu) catherine_piano_mouse_begin(menu);
     if (catherine_piano_mouse.rows != rows || catherine_piano_mouse.page != page) {
         catherine_piano_mouse_sync(menu);
         catherine_piano_mouse.rows = rows;
         catherine_piano_mouse.page = page;
     }
+    // Confirm/Back held through a transition must be released before either
+    // action can fire on the destination page, for keyboard and controllers.
+    const uint64_t input_pad = LD64(0x7000cc9070ull);
+    const uint32_t held = input_pad ? LD32(input_pad) : 0;
+    const uint32_t release_mask = catherine_piano_mouse.page_release_mask;
+    *pressed &= ~release_mask;
+    catherine_piano_mouse.page_release_mask &= held;
     const unsigned moves = (unsigned)catherine_pc_mouse(2);
     const unsigned clicks = (unsigned)catherine_pc_mouse(3);
     const int moved = moves != catherine_piano_mouse.move_serial;

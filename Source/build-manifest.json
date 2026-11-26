@@ -273,7 +273,8 @@
         "C:/catherine/recomp/Source/imports/base/dev-start/generated/include/config_menu_pc.h",
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/config_bindings_ui.h",
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/pc_dialogs.h",
-        "C:/catherine/recomp/Source/imports/base/dev-start/generated/include/pc_dropdown.h"
+        "C:/catherine/recomp/Source/imports/base/dev-start/generated/include/pc_dropdown.h",
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/menu_mouse_pc.h"
       ]
     },
     {
@@ -339,7 +340,8 @@
         "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/mf14-guest-root-units-1795326299055484900/main2-dialogstandard/candidate/source-vfs.json",
         "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/mf14-guest-root-units-1795326299055484900/main2-dialogstandard/candidate/main2-dialogstandard.c",
         "C:/catherine/recomp/Source/imports/base/dev-start/generated/include/dev_loader_native.h",
-        "C:/catherine/recomp/Source/imports/base/dev-start/generated/include/dev_loader_api.h"
+        "C:/catherine/recomp/Source/imports/base/dev-start/generated/include/dev_loader_api.h",
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/menu_mouse_pc.h"
       ]
     },
     {
@@ -430,7 +432,10 @@
         "C:/catherine/recomp/Source/imports/base/dev-start/generated/include/puzzle_recipe_host.h",
         "C:/catherine/recomp/Source/imports/base/dev-start/generated/include/supplemental_dev_levels.h",
         "C:/catherine/recomp/Source/imports/base/dev-start/generated/include/dev_world_guest.h",
-        "C:/catherine/recomp/Source/imports/base/dev-start/generated/include/dev_movie_guest.h"
+        "C:/catherine/recomp/Source/imports/base/dev-start/generated/include/dev_movie_guest.h",
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/menu_mouse_pc.h",
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/landing_mouse_pc.h",
+        "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/mf14-guest-root-units-1795326299055484900/main3-walknative60/candidate/main3-walknative60.c"
       ]
     },
     {
@@ -499,7 +504,8 @@
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/camera_filter_clock.h",
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/config_pc_host.h",
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/rocket_camera_sample.h",
-        "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/mf14-guest-root-units-1795326299055484900/main4-middlefloor-pure-phases/candidate/source-vfs.json"
+        "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/mf14-guest-root-units-1795326299055484900/main4-middlefloor-pure-phases/candidate/source-vfs.json",
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/menu_mouse_pc.h"
       ]
     },
     {
@@ -622,7 +628,9 @@
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/camera_filter_clock.h",
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/config_pc_host.h",
         "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/targetfov-candidate-1795226352084917200/qualified-source/unit6/puzzle_follow_sample.h",
-        "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/targetfov-candidate-1795226352084917200/qualified-source/unit6/puzzle_orbit_clock.h"
+        "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/targetfov-candidate-1795226352084917200/qualified-source/unit6/puzzle_orbit_clock.h",
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/puzzle_player_timing.h",
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/menu_mouse_pc.h"
       ]
     },
     {
@@ -669,7 +677,8 @@
         "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/guest-operation-review-2026-11-21/summon-actor-ages-candidate-1795275045683728200/summon_actor_clock.h",
         "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/actionnative60-candidate-1795222253773294100/qualified-source/unit7/puzzle_action_ticks.h",
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/timing_clock.h",
-        "C:/catherine/recomp/Source/imports/base/guest-timing/include/app_elapsed.h"
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/app_elapsed.h",
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/puzzle_player_timing.h"
       ]
     },
     {
@@ -720,7 +729,8 @@
         "C:/catherine/recomp/Source/imports/timing-audit/status-cadence-evidence/unsupported-fall-181/integration-final-family-boundary-plan/timing-include-preview/app_elapsed.h",
         "C:/catherine/recomp/Source/imports/timing-audit/status-cadence-evidence/unsupported-fall-181/integration-final-family-boundary-plan/timing-include-preview/timing_clock.h",
         "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/type6wait-candidate-1795238710428422200/p1_reaction_ticks.h",
-        "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/peerwait-candidate-1795238388500836300/qualified-source/unit8/npc_clock_scope.h"
+        "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/peerwait-candidate-1795238388500836300/qualified-source/unit8/npc_clock_scope.h",
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/puzzle_player_timing.h"
       ]
     },
     {
@@ -894,7 +904,9 @@
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/timing_clock.h",
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/app_elapsed.h",
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/camera_filter_clock.h",
-        "C:/catherine/recomp/Source/imports/base/guest-timing/include/config_pc_host.h"
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/config_pc_host.h",
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/puzzle_player_timing.h",
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/menu_mouse_pc.h"
       ]
     },
     {
@@ -1025,7 +1037,9 @@
         "C:/catherine/recomp/Source/imports/base/dev-start/generated/include/dev_loader_api.h",
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/puzzle_timing.h",
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/timing_clock.h",
-        "C:/catherine/recomp/Source/imports/base/guest-timing/include/app_elapsed.h"
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/app_elapsed.h",
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/menu_mouse_pc.h",
+        "C:/catherine/recomp/Source/imports/base/guest-timing/include/puzzle_pause_mouse.h"
       ]
     },
     {
