@@ -120,7 +120,8 @@ The executable is `Build\catherine.exe`.
 
 ## Planned
 
-- Further optimisation.
+- Further optimisation, especially for handhelds.
+- Support for other versions of the game.
 - A custom level editor.
 - More configuration options like FSR and DLSS.
 - Restore the voting system. Other online features are outside my plans, but forks and pull requests are welcome.
