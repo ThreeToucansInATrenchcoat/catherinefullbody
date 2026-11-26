@@ -30,6 +30,8 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+      - name: Fetch matching Vulkan headers
+        run: git clone --depth 1 --branch v1.4.363 https://github.com/KhronosGroup/Vulkan-Headers.git Build/vulkan-headers
       - name: Prepare Windows compiler and headers
         if: runner.os == 'Windows'
         shell: pwsh
@@ -38,19 +40,21 @@ jobs:
           New-Item -ItemType Junction -Path C:/catherine/recomp -Target $env:GITHUB_WORKSPACE | Out-Null
           $vswhere = "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
           $vs = & $vswhere -latest -products '*' -property installationPath
-          $candidates = @('C:/Program Files/LLVM/bin/clang.exe', "$vs/VC/Tools/Llvm/x64/bin/clang.exe")
+          $candidates = @("$vs/VC/Tools/Llvm/x64/bin/clang.exe", 'C:/Program Files/LLVM/bin/clang.exe')
           $compiler = $candidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
           if (-not $compiler) { throw 'LLVM compiler not found on runner' }
           & $compiler --version
-          git clone --depth 1 --branch v1.4.321 https://github.com/KhronosGroup/Vulkan-Headers.git Build/vulkan-headers
-          if ($LASTEXITCODE) { exit $LASTEXITCODE }
           python Source/tools/prepare_windows_ci.py --clang "$compiler"
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y clang lld pkg-config libvulkan-dev libsdl2-dev libcairo2-dev libssl-dev libavcodec-dev libavutil-dev libswscale-dev
+      - name: Check compiler and Vulkan headers
+        run: python Source/tools/check_ci_toolchain.py
       - name: Build
+        env:
+          CATHERINE_VULKAN_INCLUDE: ${{ github.workspace }}/Build/vulkan-headers/include
         run: python build.py --jobs 2
       - name: Run input and timing checks
         if: runner.os == 'Windows'
