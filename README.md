@@ -62,6 +62,40 @@ A 64-bit x86-64-v3-capable CPU and a Vulkan-capable graphics card with current d
 2. On Windows, launch `Catherine.exe` and point setup at the extracted files when prompted. Setup builds `assets.pak`, then generates the Vulkan shaders. See the [Windows setup guide](Source/resources/INSTALL-ASSETS.txt) for details.
 3. On Linux, launch `./Build/catherine` and select the extracted game and update folders when prompted. The built-in installer creates `assets.pak` and then generates the Vulkan shaders. First-time setup uses SPIRV-Tools and KDialog or Zenity. Building the executable requires the .NET 10 SDK.
 
+### Example extracted folder structure
+
+Select the `ExtractedGame` folder when setup asks for the game files, and `ExtractedUpdate` when it asks for the update files. The folder names are examples; they can be stored anywhere.
+
+```text
+ExtractedGame/
+├── exefs/
+│   ├── main
+│   ├── sdk
+│   ├── subsdk0
+│   └── subsdk1
+└── romfs/
+    └── data/
+        ├── Keyfree.cpk
+        ├── Model.cpk
+        ├── Patch.cpk
+        ├── Puzzle.cpk
+        ├── movie/
+        │   ├── mov000.usm
+        │   └── ...
+        └── ...
+
+ExtractedUpdate/
+└── romfs/
+    └── data/
+        ├── Base.cpk
+        └── movie2/
+            └── mov429.usm
+```
+
+Keep **all** extracted game files and subfolders; `...` represents files omitted from this example. The update tree shows the two update files the asset builder needs. A folder containing the already merged, supported game and update files also works.
+
+Setup scans subfolders and reads the files in place, so you do not need to copy them into the port's folder. The `exefs` files above have no file extension. Setup requires decrypted, extracted files, not an NSP/XCI container or a single `romfs.bin` image. It creates `assets.pak` in the game's build/release folder and then generates the Vulkan shaders from that package.
+
 ## Compile from source
 
 Clone this repository and run the build commands from the checkout root. Original game files are only needed when setting up the built game, not when compiling it.
