@@ -1,0 +1,13 @@
+**THIS IS AN ALPHA BUILD, EXPECT BUGS. I could've done with more testers, thats where you guys come in**
+
+- Fixed controller assignments in Babel Pair and Colosseum.
+- Fixed Player 2’s movement speed and added smooth model interpolation.
+- Fixed menus and player introductions running too fast with unlimited FPS.
+- Improved mouse support and cursor visibility across menus.
+- Fixed button prompts to match Player 1’s controls.
+- Prevented held inputs from accidentally activating the next menu.
+- Babel and Colosseum introductions now play only once.
+- Fixed the unwanted wine-glass zoom when returning to the title screen.
+- Fixed a crash after answering confessional questions.
+- Fixed missing shadows beneath the piano keys in the main menu.
+- Scott struck with Stupid Hammer, Not fixed

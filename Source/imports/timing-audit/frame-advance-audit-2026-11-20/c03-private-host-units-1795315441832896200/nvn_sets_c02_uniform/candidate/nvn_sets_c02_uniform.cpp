@@ -1133,7 +1133,8 @@ uint32_t gather_textures_compat(const std::vector<const ShaderInfo*>& shaders) {
             sampled = texture ? get<Texture>(texture) : nullptr;
         }
         // Vulkan depth comparisons require a depth format. Use the depth dummy for an unbound or color slot.
-        if (!sampled || (b->image.depth && !(format_aspect(sampled->format) & VK_IMAGE_ASPECT_DEPTH_BIT))) texture = 0;
+        // format_aspect uses NVN bits: depth=1, stencil=2 (not Vulkan aspect flags).
+        if (!sampled || (b->image.depth && !(format_aspect(sampled->format) & 1u))) texture = 0;
         if (texture) sampled->last_sampled = submit_ns;
         r.texture = texture;
         if (texture ? !sampled_ready(texture) : !dummy_ready(b->image)) out |= kNeedBreak;

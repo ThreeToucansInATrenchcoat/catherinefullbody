@@ -114,7 +114,8 @@ uint32_t gather(const Plan& p) {
         } else {
             lookup_handle(handle,texture,r.sampler,&r.view);sampled=texture?get<Texture>(texture):nullptr;
         }
-        if(!sampled||(recipe.contract.depth&&!(format_aspect(sampled->format)&VK_IMAGE_ASPECT_DEPTH_BIT)))texture=0;
+        // format_aspect uses NVN bits: depth=1, stencil=2 (not Vulkan aspect flags).
+        if(!sampled||(recipe.contract.depth&&!(format_aspect(sampled->format)&1u)))texture=0;
         if(texture)sampled->last_sampled=submit_ns;r.texture=texture;
         // Keep the old resolver's exact first-observation/cache-reset semantics.
         // Export values, never a newly guessed persistent pool incarnation.
