@@ -121,4 +121,7 @@ layout and verification commands.
 
 ## AI
 
-Yes. I used AI.
+<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/a59f8bb0-82cd-4485-9eb9-127091fd33c6" />
+
+Yea.
+
