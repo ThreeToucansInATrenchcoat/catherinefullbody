@@ -352,11 +352,19 @@ void update_input() {
     if (catherine_dev_gui_input_blocked()) pad_state[0]=pad_state[1]={};
 }
 
+#ifdef CATHERINE_LINUX_PGO_TRAIN
+extern "C" int __llvm_profile_write_file();
+#endif
+
 [[noreturn]] void close_game(int result) {
     if (window) SDL_HideWindow(window);
     catherine_linux_freeze_saves();
     // The guest owns process-lifetime render and audio threads. Running C++
     // static destructors while they still use those objects races shutdown.
+#ifdef CATHERINE_LINUX_PGO_TRAIN
+    if (__llvm_profile_write_file())
+        std::fputs("Could not save the Linux PGO training profile.\n", stderr);
+#endif
     std::_Exit(result);
 }
 

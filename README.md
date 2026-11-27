@@ -96,7 +96,7 @@ python3 build.py --jobs 2
 ./Build/catherine
 ```
 
-The header clone is a one-time setup step. System Vulkan headers alone must be version 1.4.363 or newer. Keep `ffmpeg-runtime/` beside the executable for bundled playback. Linux requires an x86-64-v3-capable CPU. `--pgo` is not supported; the default Linux build uses O3 and ThinLTO without the Windows compiler profile.
+The header clone is a one-time setup step. System Vulkan headers alone must be version 1.4.363 or newer. Keep `ffmpeg-runtime/` beside the executable for bundled playback. Linux requires an x86-64-v3-capable CPU. The default Linux build uses O3 and ThinLTO. Use `--pgo` with a [locally trained Linux profile](Source/native-renderer/README.md#linux-profile-guided-builds).
 
 ### Windows
 

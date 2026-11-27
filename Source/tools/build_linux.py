@@ -153,12 +153,21 @@ def build_setup_payload(root, build, objects, logs, compiler, dotnet, icon_png):
 
 
 def run_linux(root, manifest, options):
-    if options.pgo:
-        raise SystemExit("Linux builds do not yet support the Windows PGO recipe.")
     output = options.output or "catherine"
     if output not in {"catherine", "catherine1", "catherine2"}:
         raise SystemExit("Linux output must be catherine, catherine1 or catherine2.")
     build = root / "Build"
+    training = os.environ.get("CATHERINE_PGO_TRAIN") == "1"
+    if training and (options.pgo or options.check_dependencies or output != "catherine1"):
+        raise SystemExit("CATHERINE_PGO_TRAIN=1 requires --output catherine1 and a normal compile.")
+    profile = build / "pgo-linux" / "merged.profdata"
+    if options.pgo and not options.check_dependencies and not profile.is_file():
+        raise SystemExit(f"Missing Linux PGO profile: {profile}")
+    profile_flags = []
+    if training:
+        profile_flags = [f"-fprofile-generate={profile.parent}", "-fprofile-update=atomic"]
+    elif options.pgo and not options.check_dependencies:
+        profile_flags = [f"-fprofile-use={profile}"]
     local_dotnet = build / "dotnet-sdk" / "dotnet"
     dotnet = str(local_dotnet) if local_dotnet.is_file() else shutil.which("dotnet")
     if not dotnet and not options.check_dependencies:
@@ -172,9 +181,10 @@ def run_linux(root, manifest, options):
         ffmpeg_environment.pop("PKG_CONFIG_PATH", None)
     elif os.environ.get("CATHERINE_REQUIRE_BUNDLED_FFMPEG") == "1":
         raise SystemExit("Build the bundled FFmpeg with Source/tools/build_bundled_ffmpeg.sh first.")
-    objects = build / "obj-linux"
+    mode = "linux-pgo-train" if training else "linux-pgo" if profile_flags else "linux"
+    objects = build / ("obj-" + mode)
     overlays_dir = objects / "vfs"
-    logs = build / "logs" / "linux"
+    logs = build / "logs" / mode
     overlays_dir.mkdir(parents=True, exist_ok=True)
     logs.mkdir(parents=True, exist_ok=True)
     compilers = (os.environ.get("CC", "clang"), os.environ.get("CXX", "clang++"))
@@ -199,6 +209,9 @@ def run_linux(root, manifest, options):
 
     def compile_unit(unit):
         command, obj = native_command(unit, root, objects, overlays, compilers, vulkan_include, ffmpeg_environment)
+        command += profile_flags
+        if training:
+            command.append("-DCATHERINE_LINUX_PGO_TRAIN")
         if options.check_dependencies:
             command.remove("-c")
             index = command.index("-o")
@@ -220,6 +233,8 @@ def run_linux(root, manifest, options):
                 recipe = unit["command"]
                 sources.update(localize(recipe[i + 1], root)
                                for i, arg in enumerate(recipe) if arg == "-ivfsoverlay")
+                if options.pgo:
+                    sources.add(str(profile))
                 mtime = obj.stat().st_mtime_ns
                 if dependencies and all(path.is_file() and path.stat().st_mtime_ns <= mtime
                                         for path in [Path(__file__), *map(Path, sources)]):
@@ -251,7 +266,7 @@ def run_linux(root, manifest, options):
     payload = build_setup_payload(root, build, objects, logs, compilers[0], dotnet, icon_png)
     rsp = build / "Catherine.rsp"
     args = [line.strip().strip('"') for line in rsp.read_text().splitlines() if line.strip()]
-    link = [compilers[1], "-pthread"]
+    link = [compilers[1], "-pthread", *profile_flags]
     for arg in args:
         if arg in WINDOWS_FLAGS | WINDOWS_LIBRARIES or arg.startswith("-Wl,/") or arg.endswith(".res"):
             continue

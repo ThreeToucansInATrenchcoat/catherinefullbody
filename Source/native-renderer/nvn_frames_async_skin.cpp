@@ -421,7 +421,7 @@ bool async_cpu_compute() {
 }
 
 bool frame_timeline_requested() {
-#if defined(_WIN32)
+#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
     static const bool on = env_int("NX_GPU_TIMELINE_SYNC") == 1 && env_int("NX_REPLAY_THREAD") == 1 &&
                            async_gpu() && !pipelined() && env_int("NX_SUBMIT_CHUNK_DRAWS") == 0;
     return on;

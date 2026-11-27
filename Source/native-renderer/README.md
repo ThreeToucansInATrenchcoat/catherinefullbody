@@ -24,6 +24,22 @@ pinned to the reference release to remove timestamp-only differences.
 Linux uses the same sources with O3 + ThinLTO, without the Windows compiler profile.
 The build creates local aliases for the preserved virtual include identities.
 
+## Linux profile-guided builds
+
+Build a training executable with the same Clang version used for the final build:
+
+```sh
+CATHERINE_PGO_TRAIN=1 python3 build.py --output catherine1 --jobs 12
+LLVM_PROFILE_FILE="$PWD/Build/pgo-linux/%p.profraw" ./Build/catherine1
+```
+
+Play representative scenes and close the game normally so the training build writes its profile. More runs can cover additional scenes. Merge the captures and build:
+
+```sh
+llvm-profdata merge -o Build/pgo-linux/merged.profdata Build/pgo-linux/*.profraw
+python3 build.py --pgo --jobs 12
+```
+
 Checks:
 
 ```powershell

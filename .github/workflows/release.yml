@@ -96,9 +96,9 @@ jobs:
           pattern: Catherine-*
           path: release
           merge-multiple: true
-      - name: Publish Alpha 2.3.1 pre-release
+      - name: Publish Alpha 2.3.2 pre-release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
         run: |
-          gh release create "$RELEASE_TAG" release/* --target "$GITHUB_SHA" --prerelease --latest=false --title "Alpha 2.3.1" --notes-file .github/alpha-2.3.1-notes.md
+          gh release create "$RELEASE_TAG" release/* --target "$GITHUB_SHA" --prerelease --latest=false --title "Alpha 2.3.2" --notes-file .github/alpha-2.3.2-notes.md
