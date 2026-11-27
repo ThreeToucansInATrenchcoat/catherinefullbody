@@ -9,7 +9,7 @@ I will say this has been a way more complicated port than anything else I've rel
 - Native Windows and Linux support.
 - 60 FPS by default, with an uncapped option. Code patches and interpolation enable higher frame rates, You'd be surprised just how many things broke when you go over 30 fps, most have been fixed but there may be minor things left that still run at the wrong speed.
 - Full keyboard and mouse support.
-- Button prompts switch automatically between keyboard and mouse icons and the active controllerâ€™s icons.
+- Button prompts switch automatically between keyboard and mouse icons and the active controller’s icons.
 - Updated Menus, Xbox controllers and more now have updated tutorials.
 - Real game configuration options that are inside of the game like a real PC game. Includes things like MSAA anti-aliasing and FMV smoothing.
 - Local co-op. Online play had to be removed. Babel Pair and Colosseum automatically use local co-op and stay greyed out until two distinct input devices are connected and assigned.
@@ -59,17 +59,17 @@ Typical layout when the game and update are extracted together:
 
 ```text
 ExtractedGame/
-â”œâ”€â”€ exefs/
-â”‚   â”œâ”€â”€ main
-â”‚   â”œâ”€â”€ sdk
-â”‚   â””â”€â”€ ...
-â””â”€â”€ romfs/
-    â””â”€â”€ data/
-        â”œâ”€â”€ Base.cpk
-        â”œâ”€â”€ Model.cpk
-        â”œâ”€â”€ movie/
-        â”œâ”€â”€ movie2/
-        â””â”€â”€ ...
+├── exefs/
+│   ├── main
+│   ├── sdk
+│   └── ...
+└── romfs/
+    └── data/
+        ├── Base.cpk
+        ├── Model.cpk
+        ├── movie/
+        ├── movie2/
+        └── ...
 ```
 
 Select `ExtractedGame`, keeping all files inside it. `...` means other files are omitted from this example.
