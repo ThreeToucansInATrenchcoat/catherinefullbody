@@ -121,7 +121,7 @@ layout and verification commands.
 
 ## AI
 
-<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/a59f8bb0-82cd-4485-9eb9-127091fd33c6" />
+<img width="244" height="394" alt="image" src="https://github.com/user-attachments/assets/3bb8e7af-bc77-4e6d-b2b1-a63202bbcd04" />
 
 Yea.
 
