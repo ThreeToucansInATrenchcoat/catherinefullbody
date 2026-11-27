@@ -16,7 +16,9 @@ I will say this has been a way more complicated port than anything else I've rel
 
 ## Screenshots
 
-![The piano-key main menu](screenshots/01-piano-main-menu.webp)
+Piano menu and gameplay captures: 3840×2160, MSAA 8×, and 8192×8192 shadows on Windows.
+
+![The piano-key main menu at 4K with MSAA 8x](screenshots/01-piano-main-menu.webp)
 
 <details>
 <summary>Configuration and bindings (4K)</summary>
@@ -31,15 +33,15 @@ I will say this has been a way more complicated port than anything else I've rel
 </details>
 
 <details>
-<summary>Ten puzzle floors on Linux with live FPS</summary>
+<summary>Eight puzzle stages and two confessional landings (4K)</summary>
 
 | | |
 | --- | --- |
 | ![Stage 1, Floor 1](screenshots/puzzle-stage-01-floor-01.webp)<br>Stage 1, Floor 1 | ![Stage 2, Floor 2](screenshots/puzzle-stage-02-floor-02.webp)<br>Stage 2, Floor 2 |
-| ![Stage 2, Floor 3](screenshots/puzzle-stage-02-floor-03.webp)<br>Stage 2, Floor 3 | ![Stage 3, Floor 3](screenshots/puzzle-stage-03-floor-03.webp)<br>Stage 3, Floor 3 |
-| ![Stage 5, Floor 1](screenshots/puzzle-stage-05-floor-01.webp)<br>Stage 5, Floor 1 | ![Stage 7, Floor 1](screenshots/puzzle-stage-07-floor-01.webp)<br>Stage 7, Floor 1 |
-| ![Stage 7, Floor 2](screenshots/puzzle-stage-07-floor-02.webp)<br>Stage 7, Floor 2 | ![Stage 8, Floor 1](screenshots/puzzle-stage-08-floor-01.webp)<br>Stage 8, Floor 1 |
-| ![Stage 9, Floor 3](screenshots/puzzle-stage-09-floor-03.webp)<br>Stage 9, Floor 3 | ![Stage 9, Floor 5](screenshots/puzzle-stage-09-floor-05.webp)<br>Stage 9, Floor 5 |
+| ![Stage 3, Floor 1](screenshots/puzzle-stage-03-floor-01.webp)<br>Stage 3, Floor 1 | ![Stage 5, Floor 2](screenshots/puzzle-stage-05-floor-02.webp)<br>Stage 5, Floor 2 |
+| ![Stage 6, Floor 4](screenshots/puzzle-stage-06-floor-04.webp)<br>Stage 6, Floor 4 | ![Stage 7, Floor 1](screenshots/puzzle-stage-07-floor-01.webp)<br>Stage 7, Floor 1 |
+| ![Stage 8, Floor 1](screenshots/puzzle-stage-08-floor-01.webp)<br>Stage 8, Floor 1 | ![Stage 9, Floor 6](screenshots/puzzle-stage-09-floor-06.webp)<br>Stage 9, Floor 6 |
+| ![Quadrangle landing after Stage 5, Floor 2](screenshots/landing-quadrangle-05-02.webp)<br>Quadrangle landing after Stage 5, Floor 2 | ![Day 9, fifth landing](screenshots/landing-day-09-fifth.webp)<br>Day 9, fifth landing |
 
 </details>
 
