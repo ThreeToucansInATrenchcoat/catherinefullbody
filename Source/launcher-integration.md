@@ -60,7 +60,7 @@ launches reuse them. Users adding the repository manually can still use Catherin
 own file picker; catalog-assisted selection and backup defaults need the listing.
 
 Submission: https://quiverlauncher.com/submit
-Repository: https://github.com/scottjco/catherinefullbody
+Repository: https://github.com/ThreeToucansInATrenchcoat/catherinefullbody
 
 Checked against Quiver source commit `01f0b8822b45c23e5a26d6311afc198d6b0525c6`:
 
