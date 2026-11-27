@@ -18,7 +18,7 @@ I will say this has been a way more complicated port than anything else I've rel
 
 Piano menu and gameplay captures: 3840×2160, MSAA 8×, and 8192×8192 shadows on Windows.
 
-![The piano-key main menu at 4K with MSAA 8x](screenshots/01-piano-main-menu.webp)
+![The piano-key main menu at 4K with MSAA 8x](screenshots/piano-main-menu-4k-msaa8-alpha23.webp)
 
 <details>
 <summary>Configuration and bindings (4K)</summary>
