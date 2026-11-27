@@ -159,5 +159,3 @@ layout and verification commands.
 <img width="244" height="394" alt="image" src="https://github.com/user-attachments/assets/3bb8e7af-bc77-4e6d-b2b1-a63202bbcd04" />
 
 Yea.
-
-Hi RyuseiHikari.~
