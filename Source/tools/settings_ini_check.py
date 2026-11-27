@@ -26,7 +26,8 @@ def main():
     command = [argument for argument in unit["command"] if argument != "-DNDEBUG"]
     subprocess.run(command[:command.index("-c")] + [str(ROOT / "Source/tools/settings_ini_check.cpp"),
                    "-luser32", "-o", str(EXE)], cwd=OUT, check=True)
-    protected = {name: (BUILD / name).read_bytes() for name in ("save.dat", "catherine-settings.ini")}
+    protected = {name: (BUILD / name).read_bytes() for name in ("save.dat", "catherine-settings.ini")
+                 if (BUILD / name).is_file()}
     try:
         for value, enabled in [(None, False), ("invalid", False), ("false", False), ("0", False), ("true", True), ("TRUE", True), ("1", True)]:
             INI.write_text("[Catherine]\n" + ("devmenu=" + value + "\n" if value is not None else ""))
@@ -169,18 +170,21 @@ vOiCeLaNgUaGe=1
         assert load()["Progress"]["JokerIntroSeen"] == "true"
 
 
-        # Exercise the actual installation's effective values without writing to it.
-        (OUT / "installed.original.ini").write_bytes(protected["catherine-settings.ini"])
-        INI.write_bytes(protected["catherine-settings.ini"])
-        system = protected["save.dat"][0xc8000:0xc8000+0x9810]
-        assert len(system) == 0x9810
-        (OUT / "legacy-system.bin").write_bytes(system)
-        check("migrate-install-copy")
-        shutil.copyfile(INI, OUT / "installed.migrated.ini")
+        if all(name in protected for name in ("save.dat", "catherine-settings.ini")):
+            # Exercise the actual installation's effective values without writing to it.
+            (OUT / "installed.original.ini").write_bytes(protected["catherine-settings.ini"])
+            INI.write_bytes(protected["catherine-settings.ini"])
+            system = protected["save.dat"][0xc8000:0xc8000+0x9810]
+            assert len(system) == 0x9810
+            (OUT / "legacy-system.bin").write_bytes(system)
+            check("migrate-install-copy")
+            shutil.copyfile(INI, OUT / "installed.migrated.ini")
+        else:
+            print("Private installation migration skipped: no local game save/settings; synthetic migration checks still run.")
     finally:
         EXE.unlink(missing_ok=True)
         assert all((BUILD / k).read_bytes() == v for k,v in protected.items())
-    print("Versions 1-7, both input profiles, native settings, locked campaign choices, invalid INI and private installation migration passed.")
+    print("Versions 1-7, both input profiles, native settings, locked campaign choices, invalid INI checks passed.")
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,6 @@
 """Execute the actual action15 branch with checked guest-call boundaries."""
 from pathlib import Path
-import subprocess, shutil, sys
+import subprocess, json, sys
 E = Path(__file__).resolve().parents[2]
 S = E/'Source/imports/timing-audit/frame-advance-audit-2026-11-20/type6wait-candidate-1795238710428422200/main8-type6wait.c'
 s = S.read_text()
@@ -49,5 +49,5 @@ int main() {
 }
 '''.replace('#include <cstdlib>', '#include <cstdlib>\n#include <initializer_list>').replace('BRANCH',branch)
 (B/'test.cpp').write_text(cpp)
-subprocess.run([shutil.which('clang++'),'-std=c++17','-O0',str(B/'test.cpp'),'-o',str(B/'test.exe')],check=True)
+subprocess.run([json.loads((E/'Source/build-manifest.json').read_text())['linker'],'-std=c++17','-O0',str(B/'test.cpp'),'-o',str(B/'test.exe')],check=True)
 sys.exit(subprocess.run([str(B/'test.exe')]).returncode)
