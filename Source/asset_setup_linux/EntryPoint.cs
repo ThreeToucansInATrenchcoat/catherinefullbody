@@ -10,7 +10,7 @@ static class EntryPoint
         var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ".."));
         string? requestedPack = null;
         var sources = new List<string>();
-        bool headless = false, scanOnly = false, nativeProgress = false;
+        bool headless = false, scanOnly = false, nativeProgress = false, launcher = false, packed = false;
         LinuxSetupDialogs? dialogs = null;
         using var cancellation = new CancellationTokenSource();
         Console.CancelKeyPress += (_, e) => { e.Cancel = true; cancellation.Cancel(); };
@@ -34,6 +34,10 @@ static class EntryPoint
                         requestedPack = Path.GetFullPath(args[++i]); break;
                     case "--scan" when i + 1 < args.Length:
                         sources.Add(Path.GetFullPath(args[++i])); break;
+                    case "--launcher-progress":
+                        launcher = true; break;
+                    case "--packed":
+                        packed = true; break;
                     case "--headless":
                         headless = true; break;
                     case "--native-progress":
@@ -56,7 +60,8 @@ static class EntryPoint
                 if (progress.Stage == lastStage && now - lastUpdate < 500 && progress.Fraction < 1) return;
                 lastStage = progress.Stage;
                 lastUpdate = now;
-                dialogs.Report(progress);
+                if (launcher) LauncherProgress.Report(progress);
+                else dialogs.Report(progress);
             }
             void Log(string text)
             {
@@ -64,7 +69,8 @@ static class EntryPoint
                 Console.Error.WriteLine(text);
             }
 
-            new Installer(root, pack, headless, Report, dialogs.Select, Log, cancellation.Token).Run(sources, scanOnly);
+            new Installer(root, pack, headless, Report, dialogs.Select, Log, cancellation.Token, packed).Run(sources, scanOnly);
+            if (launcher) Console.WriteLine("progress 1 Assets ready");
             return 0;
         }
         catch (OperationCanceledException) { return 2; }

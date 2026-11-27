@@ -11,6 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/prctl.h>
 #include <sys/wait.h>
 
 int catherine_dev_save_isolate_startup(void);
@@ -19,10 +20,13 @@ int catherine_linux_run(int (*guest)(void));
 
 extern const unsigned char catherine_asset_setup_start[], catherine_asset_setup_end[];
 
+static int prepare_only;
+static char *game_source, *update_source;
+
 static int asset_setup_error(const char *message) {
     fprintf(stderr, "%s\n", message);
     const char *headless = getenv("NX_HEADLESS");
-    if ((!headless || strcmp(headless, "1")) && (getenv("DISPLAY") || getenv("WAYLAND_DISPLAY")))
+    if (!prepare_only && (!headless || strcmp(headless, "1")) && (getenv("DISPLAY") || getenv("WAYLAND_DISPLAY")))
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Catherine asset setup", message, NULL);
     return 2;
 }
@@ -35,7 +39,7 @@ static int asset_tool_error(const char *text) {
 static int run_asset_tool(const char *root, char **args, char **progress_arg) {
     size_t size = (uintptr_t)catherine_asset_setup_end - (uintptr_t)catherine_asset_setup_start;
     char work[4096], temporary[4096], installer[4096];
-    if (snprintf(work, sizeof work, "%s/assets-setup-work", root) >= (int)sizeof work ||
+    if (snprintf(work, sizeof work, "%s/%s", root, getenv("RECOMPLAUNCHER_DATA") ? "cache/assets-setup-work" : "assets-setup-work") >= (int)sizeof work ||
         snprintf(temporary, sizeof temporary, "%s/.setup-XXXXXX", work) >= (int)sizeof temporary)
         return asset_tool_error("The installer path is too long.");
     if (mkdir(work, 0700) && errno != EEXIST)
@@ -75,6 +79,7 @@ static int run_asset_tool(const char *root, char **args, char **progress_arg) {
     }
     args[0] = installer;
     if (events[0] >= 0) *progress_arg = "--native-progress";
+    pid_t parent = getpid();
     pid_t child = fork();
     if (child < 0) {
         if (events[0] >= 0) { close(events[0]); close(events[1]); }
@@ -83,6 +88,8 @@ static int run_asset_tool(const char *root, char **args, char **progress_arg) {
         return asset_tool_error("Could not start the embedded asset tool.");
     }
     if (!child) {
+        // Cancelling launcher setup must not leave the embedded installer running.
+        if (prepare_only && (prctl(PR_SET_PDEATHSIG, SIGTERM) || getppid() != parent)) _exit(127);
         if (events[0] >= 0) {
             close(events[0]);
             if (dup2(events[1], STDOUT_FILENO) < 0) _exit(127);
@@ -109,10 +116,17 @@ static int run_asset_tool(const char *root, char **args, char **progress_arg) {
 
 static int run_asset_setup(const char *root, char **argv) {
     const char *hidden = getenv("NX_HEADLESS");
-    int headless = hidden && !strcmp(hidden, "1");
-    char *args[] = {NULL, "--root", (char *)root, headless ? "--headless" : NULL, NULL};
+    int headless = prepare_only || (hidden && !strcmp(hidden, "1"));
+    char *args[16] = {NULL, "--root", (char *)root};
+    int count = 3;
+    if (game_source) { args[count++] = "--scan"; args[count++] = game_source; }
+    if (update_source) { args[count++] = "--scan"; args[count++] = update_source; }
+    if (prepare_only) { args[count++] = "--packed"; args[count++] = "--launcher-progress"; }
+    char **progress_arg = &args[count];
+    if (headless) args[count++] = "--headless";
     int status = run_asset_tool(root, args, !headless && (getenv("DISPLAY") || getenv("WAYLAND_DISPLAY"))
-                                            ? &args[3] : NULL);
+                                            ? progress_arg : NULL);
+    if (prepare_only) return status;
     if (status == 127)
         return asset_setup_error("The asset installer stopped unexpectedly. See assets-errors.log.");
     if (status == 3)
@@ -124,11 +138,27 @@ static int run_asset_setup(const char *root, char **argv) {
 }
 
 int main(int argc, char **argv) {
+    for (int i = 1; i < argc; ++i) if (!strcmp(argv[i], "--prepare")) prepare_only = 1;
     char executable[4096];
     ssize_t length = readlink("/proc/self/exe", executable, sizeof(executable) - 1);
     if (length <= 0 || length == sizeof(executable) - 1) return 2;
     executable[length] = 0;
     *strrchr(executable, '/') = 0;
+    const char *requested_data = getenv("RECOMPLAUNCHER_DATA");
+    if (requested_data && *requested_data) {
+        char *data = realpath(requested_data, NULL);
+        struct stat info;
+        if (!data || stat(data, &info) || !S_ISDIR(info.st_mode) || strlen(data) >= sizeof executable) {
+            free(data); return asset_setup_error("RECOMPLAUNCHER_DATA must name an existing writable folder.");
+        }
+        if (setenv("RECOMPLAUNCHER_DATA", data, 1)) { free(data); return 2; }
+        char cache[4096];
+        if (snprintf(cache, sizeof cache, "%s/cache", data) >= (int)sizeof cache ||
+            (mkdir(cache, 0700) && errno != EEXIST)) { free(data); return 2; }
+        if (setenv("NX_DATA_ROOT", ".", 1)) { free(data); return 2; }
+        strcpy(executable, data);
+        free(data);
+    }
     if (argc == 5 && !strcmp(argv[1], "--translate-shader")) {
         char *args[] = {NULL, "--translate", argv[2], argv[3], argv[4], NULL};
         return run_asset_tool(executable, args, NULL);
@@ -138,6 +168,22 @@ int main(int argc, char **argv) {
     int menu = 0;
     char *pack = NULL;
     for (int i = 1; i < argc; ++i) {
+        if (!strcmp(argv[i], "--prepare")) continue;
+        char **destination = NULL;
+        const char *value = NULL;
+        if (!strncmp(argv[i], "--game=", 7)) { destination = &game_source; value = argv[i] + 7; }
+        else if (!strncmp(argv[i], "--update=", 9)) { destination = &update_source; value = argv[i] + 9; }
+        else if (!strcmp(argv[i], "--game") || !strcmp(argv[i], "--update")) {
+            destination = !strcmp(argv[i], "--game") ? &game_source : &update_source;
+            if (++i < argc) value = argv[i];
+        }
+        if (destination) {
+            struct stat info;
+            if (*destination || !value || !*value || !(*destination = realpath(value, NULL)) ||
+                stat(*destination, &info) || !S_ISDIR(info.st_mode))
+                return asset_setup_error("The supplied game or update folder does not exist or cannot be read.");
+            continue;
+        }
         if (!strcmp(argv[i], "--assets-pak") && !pack && i + 1 < argc) {
             pack = realpath(argv[++i], NULL);
             if (!pack) return asset_setup_error("Could not open the specified --assets-pak path.");
@@ -154,10 +200,15 @@ int main(int argc, char **argv) {
             }
             target = number;
         } else {
-            fputs("Usage: catherine [--assets-pak PATH] [--dev-menu | --dev-level ID]\n", stderr);
+            fputs("Usage: catherine [--prepare] [--game=FOLDER] [--update=FOLDER] [--assets-pak PATH] [--dev-menu | --dev-level ID]\n", stderr);
             return 2;
         }
     }
+
+    if (prepare_only && (target || menu || pack))
+        return asset_setup_error("--prepare cannot be combined with developer or shared-pack options.");
+    if (chdir(executable)) { perror("Could not enter the game data directory"); return 2; }
+    if (prepare_only) return run_asset_setup(executable, argv);
 
     int restarted = getenv("CATHERINE_ASSET_SETUP_RESTART") != NULL;
     unsetenv("CATHERINE_ASSET_SETUP_RESTART");

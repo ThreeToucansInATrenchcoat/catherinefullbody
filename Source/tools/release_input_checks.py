@@ -17,3 +17,5 @@ subprocess.run(["python", str(root/"Source/tests/sheep_push_stack_test.py")], ch
 subprocess.run(["python", str(root/"Source/tests/sheep_transition_handoff_test.py")], check=True)
 subprocess.run(["python", str(root/"Source/tools/settings_ini_check.py")], check=True)
 subprocess.run(["python", str(root/"Source/tools/native_renderer_checks.py")], check=True)
+
+subprocess.run(["python", str(root/"Source/tests/launcher_startup_check.py")], check=True)

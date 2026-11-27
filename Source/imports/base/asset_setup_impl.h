@@ -12,27 +12,72 @@ struct ShaderProcessLock {
  ShaderProcessLock(){handle=CreateMutexW(nullptr,FALSE,L"Local\\CatherineAssetShaderTranslation");if(handle){DWORD result=WaitForSingleObject(handle,120000);acquired=result==WAIT_OBJECT_0||result==WAIT_ABANDONED;}}
  ~ShaderProcessLock(){if(acquired)ReleaseMutex(handle);if(handle)CloseHandle(handle);}
 };
-void setup_error(const char* text){FILE* f=nullptr;fopen_s(&f,"assets-errors.log","a");if(f){fprintf(f,"Asset setup: %s (Windows error %lu)\n",text,GetLastError());fclose(f);}}
+void setup_error(const char* text){fprintf(stderr,"Asset setup: %s (Windows error %lu)\n",text,GetLastError());FILE* f=nullptr;fopen_s(&f,"assets-errors.log","a");if(f){fprintf(f,"Asset setup: %s (Windows error %lu)\n",text,GetLastError());fclose(f);}}
 std::wstring setup_quote(const std::wstring& value){std::wstring out=L"\"";size_t slashes=0;for(wchar_t c:value){if(c==L'\\'){slashes++;continue;}if(c==L'\"')out.append(slashes*2+1,L'\\');else out.append(slashes,L'\\');slashes=0;out+=c;}out.append(slashes*2,L'\\');out+=L'\"';return out;}
 bool setup_extract(){
  if(!setup_tool.empty())return true;HMODULE module=GetModuleHandleW(nullptr);HRSRC resource=FindResourceW(module,MAKEINTRESOURCEW(102),MAKEINTRESOURCEW(10));if(!resource){setup_error("Missing embedded installer");return false;}DWORD size=SizeofResource(module,resource);const char* bytes=static_cast<const char*>(LockResource(LoadResource(module,resource)));if(!bytes||!size)return false;
  uint64_t key=1469598103934665603ULL;for(DWORD i=0;i<size;i++)key=(key^static_cast<unsigned char>(bytes[i]))*1099511628211ULL;
- wchar_t local[32768];DWORD n=GetEnvironmentVariableW(L"LOCALAPPDATA",local,32768);if(!n||n>=32768)return false;std::wostringstream id;id<<std::hex<<key;
- std::error_code ec;auto folder=std::filesystem::path(local)/L"Catherine"/L"AssetTools"/id.str();std::filesystem::create_directories(folder,ec);if(ec)return false;auto path=folder/L"CatherineAssetSetup.exe";
+ wchar_t local[32768]={0};DWORD n=GetEnvironmentVariableW(L"LOCALAPPDATA",local,32768);if(!getenv("RECOMPLAUNCHER_DATA")&&(!n||n>=32768))return false;std::wostringstream id;id<<std::hex<<key;
+ std::error_code ec;auto folder=getenv("RECOMPLAUNCHER_DATA") ? catherine_data_root()/L"cache"/L"AssetTools"/id.str() : std::filesystem::path(local)/L"Catherine"/L"AssetTools"/id.str();std::filesystem::create_directories(folder,ec);if(ec)return false;auto path=folder/L"CatherineAssetSetup.exe";
  bool equal=false;{std::ifstream in(path,std::ios::binary|std::ios::ate);if(in&&in.tellg()==size){in.seekg(0);std::vector<char> old(size);in.read(old.data(),size);equal=in&&memcmp(old.data(),bytes,size)==0;}}
  if(!equal){auto temporary=folder/(L"setup-"+std::to_wstring(GetCurrentProcessId())+L".tmp");{std::ofstream out(temporary,std::ios::binary|std::ios::trunc);out.write(bytes,size);if(!out){setup_error("Could not extract installer");return false;}}if(!MoveFileExW(temporary.c_str(),path.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH)){std::filesystem::remove(temporary,ec);return false;}}
+ if(getenv("RECOMPLAUNCHER_DATA")) _wputenv_s(L"DOTNET_BUNDLE_EXTRACT_BASE_DIR", (catherine_data_root()/L"cache"/L"dotnet-bundle").c_str());
  setup_tool=path;return true;
 }
-int setup_run(const std::wstring& args){
- // WinExe has no console; allow its explicit setup form to show. --headless and
- // --translate create no forms. SW_HIDE here suppresses the progress form itself.
- std::wstring command=setup_quote(setup_tool.wstring())+L" "+args;STARTUPINFOW startup={sizeof(startup)};startup.dwFlags=STARTF_USESHOWWINDOW;startup.wShowWindow=SW_SHOWNORMAL;PROCESS_INFORMATION process={};if(!CreateProcessW(setup_tool.c_str(),command.data(),nullptr,nullptr,FALSE,CREATE_NO_WINDOW,nullptr,nullptr,&startup,&process)){setup_error("Could not start embedded installer");return 1;}CloseHandle(process.hThread);WaitForSingleObject(process.hProcess,INFINITE);DWORD result=1;GetExitCodeProcess(process.hProcess,&result);CloseHandle(process.hProcess);return static_cast<int>(result);
+int setup_run(const std::wstring& args, bool forward=false){
+ std::wstring command=setup_quote(setup_tool.wstring())+L" "+args;
+ STARTUPINFOW startup={sizeof(startup)};
+ startup.dwFlags=STARTF_USESHOWWINDOW;startup.wShowWindow=SW_SHOWNORMAL;
+ HANDLE inherited[3]={};
+ if(forward){
+  const DWORD kinds[]={STD_INPUT_HANDLE,STD_OUTPUT_HANDLE,STD_ERROR_HANDLE};
+  for(int i=0;i<3;i++){
+   HANDLE original=GetStdHandle(kinds[i]);
+   if(!original||original==INVALID_HANDLE_VALUE||!DuplicateHandle(GetCurrentProcess(),original,GetCurrentProcess(),&inherited[i],0,TRUE,DUPLICATE_SAME_ACCESS)){
+    SECURITY_ATTRIBUTES security={sizeof(security),nullptr,TRUE};
+    inherited[i]=CreateFileW(L"NUL",i?GENERIC_WRITE:GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE,&security,OPEN_EXISTING,0,nullptr);
+   }
+  }
+  startup.dwFlags|=STARTF_USESTDHANDLES;
+  startup.hStdInput=inherited[0];startup.hStdOutput=inherited[1];startup.hStdError=inherited[2];
+ }
+ HANDLE job=nullptr;
+ if(forward){
+  job=CreateJobObjectW(nullptr,nullptr);
+  JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits={};limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+  if(!job||!SetInformationJobObject(job,JobObjectExtendedLimitInformation,&limits,sizeof(limits))){
+   for(HANDLE handle:inherited)if(handle&&handle!=INVALID_HANDLE_VALUE)CloseHandle(handle);
+   if(job)CloseHandle(job);setup_error("Could not create the cancellable setup job");return 1;
+  }
+ }
+ PROCESS_INFORMATION process={};
+ BOOL started=CreateProcessW(setup_tool.c_str(),command.data(),nullptr,nullptr,forward,CREATE_NO_WINDOW|(forward?CREATE_SUSPENDED:0),nullptr,nullptr,&startup,&process);
+ for(HANDLE handle:inherited)if(handle&&handle!=INVALID_HANDLE_VALUE)CloseHandle(handle);
+ if(!started){if(job)CloseHandle(job);setup_error("Could not start embedded installer");return 1;}
+ if(job){
+  if(!AssignProcessToJobObject(job,process.hProcess)||ResumeThread(process.hThread)==(DWORD)-1){
+   TerminateProcess(process.hProcess,1);CloseHandle(process.hThread);CloseHandle(process.hProcess);CloseHandle(job);
+   setup_error("Could not attach the installer to its setup job");return 1;
+  }
+ }
+ CloseHandle(process.hThread);WaitForSingleObject(process.hProcess,INFINITE);
+ DWORD result=1;GetExitCodeProcess(process.hProcess,&result);CloseHandle(process.hProcess);if(job)CloseHandle(job);return static_cast<int>(result);
 }
 bool setup_read(const std::filesystem::path& path,void** data,size_t* size){std::ifstream in(path,std::ios::binary|std::ios::ate);if(!in)return false;auto n=in.tellg();if(n<0||n>64*1024*1024)return false;void* p=malloc(static_cast<size_t>(n)+1);if(!p)return false;in.seekg(0);in.read(static_cast<char*>(p),n);if(!in){free(p);return false;}static_cast<char*>(p)[static_cast<size_t>(n)]=0;*data=p;*size=static_cast<size_t>(n);return true;}
 }
-extern "C" int catherine_asset_setup(const wchar_t* pack_path){
- std::lock_guard<std::mutex> lock(setup_mutex);if(!setup_extract())return 1;wchar_t root[32768];if(!GetCurrentDirectoryW(32768,root))return 1;auto pack=pack_path&&*pack_path?std::filesystem::absolute(pack_path):std::filesystem::path(root)/L"assets.pak";std::wstring args=L"--root "+setup_quote(root)+L" --pack "+setup_quote(pack.wstring());if(pack_path&&*pack_path)args+=L" --packed";if(const char* hidden=getenv("NX_HEADLESS");hidden&&atoi(hidden))args+=L" --headless";return setup_run(args);
+extern "C" int catherine_asset_setup_launch(const wchar_t* pack_path,const wchar_t* game,const wchar_t* update,int prepare){
+ std::lock_guard<std::mutex> lock(setup_mutex);if(!setup_extract())return 1;
+ wchar_t root[32768];if(!GetCurrentDirectoryW(32768,root))return 1;
+ auto pack=pack_path&&*pack_path?std::filesystem::absolute(pack_path):std::filesystem::path(root)/L"assets.pak";
+ std::wstring args=L"--root "+setup_quote(root)+L" --pack "+setup_quote(pack.wstring());
+ if((pack_path&&*pack_path)||prepare)args+=L" --packed";
+ if(game&&*game)args+=L" --scan "+setup_quote(game);
+ if(update&&*update)args+=L" --scan "+setup_quote(update);
+ if(prepare)args+=L" --headless --launcher-progress";
+ else if(const char* hidden=getenv("NX_HEADLESS");hidden&&atoi(hidden))args+=L" --headless";
+ return setup_run(args,prepare!=0);
 }
+extern "C" int catherine_asset_setup(const wchar_t* pack_path){return catherine_asset_setup_launch(pack_path,nullptr,nullptr,0);}
 extern "C" int catherine_translate_shader(const char* hash,const uint8_t* code,size_t size,const uint8_t* control,void** binary,size_t* length,char** resources){
  if(strlen(hash)!=16||strspn(hash,"0123456789abcdef")!=16||size>16*1024*1024)return 0;std::lock_guard<std::mutex> lock(setup_mutex);if(!setup_extract())return 0;
  ShaderProcessLock process_lock;if(!process_lock.acquired)return 0;

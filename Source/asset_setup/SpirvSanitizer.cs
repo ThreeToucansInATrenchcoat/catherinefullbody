@@ -14,7 +14,7 @@ static class SpirvSanitizer {
     throw new FileNotFoundException("Install SPIRV-Tools and make "+name+" available on PATH.");
   }
 #else
-  Tools=Path.Combine(Path.GetTempPath(),"CatherineAssetTools",Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId.ToString());Directory.CreateDirectory(Tools);
+  Tools=Path.Combine(Environment.GetEnvironmentVariable("RECOMPLAUNCHER_DATA") is {Length:>0} data?Path.Combine(data,"cache"):Path.GetTempPath(),"CatherineAssetTools",Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId.ToString());Directory.CreateDirectory(Tools);
   foreach(string name in new[]{"spirv-dis.exe","spirv-as.exe","spirv-val.exe"}){
    string path=Path.Combine(Tools,name);using var s=Assembly.GetExecutingAssembly().GetManifestResourceStream(name)??throw new FileNotFoundException(name);using var bytes=new MemoryStream();s.CopyTo(bytes);var expected=bytes.ToArray();
    if(File.Exists(path)&&File.ReadAllBytes(path).AsSpan().SequenceEqual(expected))continue;

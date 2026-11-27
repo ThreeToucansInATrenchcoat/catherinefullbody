@@ -1,5 +1,7 @@
 """Standalone settings round-trip, legacy migration, native Config and malformed-value checks."""
 import configparser
+import os
+import tempfile
 import json
 from pathlib import Path
 import shutil
@@ -181,6 +183,17 @@ vOiCeLaNgUaGe=1
             shutil.copyfile(INI, OUT / "installed.migrated.ini")
         else:
             print("Private installation migration skipped: no local game save/settings; synthetic migration checks still run.")
+        # Launcher-managed settings must never rewrite the adjacent ordinary INI.
+        ordinary_ini = INI.read_bytes()
+        with tempfile.TemporaryDirectory(prefix="launcher data café ", dir=OUT) as directory:
+            data_ini = Path(directory) / "catherine-settings.ini"
+            data_ini.write_text("[Catherine]\nNativeGpuSkinning=false\nInternalUpscaling=4\n", encoding="utf-8")
+            environment = dict(os.environ, RECOMPLAUNCHER_DATA=directory)
+            for mode in ("native-skinning-0", "upscale-4"):
+                subprocess.run([str(EXE), mode], cwd=OUT, env=environment, check=True, timeout=15)
+            assert "NativeGpuSkinning=false" in data_ini.read_text(encoding="utf-8")
+            assert INI.read_bytes() == ordinary_ini
+        print("Launcher data path keeps settings isolated, including Unicode and spaces.")
     finally:
         EXE.unlink(missing_ok=True)
         assert all((BUILD / k).read_bytes() == v for k,v in protected.items())

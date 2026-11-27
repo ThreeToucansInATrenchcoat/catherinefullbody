@@ -1633,8 +1633,32 @@ static inline void catherine_config_pc_draw(Cpu *c, uint64_t menu) {
     const unsigned preview = display_page ? catherine_config_setting(PC_PREVIEW, 0) : 0;
     const char *help = catherine_config_pc.notice;
     if (preview == 1) help = "Applying display changes...";
-    else if (!help && selected) help = display_page ? "Use Left or Right to change the selected setting." : "Confirm to configure keyboard, mouse and controller bindings.";
     if (catherine_pc_display_dialog) return;
+    if (!help && selected && display_page && catherine_config_pc.row < PC_DISPLAY_ROWS) {
+        // Keep each line within the text renderer's 63-character limit. These
+        // slots are separate from row labels and leave native Brightness alone.
+        static const char *const descriptions[PC_DISPLAY_ROWS][2] = {
+            {"Frame-rate Limit: Sets the maximum gameplay frame rate.",
+             "Higher limits look smoother but use more processing power."},
+            {"Display Mode: Choose a window or fill the whole screen.",
+             "Windowed keeps the desktop visible; Fullscreen fills it."},
+            {"Resolution: Sets how many pixels the game renders.",
+             "Higher values look sharper but require more GPU power."},
+            {"Anti-Aliasing: Smooths jagged edges on objects.",
+             "FXAA is faster; MSAA keeps detail but uses more GPU power."},
+            {"FMV Interpolation: Adds frames between cutscene video frames.",
+             "Smooths video motion, but can cause blur or visual artifacts."}
+        };
+        const unsigned row = catherine_config_pc.row;
+        pc_draw_text_scaled(c, 16, descriptions[row][0], 247.0f, 870.0f + offset, .82f, 0xffffff00u | alpha);
+        pc_draw_text_scaled(c, 17, descriptions[row][1], 247.0f, 903.0f + offset, .82f, 0xffffff00u | alpha);
+        pc_draw_text_scaled(c, 18, catherine_config_setting(PC_INPUT_LAYOUT, 0) == 0
+            ? "Use A, D or Left Click to change setting."
+            : "Use Left or Right to change setting.",
+            247.0f, 936.0f + offset, .82f, 0xffffff00u | alpha);
+        return;
+    }
+    if (!help && selected && !display_page) help = "Confirm to configure keyboard, mouse and controller bindings.";
     if (help) pc_draw_text(c, 16, help, 247.0f, 915.0f + offset, 0xffffff00u | alpha);
 
 }

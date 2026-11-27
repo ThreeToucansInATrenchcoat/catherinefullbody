@@ -14,6 +14,7 @@
 #include <unistd.h>
 #endif
 #include "asset_pak.h"
+#include "../../platform/launcher_paths.h"
 #include <filesystem>
 #include <fstream>
 #include <algorithm>
@@ -160,11 +161,7 @@ void open_archive(State& s,const wchar_t* supplied,const char* native_path){
     (void)native_path;
     std::wstring path;
     if(supplied)path=supplied;
-    else {wchar_t name[32768];DWORD count=GetModuleFileNameW(nullptr,name,32768);
-        if(!count||count>=32768)fail("Cannot locate executable for assets.pak");
-        path.assign(name,count);auto slash=path.find_last_of(L"\\/");if(slash==path.npos)fail("Cannot locate executable folder");
-        path.resize(slash+1);path+=L"assets.pak";
-    }
+    else path=(catherine_data_root()/L"assets.pak").wstring();
     s.file=CreateFileW(path.c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS,nullptr);
     if(s.file==INVALID_HANDLE_VALUE){
         const DWORD error=GetLastError();
@@ -179,7 +176,7 @@ void open_archive(State& s,const wchar_t* supplied,const char* native_path){
     static_assert(sizeof(off_t)>=sizeof(int64_t));
     auto path=native_path?std::filesystem::path(native_path)
                         :supplied?std::filesystem::path(supplied)
-                                 :std::filesystem::read_symlink("/proc/self/exe").parent_path()/"assets.pak";
+                                 :catherine_data_root()/"assets.pak";
     s.file=::open(path.c_str(),O_RDONLY|O_CLOEXEC|O_NONBLOCK);
     if(s.file<0){
         const int error=errno;
@@ -213,13 +210,7 @@ int initialize(const wchar_t* supplied,const char* native_path=nullptr){
         try{
 #ifndef CATHERINE_PAK_TESTING
             if(!supplied&&!native_path&&catherine_alt_build_mode()) {
-#ifdef _WIN32
-                wchar_t executable[32768];DWORD n=GetModuleFileNameW(nullptr,executable,32768);
-                if(!n||n>=32768)fail("Cannot locate the extracted assets directory");
-                open_folder(s,std::filesystem::path(executable).parent_path()/L"assets");
-#else
-                open_folder(s,std::filesystem::read_symlink("/proc/self/exe").parent_path()/"assets");
-#endif
+                open_folder(s,catherine_data_root()/"assets");
             } else
 #endif
             open_archive(s,supplied,native_path);

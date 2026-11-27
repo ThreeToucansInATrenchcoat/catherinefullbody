@@ -55,7 +55,7 @@ extern "C" int catherine_translate_shader(const char* hash, const uint8_t* code,
         struct stat executable;
         if (stat("/proc/self/exe", &executable)) return 0;
         const auto stamp = std::to_string(executable.st_mtim.tv_sec) + "-" + std::to_string(executable.st_mtim.tv_nsec);
-        auto cache = fs::read_symlink("/proc/self/exe").parent_path() / "assets-setup-work" / "runtime-shaders" / stamp;
+        auto cache = catherine_data_root() / (getenv("RECOMPLAUNCHER_DATA") ? "cache" : "assets-setup-work") / "runtime-shaders" / stamp;
         fs::create_directories(cache);
         auto ready = cache / hash;
         if (shader_cache_read(ready, binary, length, resources)) return 1;

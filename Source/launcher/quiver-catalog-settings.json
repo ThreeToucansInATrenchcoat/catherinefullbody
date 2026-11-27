@@ -1,0 +1,48 @@
+{
+  "folderName": "Catherine-Full-Body",
+  "filesToAdd": [],
+  "preferredExecutables": {
+    "windows": [
+      "Catherine.exe"
+    ],
+    "linux": [
+      "catherine"
+    ]
+  },
+  "setupFiles": [
+    {
+      "id": "game",
+      "label": "Extracted Catherine: Full Body Switch game",
+      "prompt": "Select your extracted North American or European game (0100BF00112C0000). Include update 1.0.1, or select its extracted folder separately.",
+      "required": true,
+      "kind": "folder",
+      "flag": "--game=",
+      "contains": [
+        "romfs/data/Base.cpk"
+      ],
+      "accepted": []
+    },
+    {
+      "id": "update",
+      "label": "Extracted update 1.0.1 (if separate)",
+      "prompt": "Skip this if update 1.0.1 is already merged into the game folder.",
+      "required": false,
+      "kind": "folder",
+      "flag": "--update=",
+      "accepted": []
+    }
+  ],
+  "saves": {
+    "locations": [
+      {
+        "root": "app",
+        "path": "recompdata/save.dat"
+      },
+      {
+        "root": "app",
+        "path": "recompdata/catherine-settings.ini",
+        "kind": "settings"
+      }
+    ]
+  }
+}

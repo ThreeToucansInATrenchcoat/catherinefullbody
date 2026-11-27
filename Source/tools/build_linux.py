@@ -292,7 +292,12 @@ def run_linux(root, manifest, options):
             shutil.copy2(files[0], runtime / files[0].name)
     temporary.replace(build / output)
     shutil.copytree(root / "Source" / "CathAssets", build / "CathAssets", dirs_exist_ok=True)
+    shutil.copy2(root / "recomplauncher.json", build / "recomplauncher.json")
     shutil.copy2(root / "Source" / "resources" / "assets-required.json", build)
+    for name in ('dev-checkpoints.pak', 'DEV-MODE.txt', 'CUTSCENES.txt', 'cutscene-catalog.json'):
+        shutil.copy2(root / 'Source/resources' / name, build / name)
+    shutil.copy2(root / 'Source/resources/Catherine DEV.sh', build)
+    (build / 'Catherine DEV.sh').chmod(0o755)
     if output == "catherine":
         install_desktop_files(icon_png, build)
     print(f"Built {build / output}")

@@ -55,6 +55,11 @@ jobs:
         run: bash Source/tools/build_bundled_ffmpeg.sh 2
       - name: Check compiler and Vulkan headers
         run: python Source/tools/check_ci_toolchain.py
+      - name: Check Linux launcher startup
+        if: runner.os == 'Linux'
+        run: python Source/tests/launcher_linux_startup_check.py
+      - name: Validate developer checkpoint resources
+        run: python Source/tests/dev_checkpoint_package_check.py
       - name: Build
         env:
           CATHERINE_REQUIRE_BUNDLED_FFMPEG: "1"
@@ -96,9 +101,9 @@ jobs:
           pattern: Catherine-*
           path: release
           merge-multiple: true
-      - name: Publish Alpha 2.3.2 pre-release
+      - name: Publish Alpha 2.4 pre-release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
         run: |
-          gh release create "$RELEASE_TAG" release/* --target "$GITHUB_SHA" --prerelease --latest=false --title "Alpha 2.3.2" --notes-file .github/alpha-2.3.2-notes.md
+          gh release create "$RELEASE_TAG" release/* --target "$GITHUB_SHA" --prerelease --latest=false --title "Alpha 2.4" --notes-file .github/alpha-2.4-notes.md

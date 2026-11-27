@@ -1,0 +1,462 @@
+{
+  "$schema": "https://recomplauncher.com/schema/recomplauncher.json",
+  "format": 1,
+  "repo": "scottjco/catherinefullbody",
+  "name": "Catherine: Full Body",
+  "inputs": [
+    {
+      "id": "game",
+      "label": "Your extracted North American or European Switch game (0100BF00112C0000), including update 1.0.1 if merged.",
+      "formats": [
+        {
+          "type": "folder"
+        }
+      ],
+      "check": {
+        "file": "romfs/data/Base.cpk"
+      }
+    },
+    {
+      "id": "update",
+      "role": "update",
+      "optional": true,
+      "label": "Extracted update 1.0.1 folder (only needed if not merged with the game).",
+      "formats": [
+        {
+          "type": "folder"
+        }
+      ]
+    }
+  ],
+  "start": {
+    "program": [
+      "Catherine.exe",
+      "catherine"
+    ]
+  },
+  "prepare": {
+    "program": [
+      "Catherine.exe",
+      "catherine"
+    ],
+    "args": [
+      "--prepare",
+      "--game={input:game}",
+      "--update={input:update}"
+    ],
+    "label": "Check your game files, build assets and prepare Vulkan shaders",
+    "done": [
+      "{data}/assets.pak"
+    ]
+  },
+  "config": [
+    {
+      "id": "main",
+      "format": "ini",
+      "file": [
+        {
+          "path": "{data}/catherine-settings.ini"
+        }
+      ],
+      "new": {
+        "Catherine/Version": "7",
+        "Catherine/devmenu": "false"
+      }
+    }
+  ],
+  "saves": [
+    "{data}/save.dat",
+    "{data}/catherine-settings.ini"
+  ],
+  "folders": {
+    "logs": [
+      {
+        "path": "{data}"
+      }
+    ],
+    "cache": [
+      {
+        "path": "{data}/cache"
+      }
+    ]
+  },
+  "exit_codes": {
+    "1": "Asset setup failed. Check the setup log and supply your extracted game and update 1.0.1.",
+    "2": "Setup was cancelled, a launch option was invalid, or required game files could not be opened."
+  },
+  "settings": [
+    {
+      "id": "fullscreen",
+      "label": "Window mode",
+      "group": "Display",
+      "choices": [
+        {
+          "label": "Windowed",
+          "set": {
+            "Catherine/Fullscreen": "0"
+          }
+        },
+        {
+          "label": "Fullscreen",
+          "set": {
+            "Catherine/Fullscreen": "1"
+          }
+        }
+      ],
+      "defaults": {
+        "Catherine/Fullscreen": "0"
+      }
+    },
+    {
+      "id": "fps",
+      "label": "Frame rate",
+      "group": "Display",
+      "choices": [
+        {
+          "label": "30 FPS",
+          "set": {
+            "Catherine/Fps": "30"
+          }
+        },
+        {
+          "label": "60 FPS",
+          "set": {
+            "Catherine/Fps": "60"
+          }
+        },
+        {
+          "label": "120 FPS",
+          "set": {
+            "Catherine/Fps": "120"
+          }
+        },
+        {
+          "label": "240 FPS",
+          "set": {
+            "Catherine/Fps": "240"
+          }
+        },
+        {
+          "label": "Display refresh rate",
+          "set": {
+            "Catherine/Fps": "-1"
+          }
+        },
+        {
+          "label": "Unlimited",
+          "set": {
+            "Catherine/Fps": "0"
+          }
+        }
+      ],
+      "defaults": {
+        "Catherine/Fps": "60"
+      },
+      "help": "Higher frame rates use the port’s timing fixes and interpolation; 30 FPS retains the original rate."
+    },
+    {
+      "id": "window_size",
+      "label": "Window size",
+      "group": "Display",
+      "choices": [
+        {
+          "label": "Auto",
+          "set": {
+            "Catherine/WindowHeight": "0"
+          }
+        },
+        {
+          "label": "720p",
+          "set": {
+            "Catherine/WindowHeight": "720"
+          }
+        },
+        {
+          "label": "1080p",
+          "set": {
+            "Catherine/WindowHeight": "1080"
+          }
+        },
+        {
+          "label": "1440p",
+          "set": {
+            "Catherine/WindowHeight": "1440"
+          }
+        },
+        {
+          "label": "4K",
+          "set": {
+            "Catherine/WindowHeight": "2160"
+          }
+        }
+      ],
+      "defaults": {
+        "Catherine/WindowHeight": "0"
+      }
+    },
+    {
+      "id": "internal_resolution",
+      "label": "Internal resolution",
+      "group": "Display",
+      "choices": [
+        {
+          "label": "720p",
+          "set": {
+            "Catherine/InternalUpscaling": "0"
+          }
+        },
+        {
+          "label": "Auto",
+          "set": {
+            "Catherine/InternalUpscaling": "1"
+          }
+        },
+        {
+          "label": "1080p",
+          "set": {
+            "Catherine/InternalUpscaling": "2"
+          }
+        },
+        {
+          "label": "1440p",
+          "set": {
+            "Catherine/InternalUpscaling": "3"
+          }
+        },
+        {
+          "label": "4K",
+          "set": {
+            "Catherine/InternalUpscaling": "4"
+          }
+        }
+      ],
+      "defaults": {
+        "Catherine/InternalUpscaling": "1"
+      },
+      "help": "Resolution is capped to fit the current screen or window."
+    },
+    {
+      "id": "anti_aliasing",
+      "label": "Anti-aliasing",
+      "group": "Display",
+      "choices": [
+        {
+          "label": "Off",
+          "set": {
+            "Catherine/AntiAliasing": "0"
+          }
+        },
+        {
+          "label": "FXAA",
+          "set": {
+            "Catherine/AntiAliasing": "1"
+          }
+        },
+        {
+          "label": "MSAA 2x",
+          "set": {
+            "Catherine/AntiAliasing": "2"
+          }
+        },
+        {
+          "label": "MSAA 4x",
+          "set": {
+            "Catherine/AntiAliasing": "4"
+          }
+        },
+        {
+          "label": "MSAA 8x",
+          "set": {
+            "Catherine/AntiAliasing": "8"
+          }
+        }
+      ],
+      "defaults": {
+        "Catherine/AntiAliasing": "0"
+      }
+    },
+    {
+      "id": "vsync",
+      "label": "VSync",
+      "group": "Display",
+      "choices": [
+        {
+          "label": "Off",
+          "set": {
+            "Catherine/VSync": "false"
+          }
+        },
+        {
+          "label": "On",
+          "set": {
+            "Catherine/VSync": "true"
+          }
+        }
+      ],
+      "defaults": {
+        "Catherine/VSync": "false"
+      }
+    },
+    {
+      "id": "triple_buffering",
+      "label": "Triple buffering",
+      "group": "Display",
+      "choices": [
+        {
+          "label": "Off",
+          "set": {
+            "Catherine/TripleBuffering": "false"
+          }
+        },
+        {
+          "label": "On",
+          "set": {
+            "Catherine/TripleBuffering": "true"
+          }
+        }
+      ],
+      "defaults": {
+        "Catherine/TripleBuffering": "false"
+      }
+    },
+    {
+      "id": "shadows",
+      "label": "Shadow resolution",
+      "group": "Display",
+      "choices": [
+        {
+          "label": "Auto",
+          "set": {
+            "Catherine/ShadowResolution": "Auto"
+          }
+        },
+        {
+          "label": "2048",
+          "set": {
+            "Catherine/ShadowResolution": "2048"
+          }
+        },
+        {
+          "label": "4096",
+          "set": {
+            "Catherine/ShadowResolution": "4096"
+          }
+        },
+        {
+          "label": "8192",
+          "set": {
+            "Catherine/ShadowResolution": "8192"
+          }
+        }
+      ],
+      "defaults": {
+        "Catherine/ShadowResolution": "Auto"
+      },
+      "help": "Higher resolutions use more GPU memory. Changes apply when the game starts."
+    },
+    {
+      "id": "movie_interpolation",
+      "label": "Movie smoothing",
+      "group": "Display",
+      "choices": [
+        {
+          "label": "Off",
+          "set": {
+            "Catherine/MovieInterpolation": "0"
+          }
+        },
+        {
+          "label": "Match game",
+          "set": {
+            "Catherine/MovieInterpolation": "-1"
+          }
+        },
+        {
+          "label": "60 FPS",
+          "set": {
+            "Catherine/MovieInterpolation": "60"
+          }
+        },
+        {
+          "label": "120 FPS",
+          "set": {
+            "Catherine/MovieInterpolation": "120"
+          }
+        },
+        {
+          "label": "240 FPS",
+          "set": {
+            "Catherine/MovieInterpolation": "240"
+          }
+        }
+      ],
+      "defaults": {
+        "Catherine/MovieInterpolation": "0"
+      }
+    },
+    {
+      "id": "button_prompts",
+      "label": "Controller prompts",
+      "group": "Controls",
+      "choices": [
+        {
+          "label": "Auto",
+          "set": {
+            "Catherine/ButtonPrompts": "0"
+          }
+        },
+        {
+          "label": "Xbox",
+          "set": {
+            "Catherine/ButtonPrompts": "1"
+          }
+        },
+        {
+          "label": "Switch",
+          "set": {
+            "Catherine/ButtonPrompts": "2"
+          }
+        },
+        {
+          "label": "PlayStation 4",
+          "set": {
+            "Catherine/ButtonPrompts": "3"
+          }
+        },
+        {
+          "label": "PlayStation 5",
+          "set": {
+            "Catherine/ButtonPrompts": "4"
+          }
+        }
+      ],
+      "defaults": {
+        "Catherine/ButtonPrompts": "0"
+      }
+    },
+    {
+      "id": "native_gpu_skinning",
+      "label": "GPU skinning",
+      "group": "Display",
+      "choices": [
+        {
+          "label": "On",
+          "set": {
+            "Catherine/NativeGpuSkinning": "true"
+          }
+        },
+        {
+          "label": "CPU fallback",
+          "set": {
+            "Catherine/NativeGpuSkinning": "false"
+          }
+        }
+      ],
+      "defaults": {
+        "Catherine/NativeGpuSkinning": "true"
+      },
+      "help": "Uses the native GPU skinning path. Changes apply when the game starts.",
+      "advanced": true
+    }
+  ]
+}

@@ -11237,7 +11237,8 @@
         "C:/catherine/recomp/Source/imports/timing-audit/performance-2026-11-16/background18/perf_background.h",
         "C:/catherine/recomp/Source/imports/timing-audit/window-area-title-2026-11-18/window_area_title.h",
         "C:/catherine/recomp/Source/native-renderer/release.profdata",
-        "C:/catherine/recomp/Source/native-renderer/selected-vfs.json"
+        "C:/catherine/recomp/Source/native-renderer/selected-vfs.json",
+        "C:/catherine/recomp/Source/platform/launcher_paths.h"
       ]
     },
     {
@@ -11576,7 +11577,8 @@
         "C:/catherine/recomp/Source/imports/base/third_party/miniz/miniz_tinfl.h",
         "C:/catherine/recomp/Source/imports/base/third_party/miniz/miniz_zip.h",
         "C:/catherine/recomp/Source/native-renderer/release.profdata",
-        "C:/catherine/recomp/Source/native-renderer/selected-vfs.json"
+        "C:/catherine/recomp/Source/native-renderer/selected-vfs.json",
+        "C:/catherine/recomp/Source/platform/launcher_paths.h"
       ]
     },
     {
@@ -13202,7 +13204,8 @@
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/catherine_settings_win.h",
         "C:/catherine/recomp/Source/imports/base/guest-timing/include/catherine_shadow_quality.h",
         "C:/catherine/recomp/Source/native-renderer/release.profdata",
-        "C:/catherine/recomp/Source/native-renderer/selected-vfs.json"
+        "C:/catherine/recomp/Source/native-renderer/selected-vfs.json",
+        "C:/catherine/recomp/Source/platform/launcher_paths.h"
       ]
     },
     {
@@ -13595,7 +13598,8 @@
         "C:/catherine/recomp/Source/imports/base/third_party/miniz/miniz_tinfl.h",
         "C:/catherine/recomp/Source/imports/base/third_party/miniz/miniz_zip.h",
         "C:/catherine/recomp/Source/native-renderer/release.profdata",
-        "C:/catherine/recomp/Source/native-renderer/selected-vfs.json"
+        "C:/catherine/recomp/Source/native-renderer/selected-vfs.json",
+        "C:/catherine/recomp/Source/platform/launcher_paths.h"
       ]
     },
     {

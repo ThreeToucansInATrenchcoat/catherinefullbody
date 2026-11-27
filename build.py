@@ -37,7 +37,8 @@ if not (B/'assets-required.json').exists() or (B/'assets-required.json').read_by
  (B/'assets-required.json').write_bytes(required_manifest.read_bytes())
 res=M['resource'];q=subprocess.run([res['compiler'],'/fo',res['output'],res['source']],cwd=R,capture_output=True,text=True,**CREATE_NO_WINDOW);assert not q.returncode,q.stderr
 shutil.copytree(S/'CathAssets',B/'CathAssets',dirs_exist_ok=True)
-for resource_name in ('Catherine DEV.cmd','INSTALL-ASSETS.txt','CUTSCENES.txt','cutscene-catalog.json'):
+shutil.copy2(R/'recomplauncher.json',B/'recomplauncher.json')
+for resource_name in ('Catherine DEV.cmd','dev-checkpoints.pak','DEV-MODE.txt','INSTALL-ASSETS.txt','CUTSCENES.txt','cutscene-catalog.json'):
  shutil.copyfile(S/'resources'/resource_name,B/resource_name)
 # Build/ outputs may be hard links shared with archived copies in Old/. The linker
 # rewrites its map in place, which would silently alter every linked archive copy.

@@ -42,14 +42,38 @@ static int startup_error(const wchar_t *message, BOOL show_dialog) {
     return 2;
 }
 
+static int prepare_only;
+static wchar_t game_path[32768], update_path[32768];
+
 static const wchar_t *read_launch_arguments(wchar_t *path, DWORD capacity) {
     int argc = 0;
     wchar_t **argv = CommandLineToArgvW(GetCommandLineW(), &argc);
     if (!argv) return L"Could not read the launch arguments.";
+    for (int i = 1; i < argc; ++i) if (!wcscmp(argv[i], L"--prepare")) prepare_only = 1;
     const wchar_t *error = NULL;
     uint32_t target = 0;
     BOOL startup_menu = FALSE;
     for (int index = 1; index < argc; ++index) {
+        if (wcscmp(argv[index], L"--prepare") == 0) { prepare_only = 1; continue; }
+        wchar_t *source = NULL;
+        const wchar_t *value = NULL;
+        if (!wcsncmp(argv[index], L"--game=", 7)) { source = game_path; value = argv[index] + 7; }
+        else if (!wcsncmp(argv[index], L"--update=", 9)) { source = update_path; value = argv[index] + 9; }
+        else if (!wcscmp(argv[index], L"--game") || !wcscmp(argv[index], L"--update")) {
+            source = !wcscmp(argv[index], L"--game") ? game_path : update_path;
+            if (++index < argc) value = argv[index];
+        }
+        if (source) {
+            if (*source || !value || !*value || !wcsncmp(value, L"--", 2)) {
+                error = L"Use --game=FOLDER and optionally --update=FOLDER for your extracted Switch files."; break;
+            }
+            DWORD count = GetFullPathNameW(value, 32768, source, NULL);
+            DWORD attributes = count && count < 32768 ? GetFileAttributesW(source) : INVALID_FILE_ATTRIBUTES;
+            if (attributes == INVALID_FILE_ATTRIBUTES || !(attributes & FILE_ATTRIBUTE_DIRECTORY)) {
+                error = L"The supplied game or update folder does not exist or cannot be read."; break;
+            }
+            continue;
+        }
         if (wcscmp(argv[index], L"--dev-level") == 0) {
             if (target || startup_menu || ++index >= argc || argv[index][0] < L'0' || argv[index][0] > L'9') {
                 error = L"Use --dev-level followed by one numeric destination ID, or use --dev-menu.";
@@ -87,6 +111,7 @@ static const wchar_t *read_launch_arguments(wchar_t *path, DWORD capacity) {
     }
     LocalFree(argv);
     if (error) return error;
+    if (prepare_only && (target || startup_menu || *path)) return L"--prepare cannot be combined with developer or shared-pack options.";
     if (target) {
         CatherineDevLoadRequest request = {0};
         request.version = CATHERINE_DEV_LOADER_VERSION;
@@ -109,14 +134,29 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE previous, PWSTR command_line, 
     BOOL redirected = has_standard_handle(STD_ERROR_HANDLE);
     wchar_t pack_path[32768] = {0};
     const wchar_t *argument_error = read_launch_arguments(pack_path, ARRAYSIZE(pack_path));
-    if (argument_error) return startup_error(argument_error, !redirected);
+    if (argument_error) return startup_error(argument_error, !redirected && !prepare_only);
     wchar_t directory[32768];
     DWORD length = GetModuleFileNameW(NULL, directory, ARRAYSIZE(directory));
     wchar_t *filename = length && length < ARRAYSIZE(directory) ? wcsrchr(directory, L'\\') : NULL;
     if (!filename)
         return startup_error(L"Could not locate the Catherine executable.", !redirected);
     filename[1] = L'\0';
-    // Keep saves, settings and the default package relative to the executable.
+    wchar_t data[32768], manifest[32768];
+    DWORD data_length = GetEnvironmentVariableW(L"RECOMPLAUNCHER_DATA", data, ARRAYSIZE(data));
+    if (data_length) {
+        if (data_length >= ARRAYSIZE(data) || !SetCurrentDirectoryW(data))
+            return startup_error(L"RECOMPLAUNCHER_DATA must name an existing writable folder.", FALSE);
+        if (!GetCurrentDirectoryW(ARRAYSIZE(data), data) || _wputenv_s(L"RECOMPLAUNCHER_DATA", data) != 0)
+            return startup_error(L"Could not resolve the launcher data directory.", FALSE);
+        if (swprintf_s(manifest, ARRAYSIZE(manifest), L"%lsassets-required.json", directory) < 0 ||
+            !CopyFileW(manifest, L"assets-required.json", FALSE))
+            return startup_error(L"Could not copy assets-required.json into the launcher data directory.", FALSE);
+        if (!CreateDirectoryW(L"cache", NULL) && GetLastError() != ERROR_ALREADY_EXISTS)
+            return startup_error(L"Could not create the launcher cache directory.", FALSE);
+        _putenv_s("NX_DATA_ROOT", ".");
+        wcscpy_s(directory, ARRAYSIZE(directory), data);
+    }
+    // Use the launcher data folder when supplied; ordinary launches use the executable folder.
     if (!SetCurrentDirectoryW(directory))
         return startup_error(L"Could not open the folder containing Catherine.exe.", !redirected);
     if ((catherine_dev_loader_pending() || catherine_dev_loader_startup_menu()) &&
@@ -128,8 +168,10 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE previous, PWSTR command_line, 
     if (!has_standard_handle(STD_OUTPUT_HANDLE))
         _wfreopen_s(&log, L"catherine-startup.log", L"w", stdout);
 
-    if (catherine_asset_setup(pack_path))
-        return startup_error(L"Asset setup did not complete. See assets-errors.log beside Catherine.exe.",
+    int setup_status = catherine_asset_setup_launch(pack_path, game_path, update_path, prepare_only);
+    if (prepare_only) return setup_status;
+    if (setup_status)
+        return startup_error(L"Asset setup did not complete. See assets-errors.log in the game data folder.",
                              !redirected && !getenv("NX_HEADLESS"));
     int packed = *pack_path ? asset_pak_initialize_from(pack_path) : asset_pak_initialize();
     if (packed < 0) {

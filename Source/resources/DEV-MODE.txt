@@ -1,0 +1,17 @@
+Developer mode is disabled by default.
+
+After launching once, close the game and open catherine-settings.ini.
+Under [Catherine], change devmenu=false to devmenu=true, then restart.
+For RecompLauncher or Quiver, edit the INI in the launcher's recompdata folder.
+For a standalone installation, edit the INI beside the executable.
+
+Press F8 to open or close the developer picker. You can also start with
+"Catherine DEV.cmd" on Windows or ./"Catherine DEV.sh" on Linux to open the
+picker at startup. Developer mode must be enabled in the INI first.
+
+Keep dev-checkpoints.pak beside Catherine.exe (Windows) or catherine (Linux).
+It supplies the checkpoints required for direct puzzle, bar, landing and room
+loading. CUTSCENES.txt and cutscene-catalog.json list the available cutscenes.
+You still need assets prepared from your own game and update files.
+
+Set devmenu=false and restart to turn developer mode off again.

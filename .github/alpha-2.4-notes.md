@@ -1,0 +1,3 @@
+- Added RecompLauncher support for Windows and Linux.
+- Added Quiver Launcher support for Windows and Linux.
+- Scott remains a dumb dumb. not fixed.

@@ -9,15 +9,15 @@ static class EntryPoint {
     SpirvSanitizer.PrepareTools();var(binary,resources,stage)=Shaders.Translate(File.ReadAllBytes(args[1]),File.ReadAllBytes(args[2]));File.WriteAllBytes(args[3]+".spv",binary);File.WriteAllText(args[3]+".resources",resources);return 0;
    }
    string Opt(string name,string fallback){int at=Array.IndexOf(args,name);return at>=0&&at+1<args.Length?args[at+1]:fallback;}
-   string root=Path.GetFullPath(Opt("--root",AppContext.BaseDirectory)),pack=Path.GetFullPath(Opt("--pack",Path.Combine(root,"assets.pak")));errorRoot=root;bool hidden=args.Contains("--headless"),forcePacked=args.Contains("--packed");var sources=new List<string>();for(int i=0;i<args.Length-1;i++)if(args[i]=="--scan")sources.Add(args[++i]);
+   string root=Path.GetFullPath(Opt("--root",AppContext.BaseDirectory)),pack=Path.GetFullPath(Opt("--pack",Path.Combine(root,"assets.pak")));errorRoot=root;bool hidden=args.Contains("--headless"),forcePacked=args.Contains("--packed"),launcher=args.Contains("--launcher-progress");var sources=new List<string>();for(int i=0;i<args.Length-1;i++)if(args[i]=="--scan")sources.Add(args[++i]);
    void Log(string message){File.AppendAllText(Path.Combine(root,"assets-setup.log"),DateTime.UtcNow.ToString("O")+" "+message+Environment.NewLine);}
    if(!File.Exists(Path.Combine(root,"assets-required.json"))){if((!forcePacked&&AssetStorageSettings.FolderMode(root))||!File.Exists(pack))throw new FileNotFoundException("Missing assets-required.json beside Catherine.exe. Restore the required-files list before installing game assets.");string warning="Cannot verify assets.pak: assets-required.json is missing. Catherine will try to launch anyway.";Log(warning);if(!hidden)MessageBox.Show(warning,"Catherine asset verification",MessageBoxButtons.OK,MessageBoxIcon.Warning);return 0;}
    using var setupLock=new FileStream(pack+".setup-lock",FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None);
    PackageUpdate.Recover(pack);
-   if((forcePacked||!AssetStorageSettings.FolderMode(root))&&File.Exists(pack)&&PackageVerification.TryReuse(root,pack,AssetManifest.Load(Path.Combine(root,"assets-required.json"))))return 0;
-   if(hidden){long last=0;string lastStage="";new Installer(root,pack,true,p=>{long now=Environment.TickCount64;if(p.Stage!=lastStage||now-last>=100||p.Fraction>=1){File.WriteAllText(Path.Combine(root,"assets-progress.json"),JsonSerializer.Serialize(p));last=now;lastStage=p.Stage;}},_=>null,Log,CancellationToken.None,forcePacked).Run(sources,args.Contains("--scan-only"));return 0;}
+   if((forcePacked||!AssetStorageSettings.FolderMode(root))&&File.Exists(pack)&&PackageVerification.TryReuse(root,pack,AssetManifest.Load(Path.Combine(root,"assets-required.json")))){if(launcher)Console.WriteLine("progress 1 Assets already prepared");return 0;}
+   if(hidden){long last=0;string lastStage="";new Installer(root,pack,true,p=>{long now=Environment.TickCount64;if(p.Stage!=lastStage||now-last>=100||p.Fraction>=1){File.WriteAllText(Path.Combine(root,"assets-progress.json"),JsonSerializer.Serialize(p));if(launcher)LauncherProgress.Report(p);last=now;lastStage=p.Stage;}},_=>null,Log,CancellationToken.None,forcePacked).Run(sources,args.Contains("--scan-only"));if(launcher)Console.WriteLine("progress 1 Assets ready");return 0;}
    ApplicationConfiguration.Initialize();using var form=new SetupWindow(root,pack,sources,args.Contains("--scan-only"),forcePacked);Application.Run(form);return form.Result;
-  }catch(OperationCanceledException){return 2;}catch(Exception e){File.AppendAllText(Path.Combine(errorRoot,"assets-errors.log"),DateTime.UtcNow+" "+e+Environment.NewLine);return 1;}
+  }catch(OperationCanceledException){return 2;}catch(Exception e){if(args.Contains("--headless"))Console.Error.WriteLine(e.GetBaseException().Message);File.AppendAllText(Path.Combine(errorRoot,"assets-errors.log"),DateTime.UtcNow+" "+e+Environment.NewLine);return 1;}
  }
 }
 sealed class SetupWindow:Form {

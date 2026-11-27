@@ -3,13 +3,14 @@
 #include <mutex>
 #include <string_view>
 #include <filesystem>
+#include "launcher_paths.h"
 #include <SDL2/SDL.h>
 #include "C:/catherine/recomp/Source/platform/window_linux.h"
 #include "gui.h"
 #include "keyboard_mouse_policy.h"
 static bool catherine_linux_checkpoint_available() {
     std::error_code error;
-    return std::filesystem::is_regular_file(std::filesystem::symlink_status("dev-checkpoints.pak",error));
+    return std::filesystem::is_regular_file(std::filesystem::symlink_status(catherine_executable_root()/"dev-checkpoints.pak",error));
 }
 #include "dev-start/runtime/dev_level_overlay.h"
 

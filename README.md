@@ -76,6 +76,27 @@ ExtractedGame/
 
 Select `ExtractedGame`, keeping all files inside it. `...` means other files are omitted from this example.
 
+## Launcher integration
+
+Release packaging includes `recomplauncher.json` for [Recomp Launcher](https://recomplauncher.com)
+and compatible [Quiver Launcher](https://quiverlauncher.com) versions. Select your extracted game folder;
+select the extracted 1.0.1 update separately only if it is not already merged.
+Recomp Launcher runs setup without a separate setup window. Quiver reads the
+same launch/settings profile; its catalog supplies the game/update selections and
+save-backup locations, and Catherine's own setup window handles the first launch.
+
+Launcher-managed sessions use `RECOMPLAUNCHER_DATA` for `assets.pak`, saves,
+settings and logs, with disposable caches under `cache/`. Ordinary launches keep
+using the folder beside the executable. Existing standalone saves are not moved
+or overwritten; copy `save.dat` and `catherine-settings.ini` into the launcher's
+`recompdata` folder to continue an existing game there.
+
+The same executable supports `--prepare --game=FOLDER --update=FOLDER` for setup
+without starting the game. Omit `--update` when the update is merged. Without
+`RECOMPLAUNCHER_DATA`, setup uses the executable's folder. No game files or keys
+are included in the release. See [launcher integration notes](Source/launcher-integration.md)
+for validation and the remaining optional integrations.
+
 ## Compile from source
 
 Clone the repository and run these commands from its folder. Game files are not needed to compile.

@@ -32,7 +32,7 @@ VkPipelineCache pipeline_cache() {
     p_vkGetPhysicalDeviceProperties(vk_physical(), &p);
     char name[64];
     std::snprintf(name, sizeof name, "/pipelines_%04x_%04x.bin", p.vendorID, p.deviceID);
-    g_path = plat::data_root() + name;
+    g_path = plat::data_root() + (std::getenv("RECOMPLAUNCHER_DATA") ? "/cache" : "") + name;
     std::vector<uint8_t> data;
     if (FILE* f = plat::fopen_utf8(g_path, "rb")) {
         plat::fseek64(f, 0, SEEK_END);

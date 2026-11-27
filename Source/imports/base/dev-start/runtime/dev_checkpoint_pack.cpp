@@ -20,6 +20,7 @@
 #define MINIZ_NO_STDIO
 #include "third_party/miniz/miniz.h"
 #include "dev_checkpoint_pack.h"
+#include "../../../../platform/launcher_paths.h"
 namespace {
 #ifdef _WIN32
 std::wstring temporary;
@@ -66,7 +67,8 @@ extern "C" int catherine_dev_checkpoint_materialize(const char*entry,const char*
  std::vector<unsigned char> bytes(valid?(size_t)size.QuadPart:0);DWORD got=0;
  if(valid)valid=ReadFile(f,bytes.data(),(DWORD)bytes.size(),&got,nullptr)&&got==bytes.size();CloseHandle(f);
 #else
- int fd=open("dev-checkpoints.pak",O_RDONLY|O_NOFOLLOW|O_CLOEXEC|O_NONBLOCK);
+ const auto pack_path=catherine_executable_root()/"dev-checkpoints.pak";
+ int fd=open(pack_path.c_str(),O_RDONLY|O_NOFOLLOW|O_CLOEXEC|O_NONBLOCK);
  if(fd<0)return fail("Place dev-checkpoints.pak beside the executable.");
  struct stat info{};
  bool valid=fstat(fd,&info)==0 && S_ISREG(info.st_mode) && info.st_size>0 && info.st_size<=16*1024*1024;

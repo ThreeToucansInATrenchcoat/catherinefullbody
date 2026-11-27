@@ -19,6 +19,7 @@
 #include <mutex>
 #include <string>
 
+#include "../../../platform/launcher_paths.h"
 #include "catherine_refresh.h"
 #include "catherine_refresh_policy.h"
 #include "catherine_shadow_quality.h"
@@ -120,17 +121,7 @@ int auto_height(const DisplayMode& display) {
 }
 
 std::filesystem::path settings_path() {
-#ifdef _WIN32
-    wchar_t path[32768];
-    const DWORD size = GetModuleFileNameW(nullptr, path, static_cast<DWORD>(std::size(path)));
-    if (!size || size >= std::size(path)) return {};
-    const wchar_t* filename = std::wcsrchr(path, L'\\');
-    return filename ? std::wstring(path, size_t(filename + 1 - path)) + L"catherine-settings.ini" : std::wstring{};
-#else
-    std::error_code error;
-    const auto executable = std::filesystem::read_symlink("/proc/self/exe", error);
-    return error ? std::filesystem::path{} : executable.parent_path() / "catherine-settings.ini";
-#endif
+    return catherine_data_root() / "catherine-settings.ini";
 }
 
 struct Ini : std::map<std::string, std::map<std::string, std::string>> {

@@ -2,6 +2,7 @@
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -19,6 +20,24 @@ exe = 'Catherine.exe' if platform == 'Windows' else 'catherine'
 shutil.copy2(build / exe, stage / exe)
 shutil.copytree(build / 'CathAssets', stage / 'CathAssets', dirs_exist_ok=True)
 shutil.copy2(build / 'assets-required.json', stage)
+shutil.copy2(root / 'recomplauncher.json', stage)
+# Direct destinations refer to fixed checkpoint entries and hashes. Refuse to
+# publish a package whose supplied archive cannot satisfy the compiled catalog.
+catalog = '\n'.join(p.read_text(encoding='utf-8') for p in
+                    (root / 'Source/imports/base/dev-start/runtime').glob('*catalog.inc'))
+checkpoints = set(re.findall(r'"(checkpoints/[A-F0-9]{64}\.dat)","([A-F0-9]{64})"', catalog))
+assert checkpoints, 'No checkpoint references found in developer catalog'
+with zipfile.ZipFile(root / 'Source/resources/dev-checkpoints.pak') as archive:
+    assert archive.testzip() is None
+    for entry, expected in checkpoints:
+        data = archive.read(entry)
+        assert len(data) == 0xd2000 and hashlib.sha256(data).hexdigest().upper() == expected
+for name in ('dev-checkpoints.pak', 'DEV-MODE.txt', 'CUTSCENES.txt', 'cutscene-catalog.json'):
+    shutil.copy2(root / 'Source/resources' / name, stage)
+dev_launcher = 'Catherine DEV.cmd' if platform == 'Windows' else 'Catherine DEV.sh'
+shutil.copy2(root / 'Source/resources' / dev_launcher, stage)
+if platform == 'Linux':
+    (stage / dev_launcher).chmod(0o755)
 licenses = []
 for path in sorted((root / 'Source/asset_setup/vendor/licenses').glob('*')):
     licenses.append(path.name + '\n\n' + path.read_text(encoding='utf-8-sig'))
@@ -53,6 +72,7 @@ readme = 'Catherine: Full Body PC Port - ' + version + '\n\n'
 readme += 'Extract all files together. Supply your own decrypted Switch game and update 1.0.1.\n'
 readme += 'Setup builds assets.pak and Vulkan shaders on first launch.\n'
 readme += 'When updating, keep your existing assets.pak, save.dat and catherine-settings.ini.\n'
+readme += 'Developer mode is disabled by default (devmenu=false). See DEV-MODE.txt to enable it.\n'
 if platform == 'Windows':
     readme += 'Run Catherine.exe.\n'
 else:
