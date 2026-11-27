@@ -147,13 +147,12 @@ included in the repository; a separate experimental source folder is unnecessary
 See [the native renderer build notes](Source/native-renderer/README.md) for source
 layout and verification commands.
 
-## Planned
+## Planned Updates in Order of Importance
 
-- Further optimisation, especially for handhelds.
-- Support for other versions of the game.
-- A custom level editor.
+- Support for other versions of the game. This is HIGH priority, I will be working on this after build 2.4!
 - More configuration options like FSR and DLSS.
 - Restore the voting system. Other online features are outside my plans, but forks and pull requests are welcome.
+- A custom level editor.
 
 ## AI
 
