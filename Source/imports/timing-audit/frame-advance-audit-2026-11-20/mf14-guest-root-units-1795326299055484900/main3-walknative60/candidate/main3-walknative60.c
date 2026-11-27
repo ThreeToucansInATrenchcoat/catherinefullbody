@@ -1649,7 +1649,15 @@ L_7000087b8c:;
     { uint64_t ea = x19 + 0x670ull; c->v[0] = LD32(ea); }
     F.nz = cmp_s(c, VSF32(0), 0);
     if (fc_nz(&F, CC_LE)) { goto L_7000087bd4; }
-    if (fc_nz(&F, CC_GT) && catherine_high_refresh_active() && !(LD8(0x7000d06360ull) & 1u) && !catherine_timing_tick())
+    // A puzzle sheep commits its block displacement before the queued idle
+    // clip is consumed. Its one-update handoff must run on the next model
+    // evaluation, including an intermediate render; retaining the old root
+    // motion there applies the block displacement twice for one frame.
+    const int sheep_block_handoff =
+        (LD32(x19 + 0x5a0ull) == 21u || LD32(x19 + 0x5a0ull) == 22u) &&
+        LD32(x19 + 0x5a4ull) == 0u && LD32(x19 + 0x5a8ull) == 1u &&
+        LD32(x19 + 0x660ull) == 0u && VS32(0) == 0x3f800000u;
+    if (fc_nz(&F, CC_GT) && catherine_high_refresh_active() && !(LD8(0x7000d06360ull) & 1u) && !catherine_timing_tick() && !sheep_block_handoff)
         goto L_7000087bf0;
     c->v[1] = 0xbf800000ull;
     fp_op_s(c, FOP_ADD, 0, 0, 1);

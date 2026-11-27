@@ -14,5 +14,6 @@ for source in ['Source/tests/menu_mouse_test.c', 'Source/tests/puzzle_player_tim
 subprocess.run(['python', str(root/'Source/tests/question_animation_stack_test.py')], check=True)
 
 subprocess.run(["python", str(root/"Source/tests/sheep_push_stack_test.py")], check=True)
+subprocess.run(["python", str(root/"Source/tests/sheep_transition_handoff_test.py")], check=True)
 subprocess.run(["python", str(root/"Source/tools/settings_ini_check.py")], check=True)
 subprocess.run(["python", str(root/"Source/tools/native_renderer_checks.py")], check=True)
