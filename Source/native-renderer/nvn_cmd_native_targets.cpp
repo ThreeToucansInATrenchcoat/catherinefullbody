@@ -1,0 +1,909 @@
+#include <mutex>
+#include "C:/catherine/native-gpu-experiment/Source/native_record_scope.h"
+#include "C:/catherine/native-gpu-experiment/Source/native_layout_memo.h"
+#include "C:/catherine/native-gpu-experiment/Source/native_state_value_memo.h"
+#include "C:/catherine/native-gpu-experiment/Source/native_state_values.h"
+#include <atomic>
+#include <thread>
+#include <immintrin.h>
+#include <algorithm>
+#include <cstring>
+// NVN command buffers (docs/NVN.md, N3): recording. Each nvnCommandBuffer* call appends a Cmd to the buffer's list;
+// nvnCommandBufferEndRecording turns the list into an NVNcommandHandle, which the game submits (possibly many times)
+// or calls from other command buffers. Replaying into Vulkan is nvn_vk.cpp's job.
+//
+// Signatures from the game's call sites (nvn_trace.txt): SetRenderTargets(cmd, n, const NVNtexture* const* colors,
+// const NVNtextureView* const* views, const NVNtexture* depth, const NVNtextureView* depthView);
+// ClearColor(cmd, int index, const float* rgba, int channelMask); ClearDepthStencil(cmd, float depth [s0],
+// NVNboolean depthMask, int stencil, int stencilMask); SetViewport / SetScissor(cmd, int x, int y, int w, int h);
+// CallCommands(cmd, int count, const NVNcommandHandle*).
+#include <algorithm>
+#include <atomic>
+#include <bit>
+#include <optional>
+#include <cstdio>
+#include <chrono>
+#include <cstring>
+#include <cstdlib>
+#include <deque>
+#include <map>
+
+#include "nvn.h"
+#include "c03_native_api.h"
+#include "producer_raster.h"
+#include "producer_clears.h"
+#include "producer_pipeline.h"
+#include "producer_fixed_pipeline.h"
+#include "producer_targets.h"
+#include "nvn_shaders.h"
+#include "periodic_render_log.h"
+
+namespace nx::nvn {
+
+static bool native_clear_packet_supplied(const Cmd&,const void*,size_t);
+
+std::shared_ptr<CmdList> peek_list(uint64_t handle);
+static int dispatch_metadata_mode(){static const int m=[] {const auto* e=std::getenv("CATHERINE_DISPATCH_METADATA");return e?std::atoi(e):1;}();return m;}
+
+
+namespace {
+
+struct Lock93 {  // cmd93: BasicLockable; one locked exchange to take, a release store to give back
+    std::atomic<uint32_t> v{0};
+    void lock() {
+        if (!v.exchange(1, std::memory_order_acquire)) return;
+        for (uint32_t spins = 0;; spins++) {
+            if (!v.load(std::memory_order_relaxed) && !v.exchange(1, std::memory_order_acquire)) return;
+            if (spins < 64) _mm_pause(); else std::this_thread::yield();
+        }
+    }
+    void unlock() { v.store(0, std::memory_order_release); }
+};
+
+struct CommandBufferState {
+    Lock93 lock;
+    const CmdList* memo93_list = nullptr;  // cmd93: the list memo93 indexes into
+    size_t blob_count = 0;                 // initialized entries in this recording
+    uint32_t memo93[64];                   // per op (< 64): index of its last blob in memo93_list
+    std::shared_ptr<CmdList> recording = std::make_shared<CmdList>();
+    size_t previous_cmds = 0, previous_blobs = 0;
+    // The memory the game hands over (AddCommandMemory / AddControlMemory) and what recording "uses" of it. Engines
+    // look at the used amounts right after EndRecording (a list that used nothing is dropped, never submitted) and
+    // at the free ones (to add memory in time), so usage grows with the commands recorded, survives EndRecording
+    // and BeginRecording like the real memory does, and is given back only when memory is added. It never reaches
+    // the total.
+    uint64_t command_size = 0, control_size = 0;
+    uint64_t command_base = 0, control_base = 0;  // usage before this recording
+    uint64_t command_memory = 0;                  // the memory added last: its GPU address (see AddCommandMemory)
+    uint64_t command_pool = 0;                    // its NVNmemoryPool*
+    uint64_t copy_row_stride = 0, copy_image_stride = 0;
+    experimental_record::LayoutMemo<Cmd> layouts;
+    experimental_record::RawLayoutMemo<Cmd> raw_layouts;
+    experimental_record::FixedValueMemo source_values;
+};
+
+// The registry wrapper can retire independently of a finite native record group.
+// A scope pins the state (including its mutex) before retaining that mutex.
+struct CommandBuffer : Object {std::shared_ptr<CommandBufferState> state=std::make_shared<CommandBufferState>();};
+thread_local experimental_record::Scope<CommandBufferState> native_scope;
+static int state_values_mode(){static const int value=[] {const auto* e=std::getenv("CATHERINE_NATIVE_STATE_VALUES");return e?std::atoi(e):1;}();return value;}
+static int record_routing_mode(){static const int value=[] {const auto* e=std::getenv("CATHERINE_NATIVE_RECORD_ROUTING");return e?std::atoi(e):1;}();return value;}
+static bool early_layout_on(){static const bool value=[] {const auto* e=std::getenv("CATHERINE_NATIVE_LAYOUT_EARLY");return !(e&&e[0]=='0');}();return value;}
+static int layout_dedup_mode(){static const int value=[] {const auto* e=std::getenv("CATHERINE_NATIVE_LAYOUT_DEDUP");return e?std::atoi(e):1;}();return value;}
+static int record_scope_mode(){static const int value=[] {const auto* e=std::getenv("CATHERINE_NATIVE_RECORD_SCOPE");return e?std::atoi(e):1;}();return value;}
+static bool record_accounting(){return layout_dedup_mode()!=0||state_values_mode()!=0;}
+struct ValueProof {CommandBufferState* state=nullptr;uint64_t guest=0,stamp=0;int key=-1;};
+thread_local ValueProof pending_value,last_value_record;
+static int fixed_kind(const Cmd& c){switch(c.op){case Cmd::BindBlendState:return 0;case Cmd::BindColorState:return 1;case Cmd::BindChannelMaskState:return 2;case Cmd::SetBlendColor:return 3;case Cmd::BindDepthStencilState:return 4;case Cmd::SetStencilMask:return 5;case Cmd::SetStencilValueMask:return 6;case Cmd::SetStencilRef:return 7;case Cmd::SetDepthBounds:return 8;default:return -1;}}
+static bool value_barrier(const Cmd& c){switch(c.op){case Cmd::CallList:case Cmd::BindDeferred:case Cmd::ClearColor:case Cmd::ClearDepthStencil:case Cmd::ClearTexture:case Cmd::CopyTextureToTexture:case Cmd::CopyBufferToTexture:case Cmd::SetRenderTargets:return true;default:return false;}}
+static CommandBufferState* command_buffer_raw(uint64_t guest){
+    if(native_scope.active())native_scope.abandon();
+    auto* wrapper=get<CommandBuffer>(guest);return wrapper?wrapper->state.get():nullptr;
+}
+static CommandBufferState* command_buffer_scoped(uint64_t guest){
+    if(t_replay_mark||t_replay_serial){native_scope.abandon();return command_buffer_raw(guest);}
+    const auto gen=objects_lock().generation.load(std::memory_order_acquire);
+    return native_scope.acquire(guest,gen,t_replay_mark,[](uint64_t address,uint64_t mark){
+        std::shared_lock lock(objects_lock());
+        auto* wrapper=dynamic_cast<CommandBuffer*>(find_object(address,mark));
+        return wrapper?wrapper->state:std::shared_ptr<CommandBufferState>{};
+    });
+}
+} // namespace
+extern "C" int catherine_native_fixed_value_skip(uint64_t command,uint32_t kind,const void* values){
+    pending_value={};const int mode=state_values_mode();
+    if(!mode||!native_scope.active()||kind>=9||!values)return 0;
+    uint32_t first;std::memcpy(&first,values,4);const int key=experimental_record::FixedValueMemo::key(kind,first);if(key<0)return 0;
+    auto* cb=command_buffer_scoped(command);if(!cb||!native_scope.active())return 0;
+    const bool match=cb->source_values.matches(key,values);
+    if(mode==2){static thread_local uint64_t queries=0,hits=0;++queries;hits+=match;if(queries==1||queries%100000==0)std::fprintf(stderr,"Native fixed values: queries %llu duplicate-candidates %llu\n",(unsigned long long)queries,(unsigned long long)hits);}
+    if(!match)return 0;
+    if(mode==2){pending_value={cb,command,cb->source_values.stamp(key),key};return 0;}
+    cb->layouts.count_record();return 1;
+}
+extern "C" void catherine_native_fixed_value_learn(uint64_t command,uint32_t kind,const void* values){
+    if(!state_values_mode()||!native_scope.active()||kind>=9||!values)return;
+    uint32_t first;std::memcpy(&first,values,4);const int key=experimental_record::FixedValueMemo::key(kind,first);if(key<0)return;
+    const uint32_t after=_mm_getcsr();
+    auto* cb=command_buffer_scoped(command);
+    if(cb&&native_scope.active()&&last_value_record.state==cb&&last_value_record.guest==command&&last_value_record.key==key)cb->source_values.learn(key,last_value_record.stamp,values,after);
+}
+extern "C" uint64_t catherine_native_record_scope_begin(void){
+    if(!record_scope_mode()||t_replay_mark||t_replay_serial)return 0;
+    return native_scope.begin();
+}
+extern "C" void catherine_native_record_scope_end(uint64_t token){
+    native_scope.end(token);
+    if(record_scope_mode()==2){const auto& n=native_scope.stats;if(n.begins==1||n.begins%100000==0)std::fprintf(stderr,"Native record scope: groups %llu records %llu cache-hits %llu locks %llu cancels %llu switches %llu\n",(unsigned long long)n.begins,(unsigned long long)n.records,(unsigned long long)n.hits,(unsigned long long)n.locks,(unsigned long long)n.cancels,(unsigned long long)n.switches);}
+}
+extern "C" void catherine_native_record_scope_abandon(void){if(native_scope.active())native_scope.abandon();}
+namespace {
+
+// Bound predictive capacity per command buffer. Larger lists can still grow normally.
+constexpr size_t kCommandReserveLimit = 131072, kBlobReserveLimit = 4096;
+
+
+// cmd161: recycled command-list storage.
+namespace pool161 {
+bool on() {
+    static const bool v = [] { const char* e = std::getenv("CATHERINE_PARALLEL161"); return !(e && e[0] == '0'); }();
+    return v;
+}
+std::mutex g_m;
+std::multimap<size_t, std::vector<Cmd>> g_cmds;                     // by capacity
+std::multimap<size_t, std::vector<std::vector<uint8_t>>> g_blobs;   // by capacity
+size_t g_bytes = 0;
+uint64_t g_parked = 0, g_reused = 0;
+constexpr size_t kMaxVectors = 512, kMaxBytes = size_t(256) << 20, kMinBytes = 16 << 10;
+size_t bytes_of(const std::vector<Cmd>& v) { return v.capacity() * sizeof(Cmd); }
+size_t bytes_of(const std::vector<std::vector<uint8_t>>& v) {
+    size_t bytes = v.capacity() * sizeof(std::vector<uint8_t>);
+    for (const auto& blob : v) bytes += blob.capacity();
+    return bytes;
+}
+void prepare_reuse(std::vector<Cmd>& v) { v.clear(); }
+void prepare_reuse(std::vector<std::vector<uint8_t>>&) {} // Keep private blob buffers for reassignment.
+template <class V, class M> void park(V& v, M& m) {
+    const size_t b = bytes_of(v);
+    if (b < kMinBytes || g_cmds.size() + g_blobs.size() >= kMaxVectors || g_bytes + b > kMaxBytes) return;
+    g_bytes += b;
+    g_parked++;
+    m.emplace(v.capacity(), std::move(v));
+}
+void recycle(CmdList* l) {
+    if (on()) {
+        std::vector<Cmd> cmds;
+        std::vector<std::vector<uint8_t>> blobs;
+        cmds.swap(l->cmds);
+        blobs.swap(l->blobs);
+        cmds.clear();
+        // The final shared owner has retired: retain the inner buffers as well
+        // as the outer vector. No published list can refer to these bytes now.
+        std::lock_guard lk(g_m);
+        park(cmds, g_cmds);
+        park(blobs, g_blobs);
+    }
+    delete l;
+}
+std::shared_ptr<CmdList> make() { return std::shared_ptr<CmdList>(new CmdList(), recycle); }
+// The smallest parked vector of at least `want` elements, swapped into v (v keeps its own if none fits).
+template <class V, class M> void take(V& v, size_t want, M& m) {
+    if (!want || v.capacity() >= want) return;
+    std::lock_guard lk(g_m);
+    auto it = m.lower_bound(want);
+    if (it == m.end()) return;
+    g_bytes -= bytes_of(it->second);
+    g_reused++;
+    V got = std::move(it->second);
+    m.erase(it);
+    prepare_reuse(got);
+    v.swap(got);  // v was empty (a fresh recording): nothing lost
+}
+}  // namespace pool161
+bool reserve_command_lists() {
+    static const bool on = [] {
+        const char* value = std::getenv("CATHERINE_NVN_LIST_RESERVE");
+        if (value) return std::strcmp(value, "1") == 0;
+#ifdef CATHERINE_HIGH_REFRESH_BUILD
+        return true;
+#else
+        return false;
+#endif
+    }();
+    return on;
+}
+
+constexpr uint64_t kCommandBytes = 16, kControlBytes = 4;  // per recorded command
+
+uint64_t used(uint64_t size, uint64_t base, size_t cmds, uint64_t per) {
+    return std::min(base + cmds * per, size > 64 ? size - 64 : 0);
+}
+
+// A handle lives as long as its command memory: on the GPU a list is valid until the game records over the memory it
+// used, so a newer list recorded over the same bytes (our usage estimate, command_base) drops the older ones. Engines
+// record some lists once and call them for a long time: Wonder's file select called handles 0x77a/0x77b recorded ~100k
+// lists earlier, and every character's draw lists are recorded when a course loads and first called only after the
+// intro (a count limit dropped them before that and the characters were never drawn, docs/nvn/DEBUG.md #26).
+// kKeepHandles is only a safety net: past it the oldest lists that were used but not since they were queued go.
+struct HandleEntry {
+    std::shared_ptr<CmdList> list;
+    uint64_t queued = 0, used = 0;  // g_handle_clock values
+    uint64_t start = 0, end = 0;    // command memory bytes: memory address + usage estimate
+    uint64_t pool = 0;              // the NVNmemoryPool* of that memory
+    uint64_t cb = 0;                // the NVNcommandBuffer* it was recorded in
+    double t = 0;                   // seconds since the first list, when it was recorded
+    uint64_t calls = 0;             // lookups (replays and submits)
+};
+uint64_t g_cross_pool_drops = 0;  // lists dropped by a list recorded in another pool (only with NX_CMD_REGION_OLD)
+
+// Where command memory is, for the overlap rule above: the pool's GPU address plus the offset. It was the
+// NVNmemoryPool* (the guest struct's address) plus the offset: pool structs sit a few hundred bytes apart while the
+// offsets reach megabytes, so a list recorded in one pool "overlapped" lists of another and dropped them. Wonder records
+// its draw lists when a course loads; a dropped one left its draws on the vertex buffers bound before them (exploded
+// geometry at course 1-1's start for the session, DEBUG-2 #90). NX_CMD_REGION_OLD=1: the old key.
+uint64_t command_memory_address(uint64_t pool, uint64_t offset) {
+    static const bool old = std::getenv("NX_CMD_REGION_OLD") != nullptr;
+    if (!old)
+        if (auto* p = get<MemoryPool>(pool)) return p->gpu + offset;
+    return pool + offset;
+}
+std::map<uint64_t, std::pair<uint64_t, uint64_t>> g_regions;  // start -> (end, handle)
+std::mutex g_handles_lock;
+std::map<uint64_t, HandleEntry> g_handles;
+std::deque<std::pair<uint64_t, uint64_t>> g_handle_order;  // (handle, queued at), oldest first
+constexpr size_t kKeepHandles = 1 << 18;
+uint64_t g_handle_clock = 0;
+std::atomic<uint64_t> g_next_handle{1};
+
+// The safety net counted g_handle_order, which keeps an entry for every list recorded, also those already dropped by
+// the overlap rule: past 2^18 lists ever recorded (2-3 minutes of play) it ran on every EndRecording and dropped any
+// live list not called in the last 2^18 recordings. The world map's lists, recorded at its first visit and not called
+// while Mario was in a course for 3 minutes, were gone on the way back: the map lavender with black wedges for good
+// (DEBUG-2 #77, #91). Now it counts live lists (g_handles) and stale queue entries are compacted away.
+// NX_HANDLES_OLD=1: the old count. NX_KEEP_HANDLES=<n>: the limit (to reproduce it quickly).
+bool handles_old() {
+    static const bool on = std::getenv("NX_HANDLES_OLD") != nullptr;
+    return on;
+}
+size_t keep_handles() {
+    static const size_t n = [] {
+        const char* e = std::getenv("NX_KEEP_HANDLES");
+        return e ? size_t(std::strtoull(e, nullptr, 0)) : kKeepHandles;
+    }();
+    return n;
+}
+double seconds_now() {
+    static const auto t0 = std::chrono::steady_clock::now();
+    return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+}
+
+// NX_CMD_DROPS=1: what dropped each list (a ring by handle), told when a dropped handle is called (explain_handle).
+struct Dropped {
+    uint64_t handle = 0, by = 0;  // by: the list recorded over it; 0: the safety net
+    uint64_t start = 0, end = 0, pool = 0, cb = 0, calls = 0;
+    uint64_t by_start = 0, by_end = 0, by_pool = 0, by_cb = 0;
+    float t = 0, t_drop = 0;
+};
+constexpr size_t kDropRing = 1 << 19;
+std::vector<Dropped> g_dropped;
+std::map<uint64_t, Dropped> g_aged_lists;  // the safety net's drops, by handle
+uint64_t g_aged = 0, g_aged_called = 0, g_overlap_drops = 0, g_pool_drops = 0;
+bool drops_on() {
+    static const bool on = std::getenv("NX_CMD_DROPS") != nullptr;
+    return on;
+}
+void note_drop(uint64_t h, const HandleEntry& e, uint64_t by, uint64_t by_start, uint64_t by_end, uint64_t by_pool,
+               uint64_t by_cb) {
+    if (by == ~0ull) g_pool_drops++;
+    else if (by) g_overlap_drops++;
+    else g_aged++, g_aged_called += e.calls != 0;
+    Dropped d{h,     by,       e.start, e.end,   e.pool, e.cb, e.calls, by_start, by_end, by_pool,
+              by_cb, float(e.t), float(seconds_now())};
+    if (!by) {  // few: kept by handle (the ring below is overwritten by later handles' overlap drops)
+        if (g_aged_lists.size() > 100000) g_aged_lists.clear();
+        g_aged_lists[h] = d;
+    }
+    if (!drops_on()) return;
+    if (g_dropped.empty()) g_dropped.resize(kDropRing);
+    g_dropped[h % kDropRing] = d;
+}
+
+
+void CommandBufferInitialize(CPU& c) {
+    catherine_native_record_scope_abandon();
+    catherine_c03_command_retired(c.x[0]);  // NVNboolean (NVNcommandBuffer*, NVNdevice*)
+    make<CommandBuffer>(c.x[0]);
+    c.x[0] = 1;
+}
+
+void CommandBufferFinalize(CPU& c) {
+    catherine_native_record_scope_abandon();
+    catherine_c03_command_retired(c.x[0]); destroy(c.x[0]); }
+
+void CommandBufferBeginRecording(CPU& c) {
+    catherine_native_record_scope_abandon();
+    catherine_c03_command_retired(c.x[0]);
+    if (auto* cb = command_buffer_raw(c.x[0])) {
+        std::lock_guard lk(cb->lock);
+        cb->layouts.reset();cb->raw_layouts.invalidate();cb->source_values.reset();
+        if (!reserve_command_lists()) {
+            cb->blob_count = 0;
+            cb->recording = (pool161::on() ? pool161::make() : std::make_shared<CmdList>());
+            return;
+        }
+
+        // EndRecording already installed an empty unpublished list. An
+        // interrupted recording still has to discard its commands and flags.
+        const auto& active = *cb->recording;
+        if (!active.cmds.empty() || cb->blob_count != 0 || active.reads_guest_texture_source) {
+            cb->recording = (pool161::on() ? pool161::make() : std::make_shared<CmdList>());
+            cb->blob_count = 0;
+        }
+        // Use common capacity sizes across buffers instead of one per exact list length.
+        // Keep spare room when nearby frames straddle a power-of-two boundary.
+        // This only reserves unpublished storage; published lists retain their
+        // own commands, blobs, handles and shared ownership until retirement.
+        const size_t commands = cb->previous_cmds ? std::min(kCommandReserveLimit,
+            std::bit_ceil(cb->previous_cmds + std::max<size_t>(256, cb->previous_cmds / 8))) : 0;
+        const size_t blobs = cb->previous_blobs ? std::min(kBlobReserveLimit,
+            std::bit_ceil(cb->previous_blobs + std::max<size_t>(16, cb->previous_blobs / 8))) : 0;
+        if (pool161::on() && cb->recording->cmds.empty() && cb->blob_count == 0) {
+            pool161::take(cb->recording->cmds, commands, pool161::g_cmds);
+            pool161::take(cb->recording->blobs, blobs, pool161::g_blobs);
+        }
+        cb->recording->cmds.reserve(commands);
+        cb->recording->blobs.reserve(blobs);
+    }
+}
+
+template <bool Image, bool Set>
+void copy_stride(CPU& c) {
+    if (auto* cb = command_buffer_raw(c.x[0])) {
+        std::lock_guard lk(cb->lock);
+        auto& stride = Image ? cb->copy_image_stride : cb->copy_row_stride;
+        if constexpr (Set) stride = c.x[1];
+        else c.x[0] = stride;
+    } else if constexpr (!Set) {
+        c.x[0] = 0;
+    }
+}
+
+void AddCommandMemory(CPU& c) {  // (cmd, const NVNmemoryPool*, ptrdiff_t offset, size_t size)
+    if (auto* cb = command_buffer_raw(c.x[0])) {
+        std::lock_guard lk(cb->lock);
+        cb->command_size = c.x[3];
+        cb->command_base = 0;
+        cb->command_memory = command_memory_address(c.x[1], c.x[2]);
+        cb->command_pool = c.x[1];
+    }
+}
+
+void AddControlMemory(CPU& c) {  // (cmd, void* memory, size_t size)
+    if (auto* cb = command_buffer_raw(c.x[0])) {
+        std::lock_guard lk(cb->lock);
+        cb->control_size = c.x[2];
+        cb->control_base = 0;
+    }
+}
+
+template <bool Command, int What>  // What: 0 used, 1 size, 2 free
+void memory_query(CPU& c) {
+    auto* cb = command_buffer_raw(c.x[0]);
+    if (!cb) {
+        c.x[0] = 0;
+        return;
+    }
+    std::lock_guard lk(cb->lock);
+    uint64_t size = Command ? cb->command_size : cb->control_size;
+    uint64_t u = used(size, Command ? cb->command_base : cb->control_base, record_accounting()?cb->layouts.logical_commands:cb->recording->cmds.size(),
+                      Command ? kCommandBytes : kControlBytes);
+    c.x[0] = What == 0 ? u : What == 1 ? size : size - u;
+}
+
+std::atomic<uint64_t> g_ends{0}, g_end_cmds{0}, g_calls{0}, g_no_cb{0};
+std::atomic<uint64_t> g_skin_lists{0}, g_skin_calls{0}, g_skin_replays{0};
+
+bool skinned_program(uint64_t program) {
+    if (const auto* sh = program_shaders(program))
+        for (const ShaderInfo* s : *sh)
+            if (s->stage == ShaderStage::Vertex)
+                for (const ShaderIo& in : s->refl.inputs)
+                    if (in.location == 6) return true;
+    return false;
+}
+
+void CommandBufferEndRecording(CPU& c) {  // NVNcommandHandle
+    std::shared_ptr<CmdList> list = (pool161::on() ? pool161::make() : std::make_shared<CmdList>());
+    uint64_t start = 0, end = 0, pool = 0;
+    const uint64_t cb_guest = c.x[0];
+    if (auto* cb = command_buffer_raw(c.x[0])) {
+        std::lock_guard lk(cb->lock);
+        if((layout_dedup_mode()==2||state_values_mode()==2)&&layout_dedup_mode()!=1&&state_values_mode()!=1&&cb->layouts.logical_commands!=cb->recording->cmds.size())fatal("Native layout memo logical command accounting mismatch");
+        size_t n = (record_accounting()?cb->layouts.logical_commands:cb->recording->cmds.size()) + 1;  // + the end of the list, so even an empty one used something
+        start = cb->command_memory + cb->command_base;
+        pool = cb->command_pool;
+        cb->command_base = used(cb->command_size, cb->command_base, n, kCommandBytes);
+        end = std::max(cb->command_memory + cb->command_base, start + 1);
+        cb->control_base = used(cb->control_size, cb->control_base, n, kControlBytes);
+        // Only initialized blobs become visible to the shared published list.
+        cb->recording->blobs.resize(cb->blob_count);
+        cb->blob_count = 0;
+        if (reserve_command_lists()) {
+            cb->previous_cmds = std::min(cb->recording->cmds.size(), kCommandReserveLimit);
+            cb->previous_blobs = std::min(cb->recording->blobs.size(), kBlobReserveLimit);
+        }
+        list.swap(cb->recording);
+        cb->layouts.reset();cb->raw_layouts.invalidate();cb->source_values.reset();
+    }
+    if(dispatch_metadata_mode()) {
+        if(dispatch_metadata_mode()==2) {
+            uint32_t dispatches=0;std::vector<uint64_t> calls;
+            for(const auto& command:list->cmds){dispatches+=command.op==Cmd::DispatchCompute;if(command.op==Cmd::CallList)calls.push_back(command.a[0]);}
+            if(dispatches!=list->own_dispatches||calls!=list->calls)fatal("Recorded dispatch metadata differs from command scan");
+        }
+        // Published command lists are immutable. All mutable appends pass record().
+        list->scanned_size=list->cmds.size();
+    }
+    list->epoch = current_epoch();
+    g_ends++;
+    g_end_cmds += list->cmds.size();
+    uint64_t h = g_next_handle++;
+    list->handle = h;
+    if (skin_lists_on()) {
+        size_t draws = 0, calls = 0;
+        for (const Cmd& k : list->cmds) {
+            list->skinned += k.op == Cmd::BindProgram && skinned_program(k.a[0]);
+            draws += k.op == Cmd::DrawArrays || k.op == Cmd::DrawElements;
+            calls += k.op == Cmd::CallList;
+        }
+        if (list->skinned && g_skin_lists++ < 40)
+            log("skinlists: recorded handle %llx in cmd %llx: %u skinned binds, %zu draws, %zu calls, %zu cmds",
+                (unsigned long long)h, (unsigned long long)c.x[0], list->skinned, draws, calls, list->cmds.size());
+    }
+    if ((g_ends & 65535) == 0 && pool161::on())
+        log("cmd161: list storage parked %llu, reused %llu, %zu KB parked now", (unsigned long long)pool161::g_parked,
+            (unsigned long long)pool161::g_reused, pool161::g_bytes >> 10);
+    if ((g_ends & 4095) == 0)
+        periodic_log("nvn: %llu lists ended (%llu commands), %llu CallCommands, %llu records into unknown command buffers%s",
+            (unsigned long long)g_ends.load(), (unsigned long long)g_end_cmds.load(), (unsigned long long)g_calls.load(),
+            (unsigned long long)g_no_cb.load(),
+            skin_lists_on() ? (" ; skinned lists " + std::to_string(g_skin_lists.load()) + " recorded, " +
+                               std::to_string(g_skin_calls.load()) + " calls to them recorded, " +
+                               std::to_string(g_skin_replays.load()) + " replays")
+                                  .c_str()
+                            : "");
+    static const bool trace_lists = std::getenv("NX_NVN_LISTS") != nullptr;
+    if (trace_lists && g_ends > 20000 && g_ends < 20200) {
+        size_t draws = 0, calls = 0;
+        for (auto& k : list->cmds) {
+            draws += k.op == Cmd::DrawArrays || k.op == Cmd::DrawElements;
+            calls += k.op == Cmd::CallList;
+        }
+        log("nvn list: end %llx -> handle %llu: %zu cmds, %zu draws, %zu calls, lr %s", (unsigned long long)c.x[0],
+            (unsigned long long)h, list->cmds.size(), draws, calls, describe(c.x[30]).c_str());
+    }
+    {
+        std::lock_guard lk(g_handles_lock);
+        uint64_t now = ++g_handle_clock;
+        // Older lists recorded over these bytes are gone.
+        auto r = g_regions.lower_bound(start);
+        if (r != g_regions.begin()) --r;
+        while (r != g_regions.end() && r->first < end) {
+            if (r->second.first > start) {
+                if (auto old = g_handles.find(r->second.second); old != g_handles.end()) {
+                    if (old->second.pool != pool && ++g_cross_pool_drops <= 5)
+                        log("nvn: list %llx (pool %llx) dropped by list %llx recorded in pool %llx",
+                            (unsigned long long)old->first, (unsigned long long)old->second.pool, (unsigned long long)h,
+                            (unsigned long long)pool);
+                    note_drop(old->first, old->second, h, start, end, pool, cb_guest);
+                    g_handles.erase(old);
+                }
+                r = g_regions.erase(r);
+            } else {
+                ++r;
+            }
+        }
+        g_regions[start] = {end, h};
+        g_handles[h] = {list, now, 0, start, end, pool, cb_guest, seconds_now(), 0};
+        g_handle_order.push_back({h, now});
+        // The safety net (see handles_old): over the limit of live lists, the oldest not called since they were
+        // queued go. The queue's entries of lists already dropped are compacted away when they outnumber the live.
+        const bool old_rule = handles_old();
+        if (!old_rule && g_handle_order.size() > 2 * g_handles.size() + 4096) {
+            std::deque<std::pair<uint64_t, uint64_t>> live;
+            for (auto& e : g_handle_order)
+                if (auto it = g_handles.find(e.first); it != g_handles.end() && it->second.queued == e.second)
+                    live.push_back(e);
+            g_handle_order.swap(live);
+        }
+        const size_t keep = keep_handles();
+        for (size_t turns = g_handle_order.size();
+             (old_rule ? g_handle_order.size() : g_handles.size()) > keep && turns && !g_handle_order.empty(); turns--) {
+            auto [old, queued] = g_handle_order.front();
+            g_handle_order.pop_front();
+            auto it = g_handles.find(old);
+            if (it == g_handles.end() || it->second.queued != queued) continue;  // dropped, or queued again later
+            if (it->second.used > queued || !it->second.used) {  // in use, or not called yet: queue it again
+                it->second.queued = ++g_handle_clock;
+                g_handle_order.push_back({old, it->second.queued});
+            } else {
+                auto reg = g_regions.find(it->second.start);
+                if (reg != g_regions.end() && reg->second.second == old) g_regions.erase(reg);
+                note_drop(old, it->second, 0, 0, 0, 0, 0);
+                g_handles.erase(it);
+            }
+        }
+        if ((g_ends & 4095) == 0)
+            periodic_log("nvn: handles: %zu live, %zu queued, %llu dropped by overlap, %llu with their pool, %llu by the safety "
+                "net (%llu of them called before)",
+                g_handles.size(), g_handle_order.size(), (unsigned long long)g_overlap_drops,
+                (unsigned long long)g_pool_drops, (unsigned long long)g_aged, (unsigned long long)g_aged_called);
+    }
+    c.x[0] = h;
+}
+
+void SetRenderTargets(CPU& c) {
+    Cmd cmd{Cmd::SetRenderTargets};
+    uint32_t n = std::min<uint32_t>(uint32_t(c.x[1]), 8);
+    cmd.n = n;
+    for (uint32_t k = 0; k < n && c.x[2]; k++) cmd.a[k] = ld<uint64_t>(c.x[2] + 8 * k);
+    cmd.a[8] = c.x[4];  // depth/stencil
+    // The views pick the level and layer rendered to (a bloom chain renders each mip of one texture in turn).
+    TargetViews tv;
+    for (uint32_t k = 0; k < n && c.x[3]; k++) {
+        ViewInfo v = read_view(c, ld<uint64_t>(c.x[3] + 8 * k));
+        tv.level[k] = uint8_t(v.base_level), tv.layer[k] = uint16_t(v.min_layer), tv.format[k] = uint16_t(v.format);
+    }
+    ViewInfo dv = read_view(c, c.x[5]);
+    tv.level[8] = uint8_t(dv.base_level), tv.layer[8] = uint16_t(dv.min_layer), tv.format[8] = uint16_t(dv.format);
+    record(c.x[0], cmd, &tv, sizeof tv);
+}
+
+void ClearColor(CPU& c) {
+    Cmd cmd{Cmd::ClearColor};
+    cmd.n = uint32_t(c.x[1]);
+    if (c.x[2]) std::memcpy(cmd.f, reinterpret_cast<const void*>(c.x[2]), 16);
+    cmd.mask = uint32_t(c.x[3]);
+    record(c.x[0], cmd);
+}
+
+void ClearDepthStencil(CPU& c) {
+    Cmd cmd{Cmd::ClearDepthStencil};
+    cmd.f[0] = c.v[0].f32[0];
+    cmd.mask = (c.x[1] & 1) | ((uint32_t(c.x[3]) & 0xFF) << 8);  // depth mask, stencil mask
+    cmd.i[0] = int32_t(c.x[2]);
+    record(c.x[0], cmd);
+}
+
+void SetViewport(CPU& c) {
+    Cmd cmd{Cmd::SetViewport};
+    for (int k = 0; k < 4; k++) cmd.i[k] = int32_t(c.x[1 + k]);
+    record(c.x[0], cmd);
+    static std::atomic<int> logged{0};
+    if ((cmd.i[3] < 0 || cmd.i[2] < 0) && logged++ < 10)
+        log("nvn: SetViewport with a negative size: %d %d %d %d", cmd.i[0], cmd.i[1], cmd.i[2], cmd.i[3]);
+}
+
+void SetScissor(CPU& c) {
+    Cmd cmd{Cmd::SetScissor};
+    for (int k = 0; k < 4; k++) cmd.i[k] = int32_t(c.x[1 + k]);
+    record(c.x[0], cmd);
+}
+
+void CallCommands(CPU& c) {
+    uint32_t n = uint32_t(c.x[1]);
+    g_calls += n;
+    for (uint32_t k = 0; k < n; k++) {
+        Cmd cmd{Cmd::CallList};
+        cmd.a[0] = ld<uint64_t>(c.x[2] + 8 * k);
+        record(c.x[0], cmd);
+        if (skin_lists_on())
+            if (auto l = peek_list(cmd.a[0]); l && l->skinned && g_skin_calls++ < 40)
+                log("skinlists: handle %llx called from cmd %llx", (unsigned long long)cmd.a[0],
+                    (unsigned long long)c.x[0]);
+    }
+}
+
+}  // namespace
+
+void record(uint64_t guest, Cmd cmd, const void* blob, size_t size) {
+    const auto value_candidate=pending_value;pending_value={};last_value_record={};
+    // Only finite, authenticated fixed/layout/uniform wrappers may retain a lock.
+    // Any future unexpected operation cancels the scope before ordinary recording.
+    if(native_scope.active())switch(cmd.op){
+      case Cmd::BindVertexAttribs:case Cmd::BindVertexStreams:case Cmd::BindDepthStencilState:
+      case Cmd::SetStencilMask:case Cmd::SetStencilValueMask:case Cmd::SetStencilRef:case Cmd::SetDepthBounds:
+      case Cmd::BindBlendState:case Cmd::BindColorState:case Cmd::BindChannelMaskState:case Cmd::SetBlendColor:case Cmd::BindUniformBuffer:break;
+      default:native_scope.abandon();break;
+    }
+    const bool scoped=native_scope.active();
+    auto* cb = scoped?command_buffer_scoped(guest):command_buffer_raw(guest);
+    if (!cb) {
+        g_no_cb++;
+        return;
+    }
+    std::unique_lock lk(cb->lock,std::defer_lock);
+    if(!scoped||!native_scope.active())lk.lock();
+    const int values=state_values_mode();
+    if(values){
+        const int kind=fixed_kind(cmd);int key=-1;
+        if(kind>=0){uint32_t first=0;if(kind==0){if(blob&&size>=sizeof(BlendTarget))std::memcpy(&first,blob,4);else first=UINT32_MAX;}else if(kind==7)first=cmd.mask;
+            key=experimental_record::FixedValueMemo::key(uint32_t(kind),first);
+            if(values==2&&cmd.a[4]==0&&value_candidate.state==cb&&value_candidate.guest==guest&&value_candidate.key==key&&cb->source_values.valid_at(key,value_candidate.stamp))cmd.a[4]=experimental_record::fixed_value_oracle_marker;
+            if(kind==0)cb->source_values.blend_changed(first<8?int(first):-1);else if(kind==7)cb->source_values.ref_changed(cmd.mask);else cb->source_values.invalidate(key);
+            if(key>=0)last_value_record={cb,guest,cb->source_values.stamp(key),key};
+        }else if(value_barrier(cmd))cb->source_values.reset();
+    }
+    if(record_accounting())cb->layouts.count_record();
+    const int dedup=layout_dedup_mode();
+    bool raw_duplicate=false;
+    if(dedup){
+        const size_t stride=cmd.op==Cmd::BindVertexAttribs?sizeof(VertexAttrib):cmd.op==Cmd::BindVertexStreams?sizeof(VertexStream):0;
+        const bool early=early_layout_on()&&record_routing_mode()==1&&producer_pipeline::mode()==0;
+        raw_duplicate=cb->raw_layouts.observe(cmd,blob,size,stride,early);
+        if(dedup==1&&raw_duplicate)return;
+    }
+
+    if (cmd.op == Cmd::CopyBufferToTexture) {
+        cmd.a[2] = cb->copy_row_stride;
+        cmd.a[3] = cb->copy_image_stride;
+        cb->recording->reads_guest_texture_source = true;
+    } else if (cmd.op == Cmd::CallList) {
+        // A nested list can also read from a guest texture transfer buffer.
+        cb->recording->reads_guest_texture_source = true;
+    }
+    struct Scratch {std::vector<uint8_t> raster,clear,vertex,fixed;std::optional<producer_targets::Payload> targets;};
+    auto attach=[](Cmd& c,const void*& data,size_t& bytes,Scratch& owned,bool routed){
+        switch(c.op){case Cmd::SetViewport:case Cmd::SetScissor:case Cmd::SetDepthRange:case Cmd::SetBlendColor:case Cmd::SetStencilRef:case Cmd::SetStencilMask:case Cmd::SetStencilValueMask:case Cmd::SetPolygonOffsetClamp:case Cmd::BindDepthStencilState:
+            producer_raster::attach(c,data,bytes,owned.raster);break;
+            default:if(!routed)producer_raster::attach(c,data,bytes,owned.raster);break;}
+        if(!routed||c.op==Cmd::ClearColor||c.op==Cmd::ClearDepthStencil)
+            if(!native_clear_packet_supplied(c,data,bytes))producer_clears::attach(c,data,bytes,owned.clear);
+        switch(c.op){case Cmd::DrawElements:case Cmd::DrawArrays:case Cmd::BindVertexAttribs:case Cmd::BindVertexStreams:
+            producer_pipeline::attach(c,data,bytes,owned.vertex);break;
+            default:if(!routed)producer_pipeline::attach(c,data,bytes,owned.vertex);break;}
+        switch(c.op){case Cmd::BindBlendState:case Cmd::BindColorState:case Cmd::BindChannelMaskState:case Cmd::BindDepthStencilState:case Cmd::BindPolygonState:case Cmd::SetDepthClamp:case Cmd::BindMultisampleState:
+            producer_fixed::attach(c,data,bytes,owned.fixed);break;
+            default:if(!routed)producer_fixed::attach(c,data,bytes,owned.fixed);break;}
+        if(!routed||c.op==Cmd::SetRenderTargets){owned.targets.emplace();producer_targets::attach(c,data,bytes,*owned.targets);}
+    };
+    const int routing=record_routing_mode();
+    thread_local Scratch owned;
+    if(routing==2){
+        const Cmd before=cmd;const void* const original_blob=blob;const size_t original_size=size;
+        attach(cmd,blob,size,owned,true);
+        thread_local Scratch oracle;Cmd expected=before;const void* expected_blob=original_blob;size_t expected_size=original_size;
+        attach(expected,expected_blob,expected_size,oracle,false);
+        if(std::memcmp(&expected,&cmd,sizeof cmd)||expected_size!=size||bool(expected_blob)!=bool(blob)||(blob&&size&&std::memcmp(expected_blob,blob,size)))fatal("Native command routing differs from original attachments");
+        static std::atomic<uint64_t> checked{0};const auto n=++checked;if(n==1||n%100000==0)log("Native command routing: %llu byte comparisons passed",(unsigned long long)n);
+    }else attach(cmd,blob,size,owned,routing!=0);
+    if (blob) {
+        static const bool reuse93 = [] { const char* e = std::getenv("CATHERINE_PARALLEL93"); return !(e && e[0] == '0'); }();
+        auto& blobs = cb->recording->blobs;
+        auto* p = static_cast<const uint8_t*>(blob);
+        const uint32_t op = uint32_t(cmd.op);
+        auto append_blob = [&] {
+            const uint32_t index = uint32_t(cb->blob_count++);
+            if (index < blobs.size()) blobs[index].assign(p, p + size);
+            else blobs.emplace_back(p, p + size);
+            return index;
+        };
+        if (reuse93 && op < 64) {
+            if (cb->memo93_list != cb->recording.get()) {
+                cb->memo93_list = cb->recording.get();
+                std::fill(std::begin(cb->memo93), std::end(cb->memo93), UINT32_MAX);
+            }
+            const uint32_t last = cb->memo93[op];
+            if (last < cb->blob_count && blobs[last].size() == size && (size == 0 || std::memcmp(blobs[last].data(), p, size) == 0)) {
+                cmd.blob = last;
+            } else {
+                cmd.blob = cb->memo93[op] = append_blob();
+            }
+        } else {
+            cmd.blob = append_blob();
+        }
+    }
+    if(dedup){
+        const bool is_layout=cmd.op==Cmd::BindVertexAttribs||cmd.op==Cmd::BindVertexStreams;
+        bool complete=false;
+        if(is_layout&&blob&&cmd.n&&cmd.n<=32&&cmd.blob<cb->blob_count){
+            const auto& owned_blob=cb->recording->blobs[cmd.blob];
+            complete=owned_blob.data()&&owned_blob.size()>=size_t(cmd.n)*(cmd.op==Cmd::BindVertexAttribs?sizeof(VertexAttrib):sizeof(VertexStream));
+        }
+        const bool duplicate=cb->layouts.observe(cmd,complete)||raw_duplicate;
+        if(dedup==2){
+            static thread_local uint64_t layouts=0,candidates=0;
+            if(is_layout){++layouts;candidates+=duplicate;if(layouts==1||layouts%100000==0)log("Native layout memo: setters %llu duplicate-candidates %llu",(unsigned long long)layouts,(unsigned long long)candidates);}
+            // Replay validates the actual live state, while retaining every Cmd.
+            if(duplicate)cmd.a[7]=experimental_record::layout_oracle_marker;
+        }else if(duplicate)return;
+    }
+    if (cmd.op == Cmd::CallList || cmd.op == Cmd::BindDeferred)
+        cb->recording->deferred_captures.push_back({cmd.op,cmd.n,cmd.mask,cmd.a[0]});
+    cb->recording->cmds.push_back(cmd);
+    if(dispatch_metadata_mode()) {
+        if(cmd.op==Cmd::DispatchCompute)++cb->recording->own_dispatches;
+        else if(cmd.op==Cmd::CallList)cb->recording->calls.push_back(cmd.a[0]);
+    }
+}
+
+// A handle's list for the traces, without marking it used (which would keep it from being dropped).
+std::shared_ptr<CmdList> peek_list(uint64_t handle) {
+    std::lock_guard lk(g_handles_lock);
+    auto it = g_handles.find(handle);
+    return it == g_handles.end() ? nullptr : it->second.list;
+}
+
+bool skin_lists_on() {
+    static const bool on = std::getenv("NX_TRACE_SKINLISTS") != nullptr;
+    return on;
+}
+
+void skin_list_replayed(const CmdList& list, int depth) {
+    if (list.skinned && g_skin_replays++ < 40)
+        log("skinlists: handle %llx replayed at depth %d", (unsigned long long)list.handle, depth);
+    // The first skinned lists' commands: P<vs> program binds (* skinned), D draws, C<handle> calls, op numbers else.
+    static int dumped = 0;
+    if (!list.skinned || dumped >= 3) return;
+    dumped++;
+    std::string s;
+    for (const Cmd& k : list.cmds) {
+        char b[64];
+        if (k.op == Cmd::BindProgram) {
+            const auto* sh = program_shaders(k.a[0]);
+            const ShaderInfo* vs = nullptr;
+            for (const ShaderInfo* x : sh ? *sh : std::vector<const ShaderInfo*>{})
+                if (x->stage == ShaderStage::Vertex) vs = x;
+            std::snprintf(b, sizeof b, " P%s%.8s/%x", skinned_program(k.a[0]) ? "*" : "", vs ? vs->hash.c_str() : "-",
+                          k.mask);
+        } else if (k.op == Cmd::DrawArrays || k.op == Cmd::DrawElements) {
+            std::snprintf(b, sizeof b, " D%u", uint32_t(k.op == Cmd::DrawElements ? k.i[0] : k.i[1]));
+        } else if (k.op == Cmd::CallList) {
+            auto l = peek_list(k.a[0]);
+            size_t draws = 0, progs = 0;
+            for (const Cmd& j : l ? l->cmds : std::vector<Cmd>{})
+                draws += j.op == Cmd::DrawArrays || j.op == Cmd::DrawElements, progs += j.op == Cmd::BindProgram;
+            if (l)
+                std::snprintf(b, sizeof b, " C%llx(%zuc%zud%zup)", (unsigned long long)k.a[0], l->cmds.size(),
+                              draws, progs);
+            else
+                std::snprintf(b, sizeof b, " C%llx(GONE)", (unsigned long long)k.a[0]);
+        } else {
+            std::snprintf(b, sizeof b, " %u", unsigned(k.op));
+        }
+        s += b;
+        if (s.size() > 3000) {
+            log("skinlists: %llx:%s", (unsigned long long)list.handle, s.c_str());
+            s.clear();
+        }
+    }
+    log("skinlists: %llx:%s", (unsigned long long)list.handle, s.c_str());
+}
+
+std::shared_ptr<CmdList> command_list(uint64_t handle) {
+    std::lock_guard lk(g_handles_lock);
+    auto it = g_handles.find(handle);
+    if (it == g_handles.end()) return nullptr;
+    it->second.used = ++g_handle_clock;
+    it->second.calls++;
+    return it->second.list;
+}
+
+// A memory pool finalized: the lists recorded in its memory are gone with it (on the GPU they are invalid). GPU
+// addresses are never reused (gpu_alloc), so without this nothing records over them again and every course load's
+// lists stayed live for the session (+3,000-7,000 per course entry), until the safety net had to run again
+// (DEBUG-2 #91). NX_CMD_POOL_DROP=0: they stay.
+void command_memory_released(uint64_t gpu, uint64_t size) {
+    static const bool off = [] {
+        const char* e = std::getenv("NX_CMD_POOL_DROP");
+        return e && e[0] == '0';
+    }();
+    if (off || !gpu) return;
+    std::lock_guard lk(g_handles_lock);
+    size_t n = 0;
+    for (auto r = g_regions.lower_bound(gpu); r != g_regions.end() && r->first < gpu + size;) {
+        if (auto it = g_handles.find(r->second.second); it != g_handles.end()) {
+            note_drop(it->first, it->second, ~0ull, gpu, gpu + size, 0, 0);
+            g_handles.erase(it), n++;
+        }
+        r = g_regions.erase(r);
+    }
+    static int logged = 0;
+    if (n && logged++ < 20)
+        log("nvn: memory pool at gpu %llx (%llu KB) finalized: %zu command lists in it dropped", (unsigned long long)gpu,
+            (unsigned long long)(size >> 10), n);
+}
+
+// For the "handle ... is unknown" lines: what dropped it (NX_CMD_DROPS=1), or why that is not known.
+std::string explain_handle(uint64_t handle) {
+    std::lock_guard lk(g_handles_lock);
+    char b[400];
+    if (handle >= g_next_handle.load()) return "never recorded";
+    auto aged = g_aged_lists.find(handle);
+    if (aged == g_aged_lists.end() &&
+        (!drops_on() || g_dropped.empty() || g_dropped[handle % kDropRing].handle != handle))
+        return drops_on() ? "dropped by overlap (not in the ring any more)" : "dropped (NX_CMD_DROPS=1 tells by what)";
+    const Dropped& d = aged != g_aged_lists.end() ? aged->second : g_dropped[handle % kDropRing];
+    if (d.by == ~0ull)
+        std::snprintf(b, sizeof b, "its memory pool (gpu %llx-%llx) was finalized at %.1f s (recorded at %.1f s in cmd "
+                      "%llx, %llu calls)", (unsigned long long)d.by_start, (unsigned long long)d.by_end, d.t_drop, d.t,
+                      (unsigned long long)d.cb, (unsigned long long)d.calls);
+    else if (!d.by)
+        std::snprintf(b, sizeof b,
+                      "aged out by the safety net at %.1f s (recorded at %.1f s in cmd %llx, %llu calls, memory %llx-%llx "
+                      "pool %llx)",
+                      d.t_drop, d.t, (unsigned long long)d.cb, (unsigned long long)d.calls, (unsigned long long)d.start,
+                      (unsigned long long)d.end, (unsigned long long)d.pool);
+    else
+        std::snprintf(b, sizeof b,
+                      "dropped at %.1f s by list %llx (cmd %llx, memory %llx-%llx pool %llx); it was recorded at %.1f s "
+                      "in cmd %llx, %llu calls, memory %llx-%llx pool %llx",
+                      d.t_drop, (unsigned long long)d.by, (unsigned long long)d.by_cb, (unsigned long long)d.by_start,
+                      (unsigned long long)d.by_end, (unsigned long long)d.by_pool, d.t, (unsigned long long)d.cb,
+                      (unsigned long long)d.calls, (unsigned long long)d.start, (unsigned long long)d.end,
+                      (unsigned long long)d.pool);
+    return b;
+}
+
+NX_HLE("nvnCommandBufferInitialize", CommandBufferInitialize);
+NX_HLE("nvnCommandBufferFinalize", CommandBufferFinalize);
+NX_HLE("nvnCommandBufferBeginRecording", CommandBufferBeginRecording);
+NX_HLE("nvnCommandBufferEndRecording", CommandBufferEndRecording);
+NX_HLE("nvnCommandBufferSetRenderTargets", SetRenderTargets);
+NX_HLE("nvnCommandBufferSetCopyRowStride", (copy_stride<false, true>));
+NX_HLE("nvnCommandBufferSetCopyImageStride", (copy_stride<true, true>));
+NX_HLE("nvnCommandBufferGetCopyRowStride", (copy_stride<false, false>));
+NX_HLE("nvnCommandBufferGetCopyImageStride", (copy_stride<true, false>));
+NX_HLE("nvnCommandBufferClearColor", ClearColor);
+NX_HLE("nvnCommandBufferClearDepthStencil", ClearDepthStencil);
+NX_HLE("nvnCommandBufferSetViewport", SetViewport);
+NX_HLE("nvnCommandBufferSetScissor", SetScissor);
+NX_HLE("nvnCommandBufferCallCommands", CallCommands);
+NX_HLE("nvnCommandBufferAddCommandMemory", AddCommandMemory);
+NX_HLE("nvnCommandBufferAddControlMemory", AddControlMemory);
+NX_HLE("nvnCommandBufferGetCommandMemoryUsed", (memory_query<true, 0>));
+NX_HLE("nvnCommandBufferGetCommandMemorySize", (memory_query<true, 1>));
+NX_HLE("nvnCommandBufferGetCommandMemoryFree", (memory_query<true, 2>));
+NX_HLE("nvnCommandBufferGetControlMemoryUsed", (memory_query<false, 0>));
+NX_HLE("nvnCommandBufferGetControlMemorySize", (memory_query<false, 1>));
+NX_HLE("nvnCommandBufferGetControlMemoryFree", (memory_query<false, 2>));
+
+}  // namespace nx::nvn
+
+namespace nx::nvn {
+
+static bool native_clear_packet_supplied(const Cmd& command,const void* blob,size_t size){
+    if(!producer_clears::mode()||command.op!=Cmd::ClearDepthStencil||command.a[8]!=producer_clears::packet_tag||
+       !blob||command.a[7]>size||sizeof(producer_clears::Intent)>size-size_t(command.a[7]))return false;
+    producer_clears::Intent intent;std::memcpy(&intent,static_cast<const uint8_t*>(blob)+size_t(command.a[7]),sizeof intent);
+    if(intent.color||intent.attachment.colorAttachment||
+       (intent.attachment.aspectMask&~(VK_IMAGE_ASPECT_DEPTH_BIT|VK_IMAGE_ASPECT_STENCIL_BIT)))return false;
+    producer_clears::recorded_packets.fetch_add(1,std::memory_order_relaxed);
+    return true;
+}
+
+}
+
+#include "engine_native_clear.h"
+extern "C" void catherine_engine_emit_depth_clear(uint64_t command,const CatherineEngineDepthClear* values,int diagnostic){
+    using namespace nx::nvn;
+    const uint32_t depth=values->depth_enabled&1u,mask=values->stencil_write_mask&255u;
+    Cmd compatibility{Cmd::ClearDepthStencil};std::memcpy(&compatibility.f[0],&values->depth_bits,4);
+    compatibility.i[0]=int32_t(values->stencil_value);compatibility.mask=depth|(mask<<8);
+    if(!producer_clears::mode()){record(command,compatibility);return;}
+    producer_clears::Intent intent;std::memset(&intent,0,sizeof intent);
+    intent.trace_mask=compatibility.mask;intent.stencil_write_mask=mask;
+    intent.attachment.aspectMask=(depth?VK_IMAGE_ASPECT_DEPTH_BIT:0)|(mask?VK_IMAGE_ASPECT_STENCIL_BIT:0);
+    std::memcpy(&intent.attachment.clearValue.depthStencil.depth,&values->depth_bits,4);
+    intent.attachment.clearValue.depthStencil.stencil=values->stencil_value;
+    if(diagnostic||producer_clears::mode()==2){
+        producer_clears::Intent expected;
+        if(!producer_clears::encode(compatibility,expected)||std::memcmp(&expected,&intent,sizeof intent))
+            nx::fatal("Owned native depth-clear values differ from SDK clear contract");
+        static std::atomic<uint64_t> compared;const uint64_t n=compared.fetch_add(1,std::memory_order_relaxed)+1;
+        if(n==1||n%10000==0)nx::log("Native owned depth clears verified: %llu",(unsigned long long)n);
+    }
+    compatibility.a[7]=0;compatibility.a[8]=producer_clears::packet_tag;
+    // record copies the owned Vulkan intent before this stack object expires.
+    record(command,compatibility,&intent,sizeof intent);
+}

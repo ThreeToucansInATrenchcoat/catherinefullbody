@@ -3450,6 +3450,11 @@ L_70001442e0:;
     x30 = 0x7000144300ull; c->x[0] = x0; c->x[30] = x30; f_70001bfce0(c); x0 = c->x[0]; x8 = c->x[8]; x9 = c->x[9]; x30 = c->x[30];
     if (((x0 >> 0) & 1) != 0) { goto L_7000144318; }
 catherine_action15_motion_override:;
+    /* The off-tick path skips f_7000138f80's register spill. Publish the
+       current guest frame before calling the motion query, or its prologue
+       overwrites this function's saved registers (including the step count). */
+    c->sp = sp_;
+    c->x[20] = x20;
     x0 = (uint64_t)(0ull | x20);
     c->x[1] = (uint32_t)(0u | 0u);
     x30 = 0x7000144310ull; c->x[0] = x0; c->x[30] = x30; f_70001bfbe0(c); x0 = c->x[0]; x8 = c->x[8]; x9 = c->x[9]; x30 = c->x[30];

@@ -108,10 +108,26 @@ private:
     };
     std::array<RangeCandidates,16384> range_cache{};
     uint64_t shape_generation=1;
+    std::vector<size_t> address_order;
+    uint64_t address_generation=0;
+    std::vector<size_t> writeback_candidates;
+    const std::vector<size_t>& ordered_records() {
+        if (address_generation != shape_generation) {
+            address_order.resize(records.size());
+            for (size_t i=0; i<records.size(); ++i) address_order[i]=i;
+            std::sort(address_order.begin(), address_order.end(), [&](size_t a,size_t b) {
+                return records[a].begin < records[b].begin ||
+                       (records[a].begin == records[b].begin && a < b);
+            });
+            address_generation=shape_generation;
+        }
+        return address_order;
+    }
     void shape_changed() {
         if (++shape_generation==0) {
             for(auto& entry:range_cache) entry.generation=0;
             shape_generation=1;
+            address_generation=0;
         }
     }
     template<class Predicate,class View> bool query_candidates(uintptr_t address,uint64_t count,uint64_t stride,Predicate predicate,View&& view) {
@@ -318,10 +334,15 @@ public:
         ++memo_epoch105;
         if (!from || !to || !size || size > UINTPTR_MAX - reinterpret_cast<uintptr_t>(to)) return;
         const uintptr_t begin = reinterpret_cast<uintptr_t>(to), end = begin + uintptr_t(size);
-        for (auto& record : records)
-            if (record.pending && record.submit == submit && record.begin >= begin &&
+        const auto& order=ordered_records();
+        auto first=std::lower_bound(order.begin(),order.end(),begin,
+            [&](size_t index,uintptr_t address){ return records[index].begin < address; });
+        for (;first!=order.end() && records[*first].begin<end;++first) {
+            auto& record=records[*first];
+            if (record.pending && record.submit == submit &&
                 record.begin + record.count * record.stride <= end)
                 record.writeback_source = from + (record.begin - begin);
+        }
     }
     // Called after apply_write_back, when from is host-ready/fenced and guest
     // positions have actually been updated. Guest races that prevent an exact
@@ -330,16 +351,23 @@ public:
         ++memo_epoch105;
         if (!from || !to || !size || size > UINTPTR_MAX - reinterpret_cast<uintptr_t>(to)) return;
         const uintptr_t begin = reinterpret_cast<uintptr_t>(to), end = begin + uintptr_t(size);
-        for (auto it = records.begin(); it != records.end();) {
-            if (!it->pending || it->begin < begin || it->begin + it->count * it->stride > end ||
-                it->writeback_source != from + (it->begin - begin)) { ++it; continue; }
-            const uint64_t offset = it->begin - begin;
-            prune_dirty = true;
-            capture(*it, from + offset);
-            if (!matches(*it, to + offset)) { it = records.erase(it); shape_changed(); continue; }
-            it->pending = false;
-            it->used = ++serial;
-            ++it;
+        const auto& order=ordered_records();
+        auto first=std::lower_bound(order.begin(),order.end(),begin,
+            [&](size_t index,uintptr_t address){ return records[index].begin < address; });
+        writeback_candidates.clear();
+        for (;first!=order.end() && records[*first].begin<end;++first)
+            writeback_candidates.push_back(*first);
+        std::sort(writeback_candidates.begin(),writeback_candidates.end());
+        for (size_t index : writeback_candidates) {
+            auto& record=records[index];
+            if (!record.pending || record.begin + record.count * record.stride > end ||
+                record.writeback_source != from + (record.begin - begin)) continue;
+            const uint64_t offset=record.begin-begin;
+            prune_dirty=true;
+            capture(record,from+offset);
+            if (!matches(record,to+offset)) { record.invalid=true; continue; }
+            record.pending=false;
+            record.used=++serial;
         }
         prune();
     }

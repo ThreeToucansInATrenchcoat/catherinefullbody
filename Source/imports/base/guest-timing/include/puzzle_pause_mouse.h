@@ -172,7 +172,12 @@ static int catherine_pause_mouse_row(Cpu *c, uint64_t menu, unsigned variant, in
     uint64_t names = LD64(0x7000ccb5d0ull);
     if (!names) return -1;
     for (unsigned row = 0; row < count; ++row) {
-        unsigned id = LD8(0x70007cd1e4ull + variant * 25 + row);
+        /* f21ab70 uses this five-entry table for the selectable labels.
+         * The 25-entry table at 7cd1e4 starts with the shared description text. */
+        /* Story resources list Return to title before Skip; the native input
+         * indices are Return, Retry, Config, Skip, Return to title. */
+        unsigned label = variant == 0 && row >= 3 ? 7 - row : row;
+        unsigned id = LD8(0x70007cd22full + variant * 5 + label);
         Cpu call = *c; call.x[0] = LD64(menu + 8); call.x[1] = LD64(names + id * 8);
         f_7000088650(&call);
         if (!call.x[0] || !catherine_pause_project(c, call.x[0], 0, &px[row], &py[row]) ||
@@ -182,8 +187,13 @@ static int catherine_pause_mouse_row(Cpu *c, uint64_t menu, unsigned variant, in
         ax[row] = (ax[row] - px[row]) / length; ay[row] = (ay[row] - py[row]) / length;
     }
     for (unsigned row = 0; row < count; ++row) {
-        unsigned next = row + 1 < count ? row + 1 : row - 1;
-        float pitch = fabsf((px[next] - px[row]) * -ay[row] + (py[next] - py[row]) * ax[row]);
+        /* Use the nearest visual neighbour to avoid overlapping hit regions. */
+        float pitch = 201;
+        for (unsigned other = 0; other < count; ++other) {
+            if (other == row) continue;
+            float distance = fabsf((px[other] - px[row]) * -ay[row] + (py[other] - py[row]) * ax[row]);
+            if (distance >= 10 && distance < pitch) pitch = distance;
+        }
         float across = (x - px[row]) * ax[row] + (y - py[row]) * ay[row];
         float down = (x - px[row]) * -ay[row] + (y - py[row]) * ax[row];
         if (pitch >= 10 && pitch <= 200 && fabsf(down) < pitch * .5f && fabsf(across) < pitch * 4.5f) return row;

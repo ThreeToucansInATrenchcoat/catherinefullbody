@@ -1,0 +1,78 @@
+#version 460
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+#ifndef TANGENT
+#define TANGENT 0
+#endif
+
+layout(local_size_x=64) in;
+layout(buffer_reference, std430, buffer_reference_align=4) readonly buffer InputWords { uint words[]; };
+layout(buffer_reference, std430, buffer_reference_align=4) buffer OutputWords { uint words[]; };
+layout(push_constant, std430) uniform Parameters {
+    InputWords source;
+    InputWords palette;
+    OutputWords destination;
+    InputWords preserved;
+    uint vertex_count;
+    uint matrix_count;
+} args;
+
+float ftz(float value) {
+    uint bits=floatBitsToUint(value);
+    return uintBitsToFloat((bits&0x7f800000u)==0u?(bits&0x80000000u):bits);
+}
+vec3 ftz(vec3 value) { return vec3(ftz(value.x),ftz(value.y),ftz(value.z)); }
+float value(InputWords data, uint at) { return ftz(uintBitsToFloat(data.words[at])); }
+vec4 input4(uint at) {
+    return vec4(value(args.source,at),value(args.source,at+1),value(args.source,at+2),value(args.source,at+3));
+}
+vec3 transform(uint joint, vec4 v, bool position) {
+    uint m=joint*16;
+    precise vec3 out_value;
+    for (uint row=0;row<3;++row) {
+        uint at=m+row*4;
+        precise float n=ftz(v.x*value(args.palette,at));
+        n=ftz(fma(v.y,value(args.palette,at+1),n));
+        n=ftz(fma(v.z,value(args.palette,at+2),n));
+        if(position)n=ftz(fma(v.w,value(args.palette,at+3),n));
+        out_value[row]=n;
+    }
+    return out_value;
+}
+vec3 weighted(uvec4 joints, vec4 weights, vec4 v, bool position) {
+    precise vec3 result=ftz(transform(joints.y,v,position)*weights.y);
+    result=ftz(fma(transform(joints.x,v,position),vec3(weights.x),result));
+    result=ftz(fma(transform(joints.z,v,position),vec3(weights.z),result));
+    result=ftz(fma(transform(joints.w,v,position),vec3(weights.w),result));
+    return result;
+}
+void store3(uint at, vec3 v) {
+    args.destination.words[at]=floatBitsToUint(v.x);
+    args.destination.words[at+1]=floatBitsToUint(v.y);
+    args.destination.words[at+2]=floatBitsToUint(v.z);
+}
+void main() {
+    uint vertex=gl_GlobalInvocationID.x;
+    if(vertex>=args.vertex_count)return;
+    uint src=vertex*(TANGENT!=0?20:16),dst=vertex*(TANGENT!=0?12:8);
+    uint w=src+(TANGENT!=0?12:8),j=w+4;
+    uvec4 joints=uvec4(args.source.words[j],args.source.words[j+1],args.source.words[j+2],args.source.words[j+3]);
+    if(any(greaterThanEqual(joints,uvec4(args.matrix_count))))return;
+    vec4 weights=input4(w),p=input4(src),n=input4(src+4);
+    bool canonical_position=TANGENT==0 && all(equal(uvec4(args.source.words[src],args.source.words[src+1],args.source.words[src+2],args.source.words[src+3]),uvec4(0xffc00000u,0xffc00000u,0xffc00000u,0x3f800000u)));
+    if(canonical_position) {
+        args.destination.words[dst]=0x7fffffffu;args.destination.words[dst+1]=0x7fffffffu;args.destination.words[dst+2]=0x7fffffffu;
+    } else store3(dst,weighted(joints,weights,p,true));
+    args.destination.words[dst+3]=0x3f800000;
+    store3(dst+4,weighted(joints,weights,n,false));
+    args.destination.words[dst+7]=args.preserved.words[vertex*(TANGENT!=0?2:1)];
+    if(TANGENT!=0) {
+        bool canonical_tangent=all(equal(uvec3(args.source.words[src+8],args.source.words[src+9],args.source.words[src+10]),uvec3(0xffc00000u)));
+        if(canonical_tangent) {
+            args.destination.words[dst+8]=0x7fffffffu;args.destination.words[dst+9]=0x7fffffffu;args.destination.words[dst+10]=0x7fffffffu;
+        } else store3(dst+8,weighted(joints,weights,input4(src+8),false));
+    }
+    if(TANGENT!=0)args.destination.words[dst+11]=args.preserved.words[vertex*2+1];
+    // All produced record bytes are written; only the unused allocation tail is seeded.
+}

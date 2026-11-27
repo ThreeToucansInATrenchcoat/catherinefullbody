@@ -92,7 +92,7 @@ Keep `ffmpeg-runtime/` beside the executable for bundled playback. Linux require
 
 ### Windows
 
-Install Python 3, .NET 10 SDK, Vulkan SDK, and Visual Studio with the C++ desktop workload, LLVM/Clang tools and Windows SDK.
+Install Python 3, .NET SDK 10.0.203 (pinned in `global.json`), Vulkan SDK, and Visual Studio with the C++ desktop workload, LLVM/Clang tools and Windows SDK.
 
 **Windows compilation currently requires the configured developer environment.** For other machines, use the Windows release or build on Linux.
 
@@ -104,6 +104,12 @@ python build.py
 ```
 
 The executable is `Build\catherine.exe`.
+
+The default build now includes native GPU skinning, the selected CPU/rendering
+optimizations and higher-resolution shadows. The O3 + ThinLTO compiler profile is
+included in the repository; a separate experimental source folder is unnecessary.
+See [the native renderer build notes](Source/native-renderer/README.md) for source
+layout and verification commands.
 
 ## Planned
 

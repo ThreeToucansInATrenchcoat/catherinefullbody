@@ -1,5 +1,5 @@
 // ZIP64 asset reader. Standard ZIP entries, raw Deflate, CRC on every cache fill.
-// The archive and its bounded RAM cache live for the process. Never extracts files.
+// Archive or extracted-folder reads share a bounded RAM cache for the process.
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
@@ -14,6 +14,8 @@
 #include <unistd.h>
 #endif
 #include "asset_pak.h"
+#include <filesystem>
+#include <fstream>
 #include <algorithm>
 #include <array>
 #include <cstdlib>
@@ -42,7 +44,8 @@
 namespace {
 constexpr uint64_t block_size=256*1024, max_entry=512ull*1024*1024;
 constexpr char manifest_name[]="catherine-pak.manifest";
-struct Entry { mz_uint index; uint64_t size; uint32_t crc; uint16_t method; };
+struct Entry { mz_uint index; uint64_t size; uint32_t crc; uint16_t method; std::string path; };
+struct FolderRange { uint64_t offset=0,size=0; std::filesystem::path path; std::vector<unsigned char> metadata; };
 struct CachedBlock { uint64_t index=UINT64_MAX,last=0; std::vector<unsigned char> bytes; };
 struct State {
     std::once_flag initialized;
@@ -54,6 +57,8 @@ struct State {
 #endif
     uint64_t file_size=0,romfs_size=0,tick=0;
     mz_zip_archive zip{};
+    std::filesystem::path folder;
+    std::vector<FolderRange> ranges;
     int mode=0;
     std::string failure;
     std::map<std::string,Entry> entries;
@@ -103,6 +108,8 @@ bool valid_name(const std::string& name){
         if(end==std::string::npos)return true;at=end+1;
     }
 }
+#include "asset_folder_reader.h"
+
 const Entry& find(State& s,const char* name){
     auto it=s.entries.find(name?name:"");
     if(it==s.entries.end())fail(std::string("Package entry missing: ")+(name?name:"(null)"));
@@ -110,6 +117,7 @@ const Entry& find(State& s,const char* name){
 }
 void extract(State& s,const Entry& e,void* destination,size_t count){
     if(count!=e.size || (!destination&&count))fail("Package output size mismatch");
+    if(!s.folder.empty()){folder_extract(s,e,destination,count);return;}
     unsigned char dummy=0;
     if(!mz_zip_reader_extract_to_mem(&s.zip,e.index,count?destination:&dummy,count,0))
         fail(std::string("Package inflate/CRC failure: ")+mz_zip_get_error_string(mz_zip_get_last_error(&s.zip)));
@@ -203,6 +211,17 @@ int initialize(const wchar_t* supplied,const char* native_path=nullptr){
     State& s=state();
     std::call_once(s.initialized,[&]{
         try{
+#ifndef CATHERINE_PAK_TESTING
+            if(!supplied&&!native_path&&catherine_alt_build_mode()) {
+#ifdef _WIN32
+                wchar_t executable[32768];DWORD n=GetModuleFileNameW(nullptr,executable,32768);
+                if(!n||n>=32768)fail("Cannot locate the extracted assets directory");
+                open_folder(s,std::filesystem::path(executable).parent_path()/L"assets");
+#else
+                open_folder(s,std::filesystem::read_symlink("/proc/self/exe").parent_path()/"assets");
+#endif
+            } else
+#endif
             open_archive(s,supplied,native_path);
         }catch(const std::exception& e){
             s.failure=e.what();
@@ -233,6 +252,11 @@ extern "C" int asset_pak_initialize_from_native_path(const char* path){return in
 #endif
 #ifdef CATHERINE_PAK_TESTING
 extern "C" int asset_pak_initialize_for_test(const wchar_t* path){return initialize(path);}
+extern "C" int asset_folder_initialize_for_test(const wchar_t* path){
+    auto& s=state();std::call_once(s.initialized,[&]{try{open_folder(s,std::filesystem::path(path));}
+        catch(const std::exception& e){s.failure=e.what();s.mode=-1;}});
+    if(s.mode<0)last_error=s.failure;return s.mode;
+}
 #endif
 extern "C" const char* asset_pak_error(void){return last_error.c_str();}
 extern "C" void asset_pak_free(void* allocation){std::free(allocation);}
@@ -254,7 +278,13 @@ extern "C" int asset_pak_read_romfs(void* output,uint64_t offset,size_t count){t
         for(auto& candidate:s.cache)if(candidate.index==index){cached=&candidate;break;}
         if(!cached){cached=&*std::min_element(s.cache.begin(),s.cache.end(),[](const auto& a,const auto& b){return a.last<b.last;});
             cached->index=UINT64_MAX;cached->last=0;char name[64];std::snprintf(name,sizeof name,"romfs/blocks/%06llu.bin",static_cast<unsigned long long>(index));
-            const Entry& e=find(s,name);cached->bytes.resize(static_cast<size_t>(e.size));extract(s,e,cached->bytes.data(),cached->bytes.size());cached->index=index;
+            if(!s.folder.empty()) {
+                cached->bytes.resize(static_cast<size_t>(std::min<uint64_t>(block_size,s.romfs_size-index*block_size)));
+                folder_read_romfs(s,index*block_size,cached->bytes.data(),cached->bytes.size());
+            } else {
+                const Entry& e=find(s,name);cached->bytes.resize(static_cast<size_t>(e.size));extract(s,e,cached->bytes.data(),cached->bytes.size());
+            }
+            cached->index=index;
         }
         cached->last=++s.tick;size_t within=size_t(position%block_size),take=std::min(count-done,cached->bytes.size()-within);
         std::memcpy(static_cast<unsigned char*>(output)+done,cached->bytes.data()+within,take);done+=take;

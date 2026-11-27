@@ -316,8 +316,14 @@ struct Cmd {
     uint32_t blob = 0;  // index into CmdList::blobs (decoded state, inline data)
 };
 
+struct DeferredCapture {
+    Cmd::Op op;
+    uint32_t count, kind;
+    uint64_t address;
+};
 struct CmdList {
     std::vector<Cmd> cmds;
+    std::vector<DeferredCapture> deferred_captures; // in command encounter order
     std::vector<std::vector<uint8_t>> blobs;
     uint64_t handle = 0;     // its NVNcommandHandle
     uint64_t epoch = 0;      // the texture epoch when its recording ended (nvn_incarnation.cpp): what its draws name

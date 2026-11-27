@@ -166,6 +166,8 @@ int main(int argc, char **argv) {
     if (!pack && !restarted && recovery_length < (int)sizeof recovery && !access(recovery, F_OK))
         return run_asset_setup(executable, argv);
 
+    if (!pack && !restarted && catherine_alt_build_mode()) return run_asset_setup(executable, argv);
+
     int packed = pack ? asset_pak_initialize_from_native_path(pack) : asset_pak_initialize();
     int has_shaders = packed == 1 && asset_pak_contains("spirv/results.tsv");
     int supplied = pack != NULL;

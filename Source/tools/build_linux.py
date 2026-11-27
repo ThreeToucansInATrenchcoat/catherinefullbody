@@ -10,6 +10,7 @@ import struct
 
 
 WINDOWS_ROOT = "C:/catherine/recomp/"
+NATIVE_VIRTUAL_ROOT = "C:/catherine/native-gpu-experiment/Source/"
 WINDOWS_VULKAN_INCLUDE = "-IC:/recomp/wetrix_dc/VulkanSDK/Include"
 WINDOWS_FLAGS = {
     "--target=x86_64-pc-windows-msvc",
@@ -25,7 +26,8 @@ WINDOWS_LIBRARIES = {
 
 
 def localize(arg, root):
-    return arg.replace(WINDOWS_ROOT, f"{root.as_posix()}/")
+    return arg.replace(WINDOWS_ROOT, f"{root.as_posix()}/").replace(
+        NATIVE_VIRTUAL_ROOT, f"{root.as_posix()}/Source/native-renderer/")
 
 
 def make_overlays(root, manifest, output):
@@ -40,7 +42,17 @@ def make_overlays(root, manifest, output):
                 continue
             source = Path(localize(path, root))
             dest = output / f"{len(overlays):02}-{source.name}"
-            dest.write_text(localize(source.read_text(encoding="utf-8"), root), encoding="utf-8")
+            data = json.loads(source.read_text(encoding="utf-8"))
+            localized = json.loads(localize(json.dumps(data), root))
+            # Quoted Windows-style includes are found through include/C:/...
+            # before Clang canonicalizes the symlink. Redirect that spelling too,
+            # otherwise it can read the old physical header behind a VFS override.
+            for entry in data.get("roots", []):
+                if entry.get("type") == "file" and entry["name"].startswith((WINDOWS_ROOT, NATIVE_VIRTUAL_ROOT)):
+                    localized["roots"].append(dict(entry,
+                        name=(output.parent / "include" / entry["name"]).as_posix(),
+                        **{"external-contents": localize(entry["external-contents"], root)}))
+            dest.write_text(json.dumps(localized, indent=2), encoding="utf-8")
             overlays[path] = str(dest)
     return overlays
 
@@ -63,6 +75,9 @@ def native_command(unit, root, objects, overlays, compilers, vulkan_include, ffm
         overlays.get(arg, localize(arg, root))
         for arg in recipe[1:]
         if arg not in WINDOWS_FLAGS and arg not in (WINDOWS_VULKAN_INCLUDE, "-march=x86-64-v3")
+        # The frozen Windows profile requires its matching LLVM toolchain.
+        # Linux builds the same source with O3 + ThinLTO, without that profile.
+        and not arg.startswith('-fprofile-instr-use=')
     )
     obj = objects / (Path(unit["object"]).stem + ".o")
     command[command.index("-o") + 1] = str(obj)
@@ -176,6 +191,10 @@ def run_linux(root, manifest, options):
     source_link = include / "Source"
     if not source_link.is_symlink():
         source_link.symlink_to(root / "Source", target_is_directory=True)
+    native_link = objects / "include" / NATIVE_VIRTUAL_ROOT.rstrip('/')
+    native_link.parent.mkdir(parents=True, exist_ok=True)
+    if not native_link.is_symlink():
+        native_link.symlink_to(root / "Source/native-renderer", target_is_directory=True)
     overlays = make_overlays(root, manifest, overlays_dir)
 
     def compile_unit(unit):

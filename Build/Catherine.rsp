@@ -251,7 +251,7 @@
 "C:/catherine/recomp/Build/obj/220-puzzle_recipe_host.obj"
 "C:/catherine/recomp/Build/obj/221-candidate-owner.obj"
 "-Wl,/map:C:/catherine/recomp/Build/Catherine.map"
-"-Wl,/debug,/opt:ref,/opt:icf,/pdb:C:/catherine/recomp/Build/Catherine.pdb"
+"-Wl,/debug:none,/opt:ref,/opt:icf,/pdb:C:/catherine/recomp/Build/Catherine.pdb"
 "C:/catherine/recomp/Build/obj/222-engine_native_front_end.obj"
 "C:/catherine/recomp/Build/obj/223-engine_native_arrays.obj"
 "C:/catherine/recomp/Build/obj/224-engine_native_compute.obj"
@@ -279,3 +279,8 @@
 "C:/catherine/recomp/Build/obj/246-c03_registry.obj"
 "C:/catherine/recomp/Build/obj/247-c03_controller.obj"
 "C:/catherine/recomp/Build/obj/catherine.res"
+
+-flto=thin
+-Wl,/opt:lldltojobs=6
+-Wl,/opt:lldlto=3
+-Wl,/timestamp:1795780842

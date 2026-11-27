@@ -211,14 +211,14 @@ DeferredValues deferred_snapshot(const std::vector<std::shared_ptr<CmdList>>& li
         auto [l, depth] = todo.back();
         todo.pop_back();
         if (!l) continue;
-        for (const Cmd& c : l->cmds) {
+        for (const DeferredCapture& c : l->deferred_captures) {
             if (c.op == Cmd::CallList && depth < 8) {
-                todo.push_back({command_list(c.a[0]), depth + 1});
-            } else if (c.op == Cmd::BindDeferred && c.n <= 64 && !v.count(c.a[0])) {
-                uint32_t words = c.mask >= 2 ? 2 : 1;  // ranges {address, size}, handles
-                std::vector<uint64_t> vals(size_t(c.n) * words);
-                for (size_t k = 0; k < vals.size(); k++) vals[k] = ld<uint64_t>(c.a[0] + 8 * k);
-                v.emplace(c.a[0], std::move(vals));
+                todo.push_back({command_list(c.address), depth + 1});
+            } else if (c.op == Cmd::BindDeferred && c.count <= 64 && !v.count(c.address)) {
+                uint32_t words = c.kind >= 2 ? 2 : 1;  // ranges {address, size}, handles
+                std::vector<uint64_t> vals(size_t(c.count) * words);
+                for (size_t k = 0; k < vals.size(); k++) vals[k] = ld<uint64_t>(c.address + 8 * k);
+                v.emplace(c.address, std::move(vals));
             }
         }
     }

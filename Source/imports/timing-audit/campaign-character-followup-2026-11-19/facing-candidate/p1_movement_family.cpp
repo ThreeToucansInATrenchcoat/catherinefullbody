@@ -125,6 +125,15 @@ struct Counters {
  uint64_t loaded=0,loaded_owned=0,uploaded=0,uploaded_owned=0,resolved=0,recorded=0,recorded_owned=0,overlap_erased=0;
 } census;
 std::mutex mutex;Active active;uint64_t serial=0,retired_model=0;std::atomic<bool> last_recorded_owned{false};std::atomic<bool> scope_seen{false};
+// A process-lifetime negative gate: before the first authenticated rigid copy,
+// none of the downstream maps or owned->unowned transitions can exist.
+// It stays true once published, so all later ownership/lifetime behavior uses
+// the original locked path, including after scene changes.
+std::atomic<bool> rigid_ever_seen{false};
+bool no_rigid_provenance() {
+ static const bool gate=[] {const char* e=std::getenv("CATHERINE_RIGID_NEGATIVE_GATE");return !e||e[0]!='0';}();
+ return gate && !rigid_ever_seen.load(std::memory_order_acquire);
+}
 std::map<uint64_t,RigidRecord> rigid_records;
 std::map<uint64_t,std::vector<Upload>> unresolved;
 std::map<uint64_t,GpuTag> gpu_tags;
@@ -294,6 +303,7 @@ extern "C" void catherine_c02_rigid_copied(uint64_t mesh,uint32_t slot,uint64_t 
  else corrected=raw;
  if(!d.facing.active)for(size_t w=0;w<16;++w)if((w<12||w>14)&&raw[w]!=corrected[w])return;
  if(d.facing.active)qa("facing_rigid",clock,owner,active.lifetime,slot,d.entry,destination,d.represented,{float(d.facing.angle),0,0},1);
+ rigid_ever_seen.store(true,std::memory_order_release);
  rigid_records[destination]={active.lifetime,next_serial(),clock,corrected};
  ++census.rigid_owned;qa("rigid",clock,owner,active.lifetime,slot,d.entry,destination,d.represented,d.translation.delta,d.translation.has_delta);log_counts();
 }
@@ -303,7 +313,8 @@ extern "C" void catherine_c02_c3_loaded(uint64_t source){
 #endif
 
  using namespace c02_bridge;c3={};current_upload_owned=false;if(!enabled())return;MxcsrGuard fp;
- if(!enter_scope(catherine_camera_render_clock()))return;std::lock_guard lock(mutex);++census.loaded;
+ if(!enter_scope(catherine_camera_render_clock()))return;
+ if(no_rigid_provenance())return;std::lock_guard lock(mutex);++census.loaded;
  if(!high_clock(catherine_camera_render_clock()))return;
  auto found=rigid_records.find(source);std::array<uint32_t,16> actual{};
  if(found==rigid_records.end()||!current_lifetime(found->second.lifetime)||!read_bytes(source,actual.data(),64)||actual!=found->second.words)return;
@@ -315,7 +326,8 @@ extern "C" void catherine_c02_c3_uploaded(uint64_t destination,uint64_t backing,
 #endif
 
  using namespace c02_bridge;if(!enabled())return;MxcsrGuard fp;current_upload_owned=false;
- if(!enter_scope(catherine_camera_render_clock()))return;std::lock_guard lock(mutex);++census.uploaded;
+ if(!enter_scope(catherine_camera_render_clock()))return;
+ if(no_rigid_provenance())return;std::lock_guard lock(mutex);++census.uploaded;
  Upload upload;upload.cpu=destination;upload.backing=backing;upload.offset=offset;upload.serial=next_serial();
  if(!destination||!backing){gpu_tags.clear();unresolved.clear();c3={};address={};return;}
  if(c3.valid&&current_lifetime(c3.record.lifetime)){
@@ -344,7 +356,8 @@ extern "C" void catherine_c02_c3_buffer_address(uint64_t backing,uint64_t base){
 #endif
 
  using namespace c02_bridge;address={backing,base,backing&&base};if(!enabled())return;MxcsrGuard fp;
- if(!enter_scope(catherine_camera_render_clock()))return;std::lock_guard lock(mutex);auto found=unresolved.find(backing);if(found==unresolved.end())return;
+ if(!enter_scope(catherine_camera_render_clock()))return;
+ if(no_rigid_provenance())return;std::lock_guard lock(mutex);auto found=unresolved.find(backing);if(found==unresolved.end())return;
  for(const auto& upload:found->second){
    if(!base||upload.offset>UINT64_MAX-base||base+upload.offset>UINT64_MAX-64){gpu_tags.clear();continue;}
    const uint64_t gpu=base+upload.offset;erase_span(gpu_tags,gpu,64);++census.resolved;
@@ -357,6 +370,7 @@ extern "C" void catherine_c02_c3_buffer_address(uint64_t backing,uint64_t base){
 static int catherine_c02_c3_record_owned_original(uint64_t gpu,uint64_t size){
  using namespace c02_bridge;if(!enabled())return 0;MxcsrGuard fp;
  if(!enter_scope(catherine_camera_render_clock())){last_recorded_owned.store(false,std::memory_order_relaxed);return 0;}
+ if(no_rigid_provenance()){last_recorded_owned.store(false,std::memory_order_relaxed);return 0;}
  std::lock_guard lock(mutex);++census.recorded;last_recorded_owned=false;
  if(!high_clock(catherine_camera_render_clock())){clear_current();log_counts();return 0;}
  if(size!=64||!address.valid){log_counts();return 0;}
@@ -368,6 +382,7 @@ static int catherine_c02_c3_record_owned_original(uint64_t gpu,uint64_t size){
 static int catherine_c02_c3_force_bind_original(void){
  using namespace c02_bridge;if(!enabled())return 0;MxcsrGuard fp;
  if(!enter_scope(catherine_camera_render_clock()))return last_recorded_owned.load(std::memory_order_relaxed);
+ if(no_rigid_provenance())return 0;
  std::lock_guard lock(mutex);
  if(!high_clock(catherine_camera_render_clock())){clear_current();return last_recorded_owned.load(std::memory_order_relaxed);}
  // Preserve native address/backing dedup whenever ownership is unchanged.

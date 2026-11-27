@@ -23,11 +23,78 @@ def main():
     OUT.mkdir(exist_ok=True)
     unit = next(u for u in json.loads((ROOT / "Source/build-manifest.json").read_text())["units"]
                 if u["source"].endswith("/catherine_refresh.cpp"))
-    command = unit["command"]
+    command = [argument for argument in unit["command"] if argument != "-DNDEBUG"]
     subprocess.run(command[:command.index("-c")] + [str(ROOT / "Source/tools/settings_ini_check.cpp"),
                    "-luser32", "-o", str(EXE)], cwd=OUT, check=True)
     protected = {name: (BUILD / name).read_bytes() for name in ("save.dat", "catherine-settings.ini")}
     try:
+        for value, enabled in [(None, False), ("invalid", False), ("false", False), ("0", False), ("true", True), ("TRUE", True), ("1", True)]:
+            INI.write_text("[Catherine]\n" + ("devmenu=" + value + "\n" if value is not None else ""))
+            check("dev-opt-in" if enabled else "dev-default-off")
+            assert load()["Catherine"].getboolean("devmenu") == enabled
+        for value, expected in (("", 0), ("Auto", 0), ("AUTO", 0), ("0", 0),
+                                ("2048", 2048), ("4096", 4096), ("8192", 8192),
+                                ("Original", 2048), ("invalid", 0), ("16384", 0), ("-1", 0)):
+            INI.write_text("[Catherine]\n" + ("ShadowResolution=" + value + "\n" if value else ""))
+            check("shadow-resolution-" + str(expected))
+            assert load()["Catherine"]["ShadowResolution"] == (str(expected) if expected else "Auto")
+            check("shadow-resolution-" + str(expected))
+        for text, expected in (("", True), ("true", True), ("TRUE", True),
+                               ("1", True), ("false", False), ("FALSE", False),
+                               ("0", False), ("invalid", True)):
+            INI.write_text("[Catherine]\n" + ("NativeGpuSkinning=" + text + "\n" if text else ""))
+            check("native-skinning-" + str(int(expected)))
+            assert load()["Catherine"].getboolean("NativeGpuSkinning", fallback=True) == expected
+            if expected:
+                assert not load()["Catherine"].get("NativeGpuSkinning")
+                assert "; NativeGpuSkinning=false" in INI.read_text()
+            check("native-skinning-" + str(int(expected)))
+        # First launch supplies the commented switch; subsequent launches leave
+        # an already documented default INI alone, including personal comments.
+        INI.write_text("[Catherine]\n")
+        check("native-skinning-startup")
+        text = INI.read_text()
+        assert "; Uncomment this line to disable GPU skinning (restart required):\n; NativeGpuSkinning=false" in text
+        assert not load()["Catherine"].get("NativeGpuSkinning")
+        text += "\n; personal note kept on launch\n"
+        INI.write_text(text)
+        unchanged = INI.read_bytes()
+        check("native-skinning-startup")
+        assert INI.read_bytes() == unchanged
+        # The documented edit must really activate CPU skinning and survive save.
+        INI.write_text(text.replace("; NativeGpuSkinning=false", "NativeGpuSkinning=false", 1))
+        check("native-skinning-0")
+        assert not load()["Catherine"].getboolean("NativeGpuSkinning")
+        # A comment in a different section does not document [Catherine].
+        INI.write_text("[Catherine]\n[Game]\n; NativeGpuSkinning=false\n")
+        check("native-skinning-startup")
+        assert "; NativeGpuSkinning=false" in INI.read_text().split("[Game]")[0]
+        check("upscale-policy")
+        for value in range(5):
+            INI.write_text(f"[Catherine]\nInternalUpscaling={value}\n")
+            check(f"upscale-{value}")
+            assert load()["Catherine"].getint("InternalUpscaling") == value
+            assert "; 2=1920x1080, 3=2560x1440, 4=3840x2160" in INI.read_text()
+            check(f"upscale-{value}")
+        for invalid in ("oops", "-1", "5"):
+            INI.write_text(f"[Catherine]\nInternalUpscaling={invalid}\n")
+            check("upscale-1")
+        for value in (False, True):
+            INI.write_text(f"[Catherine]\nAltBuildMode={str(value).upper()}\n")
+            check(f"storage-{int(value)}")
+            assert load()["Catherine"].getboolean("AltBuildMode") == value
+            check(f"storage-{int(value)}")
+        for vsync in (False, True):
+            for triple in (False, True):
+                INI.write_text(f"[Catherine]\nVSync={str(vsync).upper()}\nTripleBuffering={int(triple)}\n")
+                mode = f"presentation-{int(vsync)}{int(triple)}"
+                check(mode)
+                config = load()["Catherine"]
+                assert config.getboolean("VSync") == vsync
+                assert config.getboolean("TripleBuffering") == triple
+                check(mode)
+        INI.write_text("[Catherine]\n")
+        check("presentation-00")
         check("cursor-policy")
         for version in range(1, 7):
             encoding = "utf-16" if version == 5 else "utf-8"
@@ -77,6 +144,9 @@ P2Device=qa:Pad 2
         INI.write_text("""[Catherine]
 Version=7
 Fps=oops
+VSync=invalid
+TripleBuffering=invalid
+AltBuildMode=invalid
 devmenu=invalid
 P1Device=none
 P2Device=auto

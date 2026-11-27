@@ -1,0 +1,582 @@
+{
+  "version": 0,
+  "case-sensitive": false,
+  "use-external-names": false,
+  "roots": [
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-engine-native-geometry-2026-11-18/packets_native_geometry.c",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/packets_native_prefetch.c"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/nvn_draw_state_c02_uniform_v4/nvn_draw_state_c02_uniform_v4.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_draw_state_native_layout_memo.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/nvn_draw_state_c02_uniform_v4/nvn_draw_state_c02_uniform_v4.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_draw_state_native_layout_memo.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/c03-private-host-units-1795315441832896200/nvn_draw_state_c02_uniform_v4/candidate/nvn_draw_state_c02_uniform_v4.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_draw_state_native_layout_memo.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-engine-native-fixed-groups-2026-11-18/engine_native_fixed_groups.c",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/engine_native_fixed_groups.c"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-engine-native-shared-layouts-2026-11-18/engine_native_shared_layouts.c",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/engine_native_shared_layouts.c"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-engine-native-shared-buffers-2026-11-18/engine_native_shared_buffers.c",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/engine_native_shared_buffers.c"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-engine-native-shared-ranges-2026-11-18/engine_native_shared_ranges.c",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/engine_native_shared_ranges.c"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/c03-canonical-native-identities-1795318236126137500/candidate/main23_c02_render_copies_v2.c",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/main23_native_producer.c"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/nvn_state_native_packed/nvn_state_native_packed.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_state_native_packed.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/nvn_state_native_packed/nvn_state_native_packed.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_state_native_packed.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/c03-private-host-units-1795315441832896200/nvn_state_native_packed/candidate/nvn_state_native_packed.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_state_native_packed.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root9_native_bridge.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_native_bridge.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_native_bridge.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_native_bridge.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-native-target-producer-2026-11-19-1795088129382436700/nvn_cmd_native_targets.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_cmd_native_targets.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/c03-private-lifecycle-units-1795315537442639800/nvn_cmd_native_targets/candidate/nvn_cmd_native_targets.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_cmd_native_targets.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-native-draw-depth-2026-11-19-1795089013572113700/nvn_draw_native_depth.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_draw_native_depth.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/pub-async-skin-jobs-2026-11-18/nvn_frames_async_skin.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_frames_async_skin.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/pub-async-skin-jobs-2026-11-18/nvn_vk_async_skin.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_vk_async_skin.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/written/nvn_written_native_vertex.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_written_sheep.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/sheep-question-1795346029478118600/nvn_written_sheep.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_written_sheep.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/sets/nvn_sets_c02_uniform.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_sets_c02_uniform.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/nvn_sets_c02_uniform.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_sets_c02_uniform.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/c03-private-host-units-1795315441832896200/nvn_sets_c02_uniform/candidate/nvn_sets_c02_uniform.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_sets_c02_uniform.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-native-image-transfer-current-2026-11-19-1795088589615891900/nvn_copy_transfers.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_copy_shadow_quality.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-prepared-image-allocation-2026-11-19/nvn_image_prepared_allocation.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_image_shadow_quality.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/graphics/src/nvn/nvn_upload.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_upload_shadow_quality.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/pub-async-skin-jobs-2026-11-18/skin_device_mirror_alloc.inc",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/skin_device_mirror_alloc.inc"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-native-draw-depth-2026-11-19-1795089013572113700/fast89.inc",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/fast89.inc"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-native-draw-depth-2026-11-19-1795089013572113700/batch91.inc",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/batch91.inc"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-engine-native-shared-buffers-2026-11-18/native_shared_preflight.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_shared_preflight.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/vulkan-engine-native-shared-ranges-2026-11-18/native_shared_preflight.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_shared_preflight.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/performance-2026-11-16/cmd131/model_tracker81.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/model_tracker81.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/graphics/src/nvn/campaign_block_pose_upload.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/campaign_block_pose_upload.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/perf-2026-11-22/phase_timer.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/phase_timer.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/performance-2026-11-16/cmd141/interpolated-skin-output.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/interpolated-skin-output.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/campaign-c02-translation-candidate-2026-11-19/inactive_c3.inc",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/inactive_c3.inc"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_rigid_transport.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_rigid_transport.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root9_rigid_transport.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_rigid_transport.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/root9_rigid_transport.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_rigid_transport.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/root9_rigid_transport.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_rigid_transport.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root9_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root9_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/root9_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/root9_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/root12_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root12_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/root12_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root12_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/root12_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root12_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/root12_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root12_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/puzzle_transform88.inc",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/puzzle_transform88.inc"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/campaign-c02-translation-candidate-2026-11-19/puzzle_transform88.inc",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/puzzle_transform88.inc"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/rigid_late_sample_interpolation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/rigid_late_sample_interpolation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-index-release178-vfs-1795273636446245000/rigid_late_sample_interpolation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/rigid_late_sample_interpolation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/stage6-rigid-late-candidate-1795275071204600700/rigid_late_sample_interpolation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/rigid_late_sample_interpolation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/root9-integration-1795268470263992400/rigid_late_sample_interpolation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/rigid_late_sample_interpolation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/recomp/Source/imports/timing-audit/frame-advance-audit-2026-11-20/safety-root-candidate-1795300767913069600/candidate/campaign_block_pose_upload.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/campaign_block_pose_upload.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/batch91.inc",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/batch91.inc"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/campaign_block_pose_upload.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/campaign_block_pose_upload.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/engine_native_fixed_groups.c",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/engine_native_fixed_groups.c"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/engine_native_shared_buffers.c",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/engine_native_shared_buffers.c"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/engine_native_shared_layouts.c",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/engine_native_shared_layouts.c"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/engine_native_shared_ranges.c",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/engine_native_shared_ranges.c"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/fast89.inc",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/fast89.inc"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/geometry_compare_census.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/geometry_compare_census.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/inactive_c3.inc",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/inactive_c3.inc"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/interpolated-skin-output.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/interpolated-skin-output.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/main23_native_producer.c",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/main23_native_producer.c"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/model_tracker81.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/model_tracker81.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_byte_equal.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_byte_equal.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_exact_lookup_cache.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_exact_lookup_cache.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_guest_allocator.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_guest_allocator.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_guest_matrix.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_guest_matrix.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_layout_memo.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_layout_memo.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_record_scope.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_record_scope.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_replay_layout.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_replay_layout.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_shared_preflight.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_shared_preflight.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_skin.comp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_skin.comp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_skin_integration.inc",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_skin_integration.inc"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_skin_memory.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_skin_memory.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_skin_pipeline.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_skin_pipeline.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_skin_source_alloc.inc",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_skin_source_alloc.inc"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_skin_spirv.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_skin_spirv.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_state_values.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_state_values.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_state_value_memo.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_state_value_memo.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_tag_overlap_filter.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_tag_overlap_filter.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_template_directory.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_template_directory.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_uniform_scope.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_uniform_scope.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_uniform_shapes.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_uniform_shapes.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_xyz_copy.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_xyz_copy.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/native_xyz_match.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/native_xyz_match.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/nvn_cmd_native_targets.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_cmd_native_targets.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/nvn_copy_shadow_quality.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_copy_shadow_quality.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/nvn_draw_native_depth.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_draw_native_depth.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/nvn_draw_state_native_layout_memo.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_draw_state_native_layout_memo.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/nvn_frames_async_skin.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_frames_async_skin.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/nvn_image_shadow_quality.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_image_shadow_quality.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/nvn_sets_c02_uniform.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_sets_c02_uniform.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/nvn_state_native_packed.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_state_native_packed.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/nvn_upload_shadow_quality.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_upload_shadow_quality.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/nvn_vk_async_skin.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_vk_async_skin.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/nvn_written_sheep.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/nvn_written_sheep.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/packets_native_prefetch.c",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/packets_native_prefetch.c"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/phase_timer.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/phase_timer.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/puzzle_transform88.inc",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/puzzle_transform88.inc"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/rigid_late_sample_interpolation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/rigid_late_sample_interpolation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/root12_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root12_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/root9_bridge_mutex.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_bridge_mutex.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/root9_force_snapshot.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_force_snapshot.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/root9_native_bridge.cpp",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_native_bridge.cpp"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/root9_rigid_transport.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_rigid_transport.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/root9_source_presence.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_source_presence.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/root9_translation.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/root9_translation.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/shadow_quality.h",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/shadow_quality.h"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/shadow_transfer_gpu.inc",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/shadow_transfer_gpu.inc"
+    },
+    {
+      "type": "file",
+      "name": "C:/catherine/native-gpu-experiment/Source/skin_device_mirror_alloc.inc",
+      "external-contents": "C:/catherine/recomp/Source/native-renderer/skin_device_mirror_alloc.inc"
+    }
+  ]
+}

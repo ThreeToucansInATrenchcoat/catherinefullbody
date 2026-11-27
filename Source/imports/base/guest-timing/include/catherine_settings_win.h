@@ -46,6 +46,10 @@ struct HostSettings : InputProfile {
     // "auto"/"keyboard"/backend identity; P2 uses "none" instead of "auto".
     std::array<std::string,2> input_devices{"auto","none"};
     int button_prompts = 0; // Auto / Xbox / Switch / PS4 / PS5; gamepads only.
+    bool vsync = false;
+    bool triple_buffering = false;
+    bool alt_build_mode = false;
+    int internal_upscaling = 1; // Off / Auto / 1080p / 1440p / 2160p
 };
 inline InputProfile& input_profile(HostSettings& settings,unsigned player) {
     return player ? settings.player2 : static_cast<InputProfile&>(settings);
@@ -69,6 +73,14 @@ bool end_config_settings();
 int requested_anti_aliasing();
 int button_prompt_style();
 bool store_host_settings(const HostSettings& value, bool explicit_fps = false);
+inline unsigned internal_upscaling_height(int mode, int width, int height, bool fullscreen, int window_height) {
+    int available = 720;
+    for (int candidate : {1080, 1440, 2160})
+        if (height >= candidate && width >= candidate * 16 / 9 &&
+            (fullscreen || !window_height || window_height >= candidate)) available = candidate;
+    const int requested = mode == 1 ? available : mode == 2 ? 1080 : mode == 3 ? 1440 : mode == 4 ? 2160 : 720;
+    return unsigned(requested < available ? requested : available);
+}
 unsigned display_render_height(HostDisplay monitor, bool fullscreen, int window_height);
 void update_display_mode(HostDisplay monitor);
 #ifndef _WIN32

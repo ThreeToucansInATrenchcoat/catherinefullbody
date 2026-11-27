@@ -29,6 +29,7 @@
 #include "native_texture_bindings.h"
 #include "platform.h"
 #include "periodic_render_log.h"
+#include "catherine_settings_win.h"
 
 #include <nx/game.h>
 
@@ -394,7 +395,8 @@ bool make_swapchain() {
     if (!extent.width || !extent.height) return false;  // minimized
     VkSwapchainCreateInfoKHR ci{VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR};
     ci.surface = g_surface;
-    ci.minImageCount = std::max(caps.minImageCount, 3u);
+    const auto settings = catherine::host_settings();
+    ci.minImageCount = std::max(caps.minImageCount, settings.triple_buffering ? 3u : 2u);
     if (caps.maxImageCount) ci.minImageCount = std::min(ci.minImageCount, caps.maxImageCount);
     ci.imageFormat = g_sc_format;
     ci.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
@@ -427,24 +429,25 @@ bool make_swapchain() {
         extent.width, extent.height, caps.currentExtent.width, caps.currentExtent.height, unsigned(caps.currentTransform),
         caps.supportedTransforms, unsigned(ci.compositeAlpha), caps.supportedCompositeAlpha,
         caps.supportedUsageFlags);
-    // The game paces itself on its vsync event (hle_vi.cpp, 60 Hz): a FIFO present also waited for the display's own
-    // refresh, two clocks drifting against each other (stutter near 60 fps, docs/nvn/DEBUG.md #33). MAILBOX never
-    // blocks and shows the newest frame at each refresh; else IMMEDIATE (MoltenVK: no display sync in the Metal
-    // layer, the macOS compositor still shows whole frames at its refresh), FIFO last. NX_FIFO=1: FIFO (DEBUG.md #62).
+    // FIFO synchronizes presentation with the display. With VSync disabled prefer
+    // IMMEDIATE; retain MAILBOX/FIFO as fallbacks for surfaces without that mode.
+    // The existing NX_FIFO diagnostic override still forces FIFO.
     ci.presentMode = VK_PRESENT_MODE_FIFO_KHR;
     uint32_t modes_n = 0;
     p_vkGetPhysicalDeviceSurfacePresentModesKHR(g_physical, g_surface, &modes_n, nullptr);
     std::vector<VkPresentModeKHR> modes(modes_n);
     p_vkGetPhysicalDeviceSurfacePresentModesKHR(g_physical, g_surface, &modes_n, modes.data());
     auto has = [&](VkPresentModeKHR m) { return std::find(modes.begin(), modes.end(), m) != modes.end(); };
-    if (!std::getenv("NX_FIFO")) {
-        if (has(VK_PRESENT_MODE_MAILBOX_KHR))
-            ci.presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-        else if (has(VK_PRESENT_MODE_IMMEDIATE_KHR))
+    if (!settings.vsync && !std::getenv("NX_FIFO")) {
+        if (has(VK_PRESENT_MODE_IMMEDIATE_KHR))
             ci.presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+        else if (has(VK_PRESENT_MODE_MAILBOX_KHR))
+            ci.presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
     }
     static const char* const mode_names[] = {"IMMEDIATE", "MAILBOX", "FIFO", "FIFO_RELAXED"};
-    log("nvn/vk: present mode %s (%u modes offered)", ci.presentMode <= 3 ? mode_names[ci.presentMode] : "?", modes_n);
+    log("nvn/vk: present mode %s (%u modes offered), VSync=%s, TripleBuffering=%s, requested images=%u",
+        ci.presentMode <= 3 ? mode_names[ci.presentMode] : "?", modes_n,
+        settings.vsync ? "true" : "false", settings.triple_buffering ? "true" : "false", ci.minImageCount);
     ci.clipped = VK_TRUE;
     if (!check(p_vkCreateSwapchainKHR(g_device, &ci, nullptr, &g_swapchain), "vkCreateSwapchainKHR")) return false;
     uint32_t n = 0;

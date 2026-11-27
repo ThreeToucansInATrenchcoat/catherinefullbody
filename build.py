@@ -28,7 +28,9 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=a.jobs)as pool:
 STAMP.write_text(json.dumps({str(u['id']):signature(u)for u in M['units']},indent=2))if not a.check_dependencies else None
 if a.check_dependencies:print('All source dependencies resolve.');raise SystemExit(0)
 # Publish the embedded, self-contained installer and shader conversion tools.
-q=subprocess.run(['dotnet','publish',str(S/'asset_setup/AssetSetup.csproj'),'-c','Release','-o',str(B/'asset-setup/publish'),'--nologo','-v','quiet'],cwd=R,capture_output=True,text=True,**CREATE_NO_WINDOW)
+local_dotnet=B/'toolchains/dotnet10/dotnet.exe'
+dotnet=str(local_dotnet) if local_dotnet.is_file() else 'dotnet'
+q=subprocess.run([dotnet,'publish',str(S/'asset_setup/AssetSetup.csproj'),'-c','Release','-o',str(B/'asset-setup/publish'),'--nologo','-v','quiet'],cwd=R,capture_output=True,text=True,**CREATE_NO_WINDOW)
 (B/'logs/asset-setup-build.log').write_text(q.stdout+q.stderr);assert not q.returncode,'Asset setup build failed; see Build/logs/asset-setup-build.log'
 required_manifest=S/'resources/assets-required.json'
 if not (B/'assets-required.json').exists() or (B/'assets-required.json').read_bytes()!=required_manifest.read_bytes():
@@ -58,10 +60,16 @@ assert not q.returncode,q.stderr;print('Built',B/a.output,flush=True)
 # --pgo: the release configuration. Profile-guided + ThinLTO objects go to Build/obj-pgo/use-lto (the training
 # profile is Build/perf/pgo/merged.profdata; Build/perf/pgo/pgo_build.py gen retrains it). The result replaces the
 # requested output by rename, so hard-linked archive copies are never written.
-if a.pgo:
+if a.pgo and not M.get('native_release'):
  q=subprocess.run([sys.executable,str(B/'perf/pgo/pgo_build.py'),'use',str(max(a.jobs,8)),'lto','catherine2'],cwd=R)
  assert q.returncode==0,'PGO build failed'
  stem=Path(a.output).stem;primary=a.output.lower()=='catherine.exe'
  for n,t in [('catherine2.exe',a.output),('catherine2.map','Catherine.map' if primary else stem+'.map'),('catherine2.pdb','Catherine.pdb' if primary else stem+'.pdb')]:
   os.replace(B/n,B/t)
  print('Built (PGO + ThinLTO)',B/a.output,flush=True)
+if M.get('native_release'):
+ report=dict(M['native_release'],exe_sha256=hashlib.sha256((B/a.output).read_bytes()).hexdigest(),compiled_units=len(M['units']),default_native_source=True)
+ (B/(Path(a.output).stem+'.build.json')).write_text(json.dumps(report,indent=2))
+ if primary:
+  (B/'native-verification.json').write_text(json.dumps(report,indent=2))
+  (B/'BUILD-INFO.txt').write_text('Catherine Full Body - default native source build\nSHA256 '+report['exe_sha256']+'\nO3 + ThinLTO + selected PGO profile.\nGPU skinning enabled by default; NativeGpuSkinning=false selects CPU fallback.\nAutomatic/manual shadow quality and the high-refresh sheep-push fix included.\n')

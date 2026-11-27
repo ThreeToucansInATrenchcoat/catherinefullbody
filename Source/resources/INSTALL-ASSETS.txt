@@ -3,11 +3,16 @@ Catherine game asset setup
 Keep assets-required.json beside Catherine.exe. No game data or pretranslated
 game shaders are included in the executable or release archive.
 
-If assets.pak is missing, launch Catherine.exe. Setup searches Assets/ and
-Pending/ recursively and verifies each candidate's SHA-256. It reads matching
-files directly from their existing locations without moving, copying, renaming
-or deleting them. Source folders are remembered in assets-sources.json so an
-interrupted setup can scan them again. Existing Pending/ files remain usable.
+By default (AltBuildMode=false), launch Catherine.exe when assets.pak is
+missing. Setup searches assets/ and Pending/ recursively, verifies each
+candidate's SHA-256, and reads matching files from their existing locations
+without moving, copying, renaming or deleting them. Source folders are remembered
+in assets-sources.json so an interrupted setup can scan them again.
+
+With AltBuildMode=true, setup instead moves validated inputs into assets/ and
+prepares that folder for direct loading. An existing valid assets.pak is
+converted to that folder and deleted only after verification. The INI options
+below describe switching between the two storage modes.
 
 If files are still missing, select the folder containing your already
 extracted game files. Setup does not accept encrypted game containers and
@@ -25,7 +30,7 @@ symbols and relocations are resolved. Every generated module must still match
 its canonical SHA-256. Your extracted executables are never rewritten, and the
 same SDK, RomFS and update inputs remain required.
 
-Setup first prepares the module images and finishes building assets.pak.
+In the default packed mode, setup prepares the module images and builds assets.pak.
 It then reads the shader sources from that package, translates them to Vulkan
 SPIR-V, and adds the completed shaders to the package. If shaders are missing
 on a later launch, setup rebuilds them from assets.pak without requesting the
@@ -72,8 +77,37 @@ upgrade, missing global game preferences come from the loaded system save.
 Saving the Config menu writes this INI. Save slots and story progress use save.dat.
 
 [Catherine]
-devmenu=true enables the developer overlay. Set devmenu=false to hide it.
+devmenu=false is the default. Set devmenu=true and restart to enable F8.
+GPU skinning is enabled by default. Uncomment NativeGpuSkinning=false in the
+generated INI to use CPU skinning instead; restart after changing it.
+ShadowResolution=Auto uses 4096 shadow maps at 720p/1080p and 8192 at
+1440p/4K. Fixed values 2048 (original), 4096 and 8192 are also supported.
+Restart after editing ShadowResolution. Auto follows internal resolution changes.
 Fps accepts -1 (display rate), 0 (unlimited), 30, 60, 120 or 240.
+VSync, TripleBuffering and AltBuildMode are experimental and default to false.
+InternalUpscaling defaults to 1 (Auto). 0=Off (1280x720), 2=1920x1080,
+3=2560x1440, 4=3840x2160. Auto chooses the highest supported resolution
+that fits the current screen and configured window size. Explicit levels are
+also capped to fit. On a 720p screen all modes use the native 1280x720.
+Close the game before editing InternalUpscaling, then restart.
+VSync accepts true or false (default false). True uses synchronized FIFO
+presentation; false prefers immediate presentation when supported by the driver.
+TripleBuffering accepts true or false (default false), requesting three or two
+swapchain images respectively, subject to the display driver's limits.
+Close the game before changing either option and restart to apply it.
+The Fps limit remains independent; Fps=0 lets VSync govern presentation rate.
+AltBuildMode accepts true or false (default false). Restart after changing it.
+- true: load extracted files directly from assets/. If assets.pak is present,
+  setup extracts and verifies its contents, then deletes the PAK. The original
+  RomFS paths are retained, along with prepared modules, shaders, and metadata.
+  On first setup without a PAK, selected files are validated and moved into
+  assets/; unrelated or invalid files in the selected folders are left alone.
+- false: use assets.pak. If the PAK is absent and a prepared assets/ folder is
+  present, setup verifies the folder and rebuilds the PAK, retaining the folder.
+Conversion needs enough free disk space for the new representation while the
+existing one is retained for verification. Keep the .catherine-layout.bin and
+.catherine-folder.json files in assets/: they describe and verify its contents.
+An explicit --assets-pak launch uses that package without converting or deleting it.
 Fullscreen accepts 0 or 1. WindowHeight accepts 0 (automatic), 720, 1080,
 1440 or 2160. AntiAliasing accepts 0 (off), 1 (FXAA), 2, 4 or 8 (MSAA).
 MovieInterpolation accepts -1 (match gameplay), 0 (off), 60, 120 or 240.
@@ -130,7 +164,7 @@ The Game settings choices support word-only mouse hover and direct left-click
 selection, with slash separators. Hover never moves the selection brush.
 Disabled difficulty and puzzle-type choices ignore mouse hover and clicks.
 
-DEV menu: press F8 anywhere to open the in-game picker. Choose Levels or
+DEV menu (when devmenu=true): press F8 to open the in-game picker. Choose Levels or
 Cutscenes, then use search and the controller-style dropdown filters to select
 a destination. Clicking a list entry selects it; use Load map (or Play scene)
 to start it. Enter also activates the selected destination. Loading works

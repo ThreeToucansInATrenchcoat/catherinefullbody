@@ -58,7 +58,7 @@ sealed class AssetManifest {
  public static string Resolve(string root,string relative) {
   if(!SafeRelative(relative))throw new InvalidDataException("Unsafe file path in the required-files list.");
   string result=System.IO.Path.GetFullPath(System.IO.Path.Combine(root,relative.Replace('/',System.IO.Path.DirectorySeparatorChar)));
-  if(!result.StartsWith(System.IO.Path.GetFullPath(root).TrimEnd('\\')+"\\",StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("File path escapes Pending.");
+  if(!result.StartsWith(System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(root))+System.IO.Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("File path escapes the asset directory.");
   return result;
  }
 }

@@ -5,7 +5,8 @@ ROOT=Path(__file__).resolve().parents[2];B=ROOT/'Build'
 FILES=['Catherine.exe','Catherine DEV.cmd','CatherineInterpolation.dll','open_svpflow.dll','svpflow1_vs.dll','svpflow2_vs.dll','dev-checkpoints.pak','BUILD-INFO.txt','assets-required.json','INSTALL-ASSETS.txt','ASSET-TOOLS-LICENSES.txt','CUTSCENES.txt','cutscene-catalog.json']
 def sha(data):return hashlib.sha256(data).hexdigest()
 def main():
- files=[B/n for n in FILES]+sorted(p for p in(B/'CathAssets').rglob('*')if p.is_file());temporary=B/'Catherine-Release.zip.building'
+ names=FILES+(['native-verification.json'] if (B/'native-verification.json').is_file() else [])
+ files=[B/n for n in names]+sorted(p for p in(B/'CathAssets').rglob('*')if p.is_file());temporary=B/'Catherine-Release.zip.building'
  with zipfile.ZipFile(temporary,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=6)as z:
   for p in files:z.write(p,p.relative_to(B).as_posix())
  with zipfile.ZipFile(temporary)as z:

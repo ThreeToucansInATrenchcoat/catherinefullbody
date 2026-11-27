@@ -4,7 +4,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-// 1: validated package; 0: default package absent (legacy loose assets); -1: failed.
+int catherine_alt_build_mode(void);
+// 1: validated package or extracted folder; 0: default package absent (legacy loose assets); -1: failed.
 // An explicit path or an existing invalid package never falls back to loose assets.
 int asset_pak_initialize(void);
 // Set the package location during startup, before any other asset access.
@@ -22,6 +23,7 @@ uint64_t asset_pak_romfs_size(void);
 int asset_pak_read_romfs(void* output, uint64_t offset, size_t size);
 #ifdef CATHERINE_PAK_TESTING
 int asset_pak_initialize_for_test(const wchar_t* path);
+int asset_folder_initialize_for_test(const wchar_t* path);
 #endif
 #ifdef __cplusplus
 }

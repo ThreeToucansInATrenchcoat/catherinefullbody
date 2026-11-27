@@ -55,6 +55,7 @@ struct Lock93 {  // cmd93: BasicLockable; one locked exchange to take, a release
 struct CommandBuffer : Object {
     Lock93 lock;
     const CmdList* memo93_list = nullptr;  // cmd93: the list memo93 indexes into
+    size_t blob_count = 0;                 // initialized entries in this recording
     uint32_t memo93[64];                   // per op (< 64): index of its last blob in memo93_list
     std::shared_ptr<CmdList> recording = std::make_shared<CmdList>();
     size_t previous_cmds = 0, previous_blobs = 0;
@@ -87,7 +88,13 @@ size_t g_bytes = 0;
 uint64_t g_parked = 0, g_reused = 0;
 constexpr size_t kMaxVectors = 512, kMaxBytes = size_t(256) << 20, kMinBytes = 16 << 10;
 size_t bytes_of(const std::vector<Cmd>& v) { return v.capacity() * sizeof(Cmd); }
-size_t bytes_of(const std::vector<std::vector<uint8_t>>& v) { return v.capacity() * sizeof(std::vector<uint8_t>); }
+size_t bytes_of(const std::vector<std::vector<uint8_t>>& v) {
+    size_t bytes = v.capacity() * sizeof(std::vector<uint8_t>);
+    for (const auto& blob : v) bytes += blob.capacity();
+    return bytes;
+}
+void prepare_reuse(std::vector<Cmd>& v) { v.clear(); }
+void prepare_reuse(std::vector<std::vector<uint8_t>>&) {} // Keep private blob buffers for reassignment.
 template <class V, class M> void park(V& v, M& m) {
     const size_t b = bytes_of(v);
     if (b < kMinBytes || g_cmds.size() + g_blobs.size() >= kMaxVectors || g_bytes + b > kMaxBytes) return;
@@ -102,7 +109,8 @@ void recycle(CmdList* l) {
         cmds.swap(l->cmds);
         blobs.swap(l->blobs);
         cmds.clear();
-        blobs.clear();  // the small per-blob vectors are freed here, outside the lock
+        // The final shared owner has retired: retain the inner buffers as well
+        // as the outer vector. No published list can refer to these bytes now.
         std::lock_guard lk(g_m);
         park(cmds, g_cmds);
         park(blobs, g_blobs);
@@ -120,7 +128,7 @@ template <class V, class M> void take(V& v, size_t want, M& m) {
     g_reused++;
     V got = std::move(it->second);
     m.erase(it);
-    got.clear();
+    prepare_reuse(got);
     v.swap(got);  // v was empty (a fresh recording): nothing lost
 }
 }  // namespace pool161
@@ -247,6 +255,7 @@ void CommandBufferBeginRecording(CPU& c) {
     if (auto* cb = get<CommandBuffer>(c.x[0])) {
         std::lock_guard lk(cb->lock);
         if (!reserve_command_lists()) {
+            cb->blob_count = 0;
             cb->recording = (pool161::on() ? pool161::make() : std::make_shared<CmdList>());
             return;
         }
@@ -254,8 +263,10 @@ void CommandBufferBeginRecording(CPU& c) {
         // EndRecording already installed an empty unpublished list. An
         // interrupted recording still has to discard its commands and flags.
         const auto& active = *cb->recording;
-        if (!active.cmds.empty() || !active.blobs.empty() || active.reads_guest_texture_source)
+        if (!active.cmds.empty() || cb->blob_count != 0 || active.reads_guest_texture_source) {
             cb->recording = (pool161::on() ? pool161::make() : std::make_shared<CmdList>());
+            cb->blob_count = 0;
+        }
         // Use common capacity sizes across buffers instead of one per exact list length.
         // Keep spare room when nearby frames straddle a power-of-two boundary.
         // This only reserves unpublished storage; published lists retain their
@@ -264,7 +275,7 @@ void CommandBufferBeginRecording(CPU& c) {
             std::bit_ceil(cb->previous_cmds + std::max<size_t>(256, cb->previous_cmds / 8))) : 0;
         const size_t blobs = cb->previous_blobs ? std::min(kBlobReserveLimit,
             std::bit_ceil(cb->previous_blobs + std::max<size_t>(16, cb->previous_blobs / 8))) : 0;
-        if (pool161::on() && cb->recording->cmds.empty() && cb->recording->blobs.empty()) {
+        if (pool161::on() && cb->recording->cmds.empty() && cb->blob_count == 0) {
             pool161::take(cb->recording->cmds, commands, pool161::g_cmds);
             pool161::take(cb->recording->blobs, blobs, pool161::g_blobs);
         }
@@ -341,6 +352,9 @@ void CommandBufferEndRecording(CPU& c) {  // NVNcommandHandle
         cb->command_base = used(cb->command_size, cb->command_base, n, kCommandBytes);
         end = std::max(cb->command_memory + cb->command_base, start + 1);
         cb->control_base = used(cb->control_size, cb->control_base, n, kControlBytes);
+        // Only initialized blobs become visible to the shared published list.
+        cb->recording->blobs.resize(cb->blob_count);
+        cb->blob_count = 0;
         if (reserve_command_lists()) {
             cb->previous_cmds = std::min(cb->recording->cmds.size(), kCommandReserveLimit);
             cb->previous_blobs = std::min(cb->recording->blobs.size(), kBlobReserveLimit);
@@ -539,23 +553,29 @@ void record(uint64_t guest, Cmd cmd, const void* blob, size_t size) {
         auto& blobs = cb->recording->blobs;
         auto* p = static_cast<const uint8_t*>(blob);
         const uint32_t op = uint32_t(cmd.op);
+        auto append_blob = [&] {
+            const uint32_t index = uint32_t(cb->blob_count++);
+            if (index < blobs.size()) blobs[index].assign(p, p + size);
+            else blobs.emplace_back(p, p + size);
+            return index;
+        };
         if (reuse93 && op < 64) {
             if (cb->memo93_list != cb->recording.get()) {
                 cb->memo93_list = cb->recording.get();
                 std::fill(std::begin(cb->memo93), std::end(cb->memo93), UINT32_MAX);
             }
             const uint32_t last = cb->memo93[op];
-            if (last < blobs.size() && blobs[last].size() == size && (size == 0 || std::memcmp(blobs[last].data(), p, size) == 0)) {
+            if (last < cb->blob_count && blobs[last].size() == size && (size == 0 || std::memcmp(blobs[last].data(), p, size) == 0)) {
                 cmd.blob = last;
             } else {
-                cmd.blob = cb->memo93[op] = uint32_t(blobs.size());
-                blobs.emplace_back(p, p + size);
+                cmd.blob = cb->memo93[op] = append_blob();
             }
         } else {
-            cmd.blob = uint32_t(blobs.size());
-            blobs.emplace_back(p, p + size);
+            cmd.blob = append_blob();
         }
     }
+    if (cmd.op == Cmd::CallList || cmd.op == Cmd::BindDeferred)
+        cb->recording->deferred_captures.push_back({cmd.op,cmd.n,cmd.mask,cmd.a[0]});
     cb->recording->cmds.push_back(cmd);
 }
 

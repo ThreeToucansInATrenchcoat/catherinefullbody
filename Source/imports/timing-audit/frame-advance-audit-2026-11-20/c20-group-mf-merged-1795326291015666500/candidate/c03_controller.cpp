@@ -1,6 +1,7 @@
 #include "c03_registry.h"
 #include "c03_rigid_transport.h"
 #include <mutex>
+#include <atomic>
 #include <cstring>
 #include <cstdlib>
 #include <cmath>
@@ -16,6 +17,14 @@
 namespace {
 // This is the ONLY mutex for both lifecycle values and scalar history.
 std::mutex controller_mutex;
+// Admission is the sole producer of rigid ownership. Until the first successful
+// reservation, downstream C3 hooks cannot find a source, tag or bind transition.
+// Never reset this flag: later lifetime revocation keeps the original locked path.
+std::atomic<bool> rigid_ever_reserved{false};
+bool no_rigid_reservation(){
+ static const bool gate=[] {const char* e=std::getenv("CATHERINE_RIGID_NEGATIVE_GATE");return !e||e[0]!='0';}();
+ return gate && !rigid_ever_reserved.load(std::memory_order_acquire);
+}
 c03_private::Registry registry;
 c03_private::RigidTransport rigid;
 thread_local c03_private::RigidTransport::Flow c3flow;
@@ -134,6 +143,7 @@ void catherine_c03_native_observe(uint64_t m,uint64_t a,uint64_t n,uint64_t s){
         forget_actor_locked(a);
     const uint64_t prior_capability=rigid.generation(a);
     if(!rigid.reserve(reader,reader_context,now) || (prior_capability && prior_capability!=rigid.generation(a)))forget_actor_locked(a);
+    if(rigid.generation(a))rigid_ever_reserved.store(true,std::memory_order_release);
 }
 uint32_t catherine_c03_scalar_native(uint64_t a,uint64_t m,uint64_t lr,uint64_t clock,uint32_t raw,uint32_t nativebits,uint32_t factor,int native60,int config_high,uint32_t framework_bits){
     // No expensive native reads for native30/highoff/foreign update entry.
@@ -178,12 +188,12 @@ uint32_t catherine_c03_scalar_native(uint64_t a,uint64_t m,uint64_t lr,uint64_t 
 }
 void catherine_c03_registry_reset(){std::lock_guard lock(controller_mutex);forget_all_locked();rigid.reset();c3flow={};registry.reset();}
 int catherine_c03_c3_status(uint64_t actor,CatherineC03RigidStatus*out){if(!out)return 0;*out={};std::lock_guard lock(controller_mutex);return rigid.status(actor,*out)?1:0;}
-void catherine_c03_rigid_copied(uint64_t mesh,uint32_t slot,uint64_t destination){std::lock_guard lock(controller_mutex);uint64_t revoked=0;rigid.copied(reader,reader_context,mesh,slot,destination,&revoked);if(revoked)forget_actor_locked(revoked);}
-void catherine_c03_c3_loaded(uint64_t source){std::lock_guard lock(controller_mutex);rigid.loaded(reader,reader_context,c3flow,source);}
-void catherine_c03_c3_uploaded(uint64_t cpu,uint64_t backing,uint64_t offset,int gpu_eligible){std::lock_guard lock(controller_mutex);rigid.uploaded(reader,reader_context,c3flow,cpu,backing,offset,gpu_eligible!=0);}
-int catherine_c03_c3_force_bind(uint64_t command){std::lock_guard lock(controller_mutex);return rigid.force_bind(c3flow,command)?1:0;}
-void catherine_c03_c3_buffer_address(uint64_t command,uint64_t backing,uint64_t base,uint64_t offset){std::lock_guard lock(controller_mutex);rigid.buffer_address(reader,reader_context,c3flow,command,backing,base,offset);}
-int catherine_c03_c3_snapshot(uint64_t command,uint64_t address,uint64_t size,CatherineC03RigidPacket*out){if(!out){CatherineC03RigidPacket discarded{};std::lock_guard lock(controller_mutex);rigid.snapshot(reader,reader_context,command,0,0,discarded);return 0;}*out={};std::lock_guard lock(controller_mutex);return rigid.snapshot(reader,reader_context,command,address,size,*out)?1:0;}
+void catherine_c03_rigid_copied(uint64_t mesh,uint32_t slot,uint64_t destination){if(no_rigid_reservation())return;std::lock_guard lock(controller_mutex);uint64_t revoked=0;rigid.copied(reader,reader_context,mesh,slot,destination,&revoked);if(revoked)forget_actor_locked(revoked);}
+void catherine_c03_c3_loaded(uint64_t source){if(no_rigid_reservation()){c3flow={};return;}std::lock_guard lock(controller_mutex);rigid.loaded(reader,reader_context,c3flow,source);}
+void catherine_c03_c3_uploaded(uint64_t cpu,uint64_t backing,uint64_t offset,int gpu_eligible){if(no_rigid_reservation()){c3flow.loaded={};c3flow.uploaded={};c3flow.owned=false;c3flow.cpu=cpu;c3flow.backing=backing;c3flow.offset=offset;return;}std::lock_guard lock(controller_mutex);rigid.uploaded(reader,reader_context,c3flow,cpu,backing,offset,gpu_eligible!=0);}
+int catherine_c03_c3_force_bind(uint64_t command){if(no_rigid_reservation()){if(command)c3flow.loaded={};return 0;}std::lock_guard lock(controller_mutex);return rigid.force_bind(c3flow,command)?1:0;}
+void catherine_c03_c3_buffer_address(uint64_t command,uint64_t backing,uint64_t base,uint64_t offset){if(no_rigid_reservation())return;std::lock_guard lock(controller_mutex);rigid.buffer_address(reader,reader_context,c3flow,command,backing,base,offset);}
+int catherine_c03_c3_snapshot(uint64_t command,uint64_t address,uint64_t size,CatherineC03RigidPacket*out){if(no_rigid_reservation()){if(out)*out={};return 0;}if(!out){CatherineC03RigidPacket discarded{};std::lock_guard lock(controller_mutex);rigid.snapshot(reader,reader_context,command,0,0,discarded);return 0;}*out={};std::lock_guard lock(controller_mutex);return rigid.snapshot(reader,reader_context,command,address,size,*out)?1:0;}
 void catherine_c03_backing_retired(uint64_t backing){std::lock_guard lock(controller_mutex);rigid.backing_retired(backing);}
 void catherine_c03_command_retired(uint64_t command){std::lock_guard lock(controller_mutex);rigid.command_retired(command);}
 // Source-hook-only lifecycle notifications; no new actor admission or guest reads.

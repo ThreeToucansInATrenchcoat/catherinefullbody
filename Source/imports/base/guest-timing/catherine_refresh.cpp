@@ -21,6 +21,7 @@
 
 #include "catherine_refresh.h"
 #include "catherine_refresh_policy.h"
+#include "catherine_shadow_quality.h"
 #include "catherine_settings_win.h"
 
 namespace catherine {
@@ -132,7 +133,9 @@ std::filesystem::path settings_path() {
 #endif
 }
 
-using Ini = std::map<std::string, std::map<std::string, std::string>>;
+struct Ini : std::map<std::string, std::map<std::string, std::string>> {
+    bool native_gpu_hint = false;
+};
 
 std::string lower(std::string text) {
     for (char& c : text) if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
@@ -178,7 +181,15 @@ Ini read_ini(const std::filesystem::path& path) {
     while (std::getline(input, line)) {
         if (line.starts_with("\xef\xbb\xbf")) line.erase(0, 3);
         line = trim(line);
-        if (line.empty() || line[0] == ';' || line[0] == '#') continue;
+        if (line.empty()) continue;
+        if (line[0] == ';' || line[0] == '#') {
+            const auto hint = lower(trim(std::string_view(line).substr(1)));
+            const auto equals = hint.find('=');
+            if (section == "catherine" && equals != hint.npos &&
+                trim(hint.substr(0, equals)) == "nativegpuskinning" && trim(hint.substr(equals + 1)) == "false")
+                ini.native_gpu_hint = true;
+            continue;
+        }
         if (line.front() == '[' && line.back() == ']') {
             section = lower(trim(std::string_view(line).substr(1, line.size() - 2)));
             continue;
@@ -210,6 +221,13 @@ int boolean(std::string text, int fallback) {
     if (text == "true" || text == "1") return 1;
     if (text == "false" || text == "0") return 0;
     return fallback;
+}
+
+int load_shadow_resolution(const Ini& ini) {
+    const auto text = lower(field(ini, "Catherine", "ShadowResolution"));
+    if (text == "original" || text == "native") return 2048;
+    const auto value = parse_integer<int>(text);
+    return value && (*value == 2048 || *value == 4096 || *value == 8192) ? *value : 0;
 }
 
 constexpr const char* actions[] = {
@@ -305,6 +323,11 @@ HostSettings load_settings(const Ini& ini) {
     if (valid_movie_interpolation(movie)) settings.movie_interpolation = movie;
     if (prompts >= 0 && prompts <= 4) settings.button_prompts = prompts;
     settings.fullscreen = boolean(value("Fullscreen"), false);
+    settings.vsync = boolean(value("VSync"), false);
+    settings.triple_buffering = boolean(value("TripleBuffering"), false);
+    settings.alt_build_mode = boolean(value("AltBuildMode"), false);
+    const int upscaling = number("InternalUpscaling", 1);
+    if (upscaling >= 0 && upscaling <= 4) settings.internal_upscaling = upscaling;
     for (unsigned player = 0; player < 2; ++player) {
         load_profile(ini, settings, player, number("Version", 0));
         const auto device = value(player ? "P2Device" : "P1Device");
@@ -373,11 +396,26 @@ NativeValues load_native(const Ini& ini) {
     return values;
 }
 
-bool write_settings(const std::filesystem::path& path, const HostSettings& value, bool devmenu, const NativeValues& native, const std::array<bool, 3>& intros) {
+bool write_settings(const std::filesystem::path& path, const HostSettings& value, bool devmenu, const NativeValues& native, const std::array<bool, 3>& intros, bool native_gpu_skinning, int shadow_resolution) {
     if (path.empty()) return false;
     std::ostringstream out;
     out << "[Catherine]\nVersion=7\ndevmenu=" << (devmenu ? "true" : "false")
         << "\nFps=" << value.fps << "\nFullscreen=" << int(value.fullscreen)
+        << "\nVSync=" << (value.vsync ? "true" : "false")
+        << "\nTripleBuffering=" << (value.triple_buffering ? "true" : "false")
+        << "\nAltBuildMode=" << (value.alt_build_mode ? "true" : "false")
+        << (native_gpu_skinning
+            ? "\n; Uncomment this line to disable GPU skinning (restart required):\n; NativeGpuSkinning=false"
+            : "\n; Comment this line to enable GPU skinning (restart required):\nNativeGpuSkinning=false")
+        << "\n; ShadowResolution: Auto (default), 2048 (original), 4096, or 8192."
+        << "\n; Auto uses 4096 at 720p/1080p and 8192 at 1440p/4K. Higher sizes use more GPU memory."
+        << "\n; Auto follows internal resolution changes. Restart after editing this INI option."
+        << "\nShadowResolution=" << (shadow_resolution ? std::to_string(shadow_resolution) : "Auto")
+        << "\n; InternalUpscaling: 0=Off (1280x720), 1=Auto (default)"
+        << "\n; 2=1920x1080, 3=2560x1440, 4=3840x2160"
+        << "\n; Auto picks the highest level that fits the current screen/window."
+        << "\n; Explicit levels are capped to fit; 720p screens use 1280x720."
+        << "\nInternalUpscaling=" << value.internal_upscaling
         << "\nWindowHeight=" << value.window_height << "\nAntiAliasing=" << value.anti_aliasing
         << "\nMovieInterpolation=" << value.movie_interpolation << "\nButtonPrompts=" << value.button_prompts;
     for (unsigned player = 0; player < 2; ++player) {
@@ -458,8 +496,7 @@ struct RuntimeSettings {
     bool bindings_editing = false;
     unsigned binding_player = 0;
     DisplayMode display = query_display_mode(primary_display());
-    unsigned internal_height = display_render_height(
-        primary_display(), values.fullscreen, values.window_height);
+    unsigned internal_height = internal_upscaling_height(values.internal_upscaling, display.width, display.height, values.fullscreen, values.window_height);
     std::atomic<uint64_t> bindings{values.bindings};
     std::atomic<int> anti_aliasing{values.anti_aliasing};
     std::atomic<int> button_prompts{values.button_prompts};
@@ -468,7 +505,14 @@ struct RuntimeSettings {
     std::array<std::atomic<uint16_t>,kKeyboardBindings> player2_keyboard{};
     std::atomic<uint64_t> keyboard_version{1};
     std::atomic<uint64_t> player2_keyboard_version{1};
-    RuntimeSettings(){for(unsigned i=0;i<kKeyboardBindings;++i){keyboard[i].store(values.keyboard[i]);player2_keyboard[i].store(values.player2.keyboard[i]);}}
+    RuntimeSettings(){
+        for(unsigned i=0;i<kKeyboardBindings;++i){keyboard[i].store(values.keyboard[i]);player2_keyboard[i].store(values.player2.keyboard[i]);}
+        if(((native_gpu_skinning && (!initial_ini(path).native_gpu_hint ||
+           !field(initial_ini(path),"Catherine","NativeGpuSkinning").empty())) ||
+           field(initial_ini(path),"Catherine","ShadowResolution").empty()) &&
+           !write_settings(path,values,devmenu,native,intros,native_gpu_skinning,shadow_resolution))
+            std::fprintf(stderr,"Could not initialize NativeGpuSkinning in catherine-settings.ini\n");
+    }
     void publish_keyboard(){
         for(unsigned i=0;i<kKeyboardBindings;++i){keyboard[i].store(values.keyboard[i],std::memory_order_relaxed);player2_keyboard[i].store(values.player2.keyboard[i],std::memory_order_relaxed);}
         keyboard_version.fetch_add(1,std::memory_order_release);player2_keyboard_version.fetch_add(1,std::memory_order_release);
@@ -481,12 +525,15 @@ struct RuntimeSettings {
     std::atomic<int> effective{resolve_rate()};
     std::atomic<int> effective_movie{resolve_movie_rate()};
 
-    const bool devmenu = boolean(field(initial_ini(path), "Catherine", "devmenu"), true);
+    const bool devmenu = boolean(field(initial_ini(path), "Catherine", "devmenu"), false);
     NativeValues native = load_native(initial_ini(path));
     std::array<bool, 3> intros{
         bool(boolean(field(initial_ini(path), "Progress", "BabelIntroSeen"), false)),
         bool(boolean(field(initial_ini(path), "Progress", "ColosseumIntroSeen"), false)),
         bool(boolean(field(initial_ini(path), "Progress", "JokerIntroSeen"), false))};
+    // INI-only startup choice, kept outside the shared presentation settings ABI.
+    const bool native_gpu_skinning = boolean(field(initial_ini(path), "Catherine", "NativeGpuSkinning"), true);
+    const int shadow_resolution = load_shadow_resolution(initial_ini(path));
 
     int resolve_rate() const {
         if (debug_rate != kAutoFps) return debug_rate;
@@ -523,11 +570,11 @@ HostSettings host_settings() {
 bool store_host_settings(const HostSettings& value, bool explicit_fps) {
     if (!valid_fps(value.fps) || !valid_resolution(value.window_height) ||
         !valid_anti_aliasing(value.anti_aliasing) || !valid_movie_interpolation(value.movie_interpolation) ||
-        !valid_input_settings(value)||value.button_prompts<0||value.button_prompts>4) return false;
+        !valid_input_settings(value)||value.button_prompts<0||value.button_prompts>4||value.internal_upscaling<0||value.internal_upscaling>4) return false;
     auto& state = runtime();
     std::lock_guard lock(state.mutex);
     // Config choices take effect for preview, but only Save Settings writes them.
-    if (!state.config_editing && !write_settings(state.path, value, state.devmenu, state.native, state.intros)) return false;
+    if (!state.config_editing && !write_settings(state.path, value, state.devmenu, state.native, state.intros, state.native_gpu_skinning, state.shadow_resolution)) return false;
     if (explicit_fps || value.fps != state.values.fps) state.debug_rate = kAutoFps;
     const bool keyboard_changed=state.values.keyboard!=value.keyboard||state.values.player2.keyboard!=value.player2.keyboard;
     state.values = value;
@@ -575,7 +622,7 @@ bool save_bindings_settings() {
     // Input Apply is an independent transaction: do not persist the main Config draft.
     auto persisted=state.config_editing?state.config_original:state.values;
     input_profile(persisted,state.binding_player)=input_profile(state.bindings_draft,state.binding_player);
-    if(!write_settings(state.path, persisted, state.devmenu, state.native, state.intros))return false;
+    if(!write_settings(state.path, persisted, state.devmenu, state.native, state.intros, state.native_gpu_skinning, state.shadow_resolution))return false;
     const bool keyboard_changed=state.values.keyboard!=state.bindings_draft.keyboard||state.values.player2.keyboard!=state.bindings_draft.player2.keyboard;
     input_profile(state.values,state.binding_player)=input_profile(state.bindings_draft,state.binding_player);
     if(state.config_editing)input_profile(state.config_original,state.binding_player)=input_profile(state.bindings_draft,state.binding_player);
@@ -606,7 +653,7 @@ bool save_config_settings() {
     auto& state = runtime();
     std::lock_guard lock(state.mutex);
     if (!state.config_editing) return true;
-    if (!write_settings(state.path, state.values, state.devmenu, state.native, state.intros)) return false;
+    if (!write_settings(state.path, state.values, state.devmenu, state.native, state.intros, state.native_gpu_skinning, state.shadow_resolution)) return false;
     state.config_original = state.values;
     state.config_original_debug_rate = state.debug_rate;
     return true;
@@ -639,8 +686,8 @@ uint64_t keyboard_binding_version(unsigned player){
 }
 
 unsigned display_render_height(HostDisplay monitor, bool fullscreen, int window_height) {
-    const int native_height = auto_height(query_display_mode(monitor));
-    return unsigned(!fullscreen && window_height && window_height <= native_height ? window_height : native_height);
+    const auto display = query_display_mode(monitor);
+    return internal_upscaling_height(host_settings().internal_upscaling, display.width, display.height, fullscreen, window_height);
 }
 
 int requested_anti_aliasing() {
@@ -661,7 +708,7 @@ void initialize_display_mode(HostDisplay monitor, bool fullscreen, int window_he
     auto& state = runtime();
     std::lock_guard lock(state.mutex);
     state.display = query_display_mode(monitor);
-    state.internal_height = display_render_height(monitor, fullscreen, window_height);
+    state.internal_height = internal_upscaling_height(state.values.internal_upscaling, state.display.width, state.display.height, fullscreen, window_height);
     state.publish_rates();
 }
 #endif
@@ -713,6 +760,14 @@ extern "C" int catherine_dev_enabled(void) {
     return catherine::runtime().devmenu;
 }
 
+extern "C" int catherine_shadow_resolution_setting(void) {
+    return catherine::runtime().shadow_resolution;
+}
+
+extern "C" int catherine_native_gpu_skinning_enabled(void) {
+    return catherine::runtime().native_gpu_skinning;
+}
+
 extern "C" void catherine_load_native_config(unsigned char* game, int load_campaign_defaults) {
     using namespace catherine;
     auto& state = runtime();
@@ -728,7 +783,7 @@ extern "C" void catherine_load_native_config(unsigned char* game, int load_campa
         }
         if (i >= 2 || load_campaign_defaults) apply_native(game, option, *state.native[i]);
     }
-    if (missing && !write_settings(state.path, state.values, state.devmenu, state.native, state.intros))
+    if (missing && !write_settings(state.path, state.values, state.devmenu, state.native, state.intros, state.native_gpu_skinning, state.shadow_resolution))
         std::fprintf(stderr, "Could not initialize catherine-settings.ini\n");
 }
 
@@ -742,7 +797,7 @@ extern "C" int catherine_save_native_config(const unsigned char* game, int campa
         const int value = read_native(game, native_options[i]);
         if (valid_native(native_options[i], value)) next[i] = value;
     }
-    if (!write_settings(state.path, state.values, state.devmenu, next, state.intros)) return 0;
+    if (!write_settings(state.path, state.values, state.devmenu, next, state.intros, state.native_gpu_skinning, state.shadow_resolution)) return 0;
     state.native = next;
     state.config_original = state.values;
     state.config_original_debug_rate = state.debug_rate;
@@ -759,7 +814,7 @@ extern "C" int catherine_mode_intro_should_play(unsigned group, unsigned scene) 
     std::lock_guard lock(state.mutex);
     if (state.intros[mode]) return 0;
     state.intros[mode] = true;
-    if (!catherine::write_settings(state.path, state.values, state.devmenu, state.native, state.intros))
+    if (!catherine::write_settings(state.path, state.values, state.devmenu, state.native, state.intros, state.native_gpu_skinning, state.shadow_resolution))
         std::fprintf(stderr, "Could not save optional-mode introduction progress.\n");
     return 1;
 }
@@ -780,4 +835,8 @@ extern "C" void catherine_menu_cursor_set(unsigned owner, int visible) {
 }
 extern "C" int catherine_menu_cursor_visible(void) {
     return catherine_menu_cursor_owners.load(std::memory_order_relaxed) != 0;
+}
+
+extern "C" int catherine_alt_build_mode(void) {
+    return catherine::host_settings().alt_build_mode;
 }

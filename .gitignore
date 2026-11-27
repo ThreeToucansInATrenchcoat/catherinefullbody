@@ -6,6 +6,7 @@
 !/README.md
 !/AGENTS.md
 !/build.py
+!/global.json
 !/CLAUDE_PERFORMANCE_LEVELS.md
 !/HANDOFF_PERFORMANCE_STATUES_2026-11-22.md
 !/Source/
@@ -53,3 +54,6 @@ assets-missing.txt
 *.key
 *.pfx
 *.p12
+
+# Selected release profile is part of the reproducible default build.
+!/Source/native-renderer/release.profdata

@@ -60,11 +60,11 @@ public:
         return nullptr;
     }
     void emplace(const ModelKey81& k, uint64_t id) {
-        if (find(k)) return;  // insert if absent, as unordered_map::emplace
         size_t at = ModelKeyHash81{}(k) & (kSlots - 1);
         for (size_t n = 0; n < kProbe; ++n, at = (at + 1) & (kSlots - 1)) {
             Slot& s = slots[at];
             if (s.gen != gen) { s.gen = gen, s.key = k, s.id = id; return; }
+            if (s.key == k) return;
         }
         spill.emplace(k, id), spilled = true;
     }
@@ -130,6 +130,20 @@ class ModelInstanceTracker81 {
     std::unordered_map<uint64_t, std::vector<Instance>> meshes;
     uint64_t next_id = 1, last_pruned = 0;
     FlatExact131 exact;
+    FlatExact131 previous_exact; // earliest eligible vector index for each exact prior-frame matrix
+    uint64_t previous_frame = ~0ull;
+    void index_previous(uint64_t frame) {
+        previous_exact.clear();
+        for (const auto& [mesh,entries] : meshes)
+            for (size_t n=0;n<entries.size();++n) {
+                const auto& i=entries[n];
+                if (i.frame>=frame || frame-i.frame>2) continue;
+                ModelKey81 key{mesh,{}};
+                std::memcpy(key.m.data(),i.matrix.data(),64);
+                previous_exact.emplace(key,uint64_t(n));
+            }
+        previous_frame=frame;
+    }
     std::unordered_set<uint64_t> shared_basis_meshes;
     uint64_t exact_frame = ~0ull;
     bool exact_complete = true;  // cmd98: every current-frame entry is in `exact`
@@ -140,7 +154,7 @@ class ModelInstanceTracker81 {
 
 public:
     uint64_t index_hits = 0, scans = 0;
-    void clear() { meshes.clear(), exact.clear(), shared_basis_meshes.clear(), exact_complete = true; }
+    void clear() { meshes.clear(), exact.clear(), previous_exact.clear(), shared_basis_meshes.clear(), exact_complete = true; previous_frame=~0ull; }
     bool ambiguous(uint64_t mesh) const { return shared_basis_meshes.contains(mesh); }
     uint64_t resolve(uint64_t mesh, const float *matrix, uint64_t frame) {
         if (frame > last_pruned + 64) {
@@ -159,6 +173,7 @@ public:
                     ++it;
             }
         }
+        if (frame != previous_frame) index_previous(frame);
         if (frame != exact_frame) exact.clear(), exact_frame = frame, exact_complete = true;
         ModelKey81 key{mesh, {}};
         std::memcpy(key.m.data(), matrix, 64);
@@ -182,12 +197,23 @@ public:
         // Two differently oriented copies in one presentation are distinct
         // instances, but this generic fallback has no native instance owner.
         // Never let the renderer infer their animation history from proximity.
-        for (const auto& i : instances) if (i.frame == frame) {
+        if (!shared_basis_meshes.contains(mesh)) for (const auto& i : instances) if (i.frame == frame) {
             bool different = false;
             for (unsigned row = 0; row < 3; ++row)
                 for (unsigned col = 0; col < 3; ++col)
                     different |= std::fabs(i.matrix[row*4+col]-matrix[row*4+col]) > 1e-5f;
             if (different) { shared_basis_meshes.insert(mesh); break; }
+        }
+        if (const uint64_t* index=previous_exact.find(key); index && *index<instances.size()) {
+            auto& i=instances[size_t(*index)];
+            // A prior entry may have been consumed by another instance this frame.
+            // Validate it and use the original ordered search if it changed.
+            if (i.frame<frame && frame-i.frame<=2 && std::memcmp(i.matrix.data(),matrix,64)==0) {
+                i.basis=current_basis;
+                i.frame=frame;
+                exact.emplace(key,i.id);
+                return i.id;
+            }
         }
         for (auto &i : instances) {
             if (i.frame >= frame || frame - i.frame > 2)
@@ -217,15 +243,20 @@ public:
         }
         if (instances.size() > 4096) {
             instances.clear();
+            previous_exact.clear();
             exact.clear();
             exact_complete = false;  // other meshes keep current-frame entries the index lost
         }
+        const size_t previous_size=instances.size();
         instances.erase(std::remove_if(instances.begin(), instances.end(),
                                        [&](const Instance &i) {
                                            return frame > i.frame &&
                                                   frame - i.frame > 80;
                                        }),
                         instances.end());
+        // Erasure changes vector indices; an incomplete index simply falls back
+        // to the original exact/affine search for the rest of this presentation.
+        if (instances.size()!=previous_size) previous_exact.clear();
         Instance fresh{next_id++, frame, {}};
         std::memcpy(fresh.matrix.data(), matrix, 64);
         fresh.basis = current_basis;

@@ -5,7 +5,7 @@ namespace Catherine.AssetSetup;
 // .NET 10 updates only the changed suffix. Keep the old directory/footer so a
 // failed or interrupted shader append can restore the completed asset archive.
 static class PackageUpdate {
- public static (long Offset,byte[] Tail,Dictionary<string,ushort> Methods) Directory(FileStream file){
+ public static (long Offset,byte[] Tail,Dictionary<string,ushort> Methods) Directory(FileStream file,bool backupShaders=true){
   using var r=new BinaryReader(file,Encoding.UTF8,true);
   if(file.Length<22)throw new InvalidDataException("Truncated asset archive.");
   file.Position=file.Length-22;
@@ -34,6 +34,7 @@ static class PackageUpdate {
    if(path.StartsWith("spirv/",StringComparison.Ordinal)||path=="catherine-pak.manifest")backupOffset=Math.Min(backupOffset,local);
    directory.BaseStream.Position=extraEnd+comment;
   }
+  if(!backupShaders)return(offset,tail,methods);
   if(backupOffset<0||file.Length-backupOffset>64*1024*1024)throw new InvalidDataException("Invalid shader archive suffix.");
   file.Position=backupOffset;return(backupOffset,r.ReadBytes(checked((int)(file.Length-backupOffset))),methods);
  }

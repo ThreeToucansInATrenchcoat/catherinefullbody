@@ -61,15 +61,25 @@ int main(void){
     catherine_puzzle_pause_view=1;ST64(menu+8,1);ST64(0x7000ccb5d0ull,0x30000);
     node(0x40000,100,100,0);
     for(unsigned row=0;row<5;++row){
-        ST8(0x70007cd1e4ull+row,row);ST64(0x30000+row*8,0x41000+row*0x200);
-        node(0x41000+row*0x200,860,200+row*50,0x40000);
+        /* The description nodes overlap below the menu. Hover must follow the
+         * selectable-label table used by the native pause input handler. */
+        ST8(0x70007cd1e4ull+row,row+5);
+        ST64(0x30000+(row+5)*8,0x45000+row*0x200);
+        node(0x45000+row*0x200,860,600,0x40000);
+        ST8(0x70007cd22full+row,row);ST64(0x30000+row*8,0x41000+row*0x200);
+        unsigned visual_row=row==3?4:row==4?3:row;
+        node(0x41000+row*0x200,860,200+visual_row*50,0x40000);
     }
     assert(catherine_pause_mouse_row(&c,menu,0,960,400)==2);
+    assert(catherine_pause_mouse_row(&c,menu,0,960,435)==3);
+    assert(catherine_pause_mouse_row(&c,menu,0,960,500)==4);
     assert(catherine_pause_mouse_row(&c,menu,0,100,400)==-1);
     catherine_menu_pointer_show(&catherine_puzzle_pause_pointer,1,1);
     mouse[0]=960;mouse[1]=450;mouse[2]++;mouse[3]++;
     ST8(menu+0x18,0);
     assert(!(catherine_puzzle_pause_mouse(&c,menu,0,0)&0x2000));assert(LD8(menu+0x18)==0);
+    mouse[1]=500;mouse[2]++;
+    assert(!(catherine_puzzle_pause_mouse(&c,menu,0,0)&0x2000));assert(LD8(menu+0x18)==4);
     mouse[1]=400;mouse[2]++;mouse[3]++;
     assert(catherine_puzzle_pause_mouse(&c,menu,0,0)&0x2000);assert(LD8(menu+0x18)==2);
     /* An idle P2 pause object must not consume P1's movement/click serials. */

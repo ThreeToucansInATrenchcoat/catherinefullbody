@@ -38,6 +38,8 @@ struct GpuImage {
     VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT;
     VkDeviceSize msaa_bytes = 0;
     bool msaa_valid = false;
+    // Physical shadow maps can exceed the unchanged guest texture dimensions.
+    uint32_t shadow_base_width = 0, shadow_base_height = 0, shadow_requested = 0;
 };
 
 VkDevice vk_device();

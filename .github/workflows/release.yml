@@ -29,7 +29,7 @@ jobs:
           python-version: '3.12'
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '10.0.203'
       - name: Fetch matching Vulkan headers
         run: git clone --depth 1 --branch v1.4.363 https://github.com/KhronosGroup/Vulkan-Headers.git Build/vulkan-headers
       - name: Prepare Windows compiler and headers

@@ -1,5 +1,6 @@
 #include "catherine_settings_win.h"
 #include "config_pc_host.h"
+#include "catherine_shadow_quality.h"
 #include <array>
 #include <cassert>
 #include <filesystem>
@@ -8,6 +9,7 @@
 
 extern "C" int catherine_mode_intro_should_play(unsigned, unsigned);
 extern "C" int catherine_title_mouse_enabled();
+extern "C" int catherine_native_gpu_skinning_enabled();
 using namespace catherine;
 using Game = std::array<unsigned char, 0x9b60>;
 
@@ -36,6 +38,72 @@ int main(int argc, char** argv) {
     const std::string mode = argv[1];
     auto s = host_settings();
     auto game = native_fixture();
+    if (mode.starts_with("shadow-resolution-")) {
+        const int expected = std::stoi(mode.substr(18));
+        assert(catherine_shadow_resolution_setting() == expected);
+        s.button_prompts = (s.button_prompts + 1) % 5;
+        assert(store_host_settings(s));
+        assert(catherine_shadow_resolution_setting() == expected);
+        assert(catherine_shadow_resolution_for_height(0, 720) == 4096);
+        assert(catherine_shadow_resolution_for_height(0, 1080) == 4096);
+        assert(catherine_shadow_resolution_for_height(0, 1440) == 8192);
+        assert(catherine_shadow_resolution_for_height(0, 2160) == 8192);
+        assert(catherine_shadow_resolution_for_height(2048, 2160) == 2048);
+        assert(catherine_shadow_resolution_for_height(4096, 720) == 4096);
+        assert(catherine_shadow_resolution_with_limit(8192, 4096) == 4096);
+        assert(catherine_shadow_resolution_with_limit(8192, 2048) == 2048);
+        assert(catherine_shadow_resolution_with_limit(4096, 8192) == 4096);
+        return 0;
+    }
+    if (mode == "native-skinning-startup") {
+        assert(catherine_native_gpu_skinning_enabled());
+        return 0;
+    }
+    if (mode == "native-skinning-0" || mode == "native-skinning-1") {
+        const bool expected = mode.back() == '1';
+        assert(bool(catherine_native_gpu_skinning_enabled()) == expected);
+        // An unrelated menu change must preserve the startup renderer choice.
+        s.button_prompts = (s.button_prompts + 1) % 5;
+        assert(store_host_settings(s));
+        assert(bool(catherine_native_gpu_skinning_enabled()) == expected);
+        return 0;
+    }
+    if (mode == "upscale-policy") {
+        for(int mode=0;mode<=4;++mode) {
+            assert(internal_upscaling_height(mode,1280,720,true,0)==720);
+            assert(internal_upscaling_height(mode,3840,2160,false,720)==720);
+        }
+        assert(internal_upscaling_height(0,3840,2160,true,0)==720);
+        assert(internal_upscaling_height(1,1920,1080,true,0)==1080);
+        assert(internal_upscaling_height(1,2560,1440,true,0)==1440);
+        assert(internal_upscaling_height(1,3840,2160,true,0)==2160);
+        assert(internal_upscaling_height(1,1366,768,true,0)==720);
+        assert(internal_upscaling_height(1,3440,1440,true,0)==1440);
+        assert(internal_upscaling_height(2,3840,2160,true,0)==1080);
+        assert(internal_upscaling_height(4,1920,1080,true,0)==1080);
+        assert(internal_upscaling_height(1,3840,2160,false,1080)==1080);
+        return 0;
+    }
+    if (mode.rfind("upscale-",0)==0) {
+        assert(s.internal_upscaling == mode.back()-'0');
+        s.button_prompts=(s.button_prompts+1)%5;
+        assert(store_host_settings(s));return 0;
+    }
+    if (mode == "storage-0" || mode == "storage-1") {
+        assert(s.alt_build_mode == (mode == "storage-1"));
+        s.button_prompts = (s.button_prompts + 1) % 5;
+        assert(store_host_settings(s));
+        return 0;
+    }
+    if (mode.rfind("presentation-", 0) == 0) {
+        assert(mode.size() == 15);
+        assert(s.vsync == (mode[13] == '1'));
+        assert(s.triple_buffering == (mode[14] == '1'));
+        // Saving an unrelated setting must retain both INI-only options.
+        s.button_prompts = (s.button_prompts + 1) % 5;
+        assert(store_host_settings(s));
+        return 0;
+    }
     if (mode == "cursor-policy") {
         for (const auto& p1 : {"auto", "keyboard", "qa:Pad 1", "disconnected-pad"}) {
             for (const auto& p2 : {"none", "keyboard", "qa:Pad 2"}) {
@@ -47,7 +115,10 @@ int main(int argc, char** argv) {
         }
         return 0;
     }
-    if (mode == "intro-first" || mode == "intro-repeat") {
+    if (mode == "dev-default-off" || mode == "dev-opt-in") {
+        assert(bool(catherine_dev_enabled()) == (mode == "dev-opt-in"));
+        assert(store_host_settings(s));
+    } else if (mode == "intro-first" || mode == "intro-repeat") {
         const int expected = mode == "intro-first";
         assert(catherine_mode_intro_should_play(102, 10) == expected);
         assert(catherine_mode_intro_should_play(101, 11) == expected);
@@ -97,13 +168,14 @@ int main(int argc, char** argv) {
         assert(end_config_settings());
     } else if (mode == "check-invalid") {
         assert(s.fps == 60 && s.input_devices[0] == "auto" && s.input_devices[1] == "none");
+        assert(!s.vsync && !s.triple_buffering && !s.alt_build_mode && s.internal_upscaling == 1);
         assert(s.keyboard == kDefaultKeyboard && s.bindings == kDefaultBindings);
-        assert(catherine_dev_enabled() && s.player2.keyboard[0] == 'B');
+        assert(!catherine_dev_enabled() && s.player2.keyboard[0] == 'B');
         catherine_load_native_config(game.data(), 1);
         assert(game[0x2fb] == static_cast<unsigned char>(-40) && game[0x301] == 1);
     } else if (mode == "check-pre6" || mode == "check-v6") {
         const auto expected = mode == "check-pre6" ? kDefaultBindings : kIdentityBindings;
-        assert(s.bindings == expected && s.player2.bindings == expected && catherine_dev_enabled());
+        assert(s.bindings == expected && s.player2.bindings == expected && !catherine_dev_enabled());
         catherine_load_native_config(game.data(), 1);
     } else if (mode == "migrate-install-copy") {
         // The runner provides a private copy of the legacy native system record.
