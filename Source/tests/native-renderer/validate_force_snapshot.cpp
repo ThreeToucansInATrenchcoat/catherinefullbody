@@ -3,6 +3,7 @@
 #include <array>
 #include <atomic>
 #include <thread>
+#include <latch>
 #include <mutex>
 #include <random>
 #include <unordered_set>
@@ -46,8 +47,16 @@ int main(){
  // Readers must never accept a tuple/guest pair spanning an in-flight update.
  ForceSnapshot concurrent;std::atomic<uint64_t> command{0};std::atomic<bool> known{false},done{false};std::atomic<uint64_t> accepted{0},fallbacks{0};
  std::mutex writer_lock;ForceTuple locked_tuple;
- std::array<std::thread,4> readers;
- for(auto&thread:readers)thread=std::thread([&]{unsigned after=0;while(!done.load()||after++<1000){
+ std::array<std::thread,4> readers;std::latch ready(readers.size());
+ for(auto&thread:readers)thread=std::thread([&]{
+   // Prove fallback coverage before publishing: CI may otherwise schedule the
+   // complete writer loop before any reader runs. The final stable publication
+   // guarantees accepted coverage in each reader's post-writer iterations.
+   ForceObservation empty;
+   CHECK(!concurrent.observe(empty,[&]{return ForceCommand{command.load(),known.load()};}));
+   {std::lock_guard lock(writer_lock);CHECK(!locked_tuple.context);fallbacks.fetch_add(1);}
+   ready.count_down();ready.wait();
+   unsigned after=0;while(!done.load()||after++<1000){
    ForceObservation value;
    if(concurrent.observe(value,[&]{return ForceCommand{command.load(),known.load()};})){
     const uint64_t serial_number=value.tuple.context>>2;
@@ -60,6 +69,7 @@ int main(){
     fallbacks.fetch_add(1);
    }
  }});
+ ready.wait();
  for(uint64_t n=1;n<=50000;++n){
   std::lock_guard lock(writer_lock);ForceTuple value{n<<2,n%17!=0,bool(n&1)};const auto publication=concurrent.begin_change(value);
   locked_tuple=value;command.store(value.context+(n%3==0));known.store(n%11!=0);concurrent.commit(publication,value);
