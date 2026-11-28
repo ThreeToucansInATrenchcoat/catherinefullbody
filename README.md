@@ -47,9 +47,7 @@ Piano menu and gameplay captures: 3840×2160, MSAA 8×, and 8192×8192 shadows o
 
 ## Installation
 
-1. Decrypt and extract your own North American or European Switch copy (`0100BF00112C0000`) with update **1.0.1**, using a tool such as NSPUnpacker.
-
-You must unpack the update together with the base game.
+1. Decrypt and extract your own North American or European Switch copy (`0100BF00112C0000`) with update **1.0.1**, using a tool such as NSPUnpacker. You MUST unpack the update together with the base game.
 
 2. Launch `Catherine.exe` on Windows or `./catherine` from the extracted Linux release folder, then select the extracted folder.
    
